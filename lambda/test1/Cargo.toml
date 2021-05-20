@@ -1,0 +1,12 @@
+[package]
+name = "test1"
+version = "0.1.5"
+edition = "2018"
+
+[dependencies]
+tokio = { version = "1", features = ["macros"] }
+lambda_http = { git = "https://github.com/awslabs/aws-lambda-rust-runtime/", branch = "master" }
+serde_json = "1.0"
+hvcg_example_openapi_entity = "1.0"
+controller = { path = "../../example-app/controller" }
+dotenv = "0.15.0"

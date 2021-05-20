@@ -1,0 +1,7 @@
+[package]
+name = "presenter"
+version = "0.1.5"
+edition = "2018"
+
+[dependencies]
+domain = { path = "../domain" }
