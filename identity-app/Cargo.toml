@@ -1,2 +1,2 @@
 [workspace]
-members = ["domain", "db-postgres", "controller", "presenter", "iam-cognito"]
+members = ["domain", "controller", "presenter", "db-cognito"]

@@ -1,5 +1,5 @@
 [package]
-name = "iam-cognito"
+name = "db-cognito"
 version = "0.1.5"
 edition = "2018"
 

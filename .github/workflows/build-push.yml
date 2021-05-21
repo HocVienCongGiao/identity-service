@@ -53,7 +53,7 @@ jobs:
         working-directory: lambda
         run: cargo fmt --all -- --check
       -
-        working-directory: example-app
+        working-directory: identity-app
         run: cargo fmt --all -- --check
 
   lint:
@@ -70,7 +70,7 @@ jobs:
         working-directory: lambda      
         run: cargo clippy --all-targets -- -D clippy::all
       -
-        working-directory: example-app
+        working-directory: identity-app
         run: cargo clippy --all-targets -- -D clippy::all
 
   compile:
@@ -85,7 +85,7 @@ jobs:
         working-directory: lambda      
         run: cargo check --all
       -
-        working-directory: example-app
+        working-directory: identity-app
         run: cargo check --all
   test:
     needs: [codestyle, lint, compile]
@@ -99,7 +99,7 @@ jobs:
       working-directory: lambda    
       run: cargo test
     - name: Test components
-      working-directory: example-app
+      working-directory: identity-app
       run: cargo test
 
   # deploy on pushes to master branch

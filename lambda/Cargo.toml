@@ -1,2 +1,0 @@
-[workspace]
-members = ["test1", "test2","cognito","postgres"]

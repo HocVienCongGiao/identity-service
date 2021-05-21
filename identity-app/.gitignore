@@ -1,2 +1,2 @@
-/db-postgres/data/postgres/*.zip
+/db-cognito/data/postgres/*.zip
 .env

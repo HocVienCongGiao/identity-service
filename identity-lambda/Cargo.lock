@@ -360,7 +360,7 @@ checksum = "245097e9a4535ee1e3e3931fcfcd55a796a44c643e8596ff6566d68f09b87bbc"
 name = "controller"
 version = "0.1.5"
 dependencies = [
- "db-postgres",
+ "db-cognito",
  "domain",
  "tokio-postgres 0.7.2",
 ]
@@ -546,7 +546,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "db-postgres"
+name = "db-cognito"
 version = "0.1.5"
 dependencies = [
  "async-trait",
