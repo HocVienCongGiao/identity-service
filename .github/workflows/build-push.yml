@@ -31,7 +31,7 @@ jobs:
           while IFS= read -r file
           do
             echo $file
-            if [[ $file == lambda/terraform/* || $file == .github/*  ]]; then
+            if [[ $file == identity-lambda/terraform/* || $file == .github/*  ]]; then
               echo "This modified file is not Lambda source code"
               echo "::set-output name=run_job::false"
               break
