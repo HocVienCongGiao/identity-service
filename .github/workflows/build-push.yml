@@ -5,6 +5,7 @@ on:
     branches:
       - dev
       - prod
+      - feature/apply_as_example_service
 
 jobs:
   check_lambda_files:
@@ -20,7 +21,7 @@ jobs:
 
       - name: Check modified AWS Lambda Source Code
         id: check_lambda_files
-        working-directory: lambda
+        working-directory: identity-lambda
         run: |
           echo "=============== list modified files ==============="
           git diff --name-only HEAD^ HEAD
@@ -82,7 +83,7 @@ jobs:
         uses: hecrj/setup-rust-action@v1
       - uses: actions/checkout@v2
       - 
-        working-directory: lambda      
+        working-directory: identity-lambda
         run: cargo check --all
       -
         working-directory: identity-app
@@ -96,7 +97,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Test lambda
-      working-directory: lambda    
+      working-directory: identity-lambda
       run: cargo test
     - name: Test components
       working-directory: identity-app
@@ -105,14 +106,23 @@ jobs:
   # deploy on pushes to master branch
   # assumes aws credentials (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY) are set in github secrets
   push_dev:
-    if: github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/feature/apply_as_example_service'
+#    if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
     env:
       TFE_TOKEN: ${{ secrets.TFE_TOKEN }}
     needs: [test]
     steps:
+      - name: Install Musl-gcc
+        run: |
+          sudo apt update -y
+          sudo apt install -y musl-tools
+
       - name: Set up Rust
         uses: hecrj/setup-rust-action@v1
+        with:
+          targets: x86_64-unknown-linux-musl
+
       - name: Checkout
         uses: actions/checkout@v2
         
@@ -124,28 +134,37 @@ jobs:
           aws-region: ap-southeast-1
 
       - name: Build and Push for Dev
-        working-directory: lambda
+        working-directory: identity-lambda
         run: |
-          npm install
-          npx serverless package
-
-          aws s3 cp target/lambda/release/test1.zip s3://891616054205-ap-southeast-1-aws-lambda/dev-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/test1.zip
-          aws s3 cp target/lambda/release/test2.zip s3://891616054205-ap-southeast-1-aws-lambda/dev-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/test2.zip
+          cargo build --release --target x86_64-unknown-linux-musl
+          cp ./target/x86_64-unknown-linux-musl/release/test1 ./bootstrap && zip test1.zip bootstrap
+          cp ./target/x86_64-unknown-linux-musl/release/test2 ./bootstrap && zip test2.zip bootstrap
+          aws s3 cp ./test1.zip s3://891616054205-ap-southeast-1-aws-lambda/dev-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/test1.zip
+          aws s3 cp ./test2.zip s3://891616054205-ap-southeast-1-aws-lambda/dev-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/test2.zip
       - name: Deploy Terraform Config 
         run: |
           chmod +x ./scripts/terraform-enterprise-push.sh
           ./scripts/terraform-enterprise-push.sh lambda/terraform HocVienCongGiao/dev-sg-lambda-services-hvcg-example-service
 
   push_prod:
-    if: github.ref == 'refs/heads/prod'
+    if: github.ref == 'refs/heads/feature/apply_as_example_service'
+#    if: github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest
     env:
       TFE_TOKEN: ${{ secrets.TFE_TOKEN }}
 
     needs: [test]
     steps:
+      - name: Install Musl-gcc
+        run: |
+          sudo apt update -y
+          sudo apt install -y musl-tools
+
       - name: Set up Rust
         uses: hecrj/setup-rust-action@v1
+        with:
+          targets: x86_64-unknown-linux-musl
+
       - name: Checkout
         uses: actions/checkout@v2
         
@@ -157,13 +176,14 @@ jobs:
           aws-region: ap-southeast-1
 
       - name: Build and Push for Prod
-        working-directory: lambda
+        working-directory: identity-lambda
         run: |
-          npm install
-          npx serverless package
+          cargo build --release --target x86_64-unknown-linux-musl
+          cp ./target/x86_64-unknown-linux-musl/release/test1 ./bootstrap && zip test1.zip bootstrap
+          cp ./target/x86_64-unknown-linux-musl/release/test2 ./bootstrap && zip test2.zip bootstrap
 
-          aws s3 cp target/lambda/release/test1.zip s3://891616054205-ap-southeast-1-aws-lambda/prod-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/test1.zip
-          aws s3 cp target/lambda/release/test2.zip s3://891616054205-ap-southeast-1-aws-lambda/prod-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/test2.zip
+          aws s3 cp ./test1.zip s3://891616054205-ap-southeast-1-aws-lambda/prod-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/test1.zip
+          aws s3 cp ./test2.zip s3://891616054205-ap-southeast-1-aws-lambda/prod-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/test2.zip
 
 #         aws s3 cp target/lambda/release/notification.zip s3://891616054205-ap-southeast-1-aws-lambda/terraform-api/latest/notification.zip          
 #         aws s3 rm --recursive s3://479284709538-us-west-2-aws-lambda/terraform-api/latest
