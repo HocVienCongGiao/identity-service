@@ -28,7 +28,8 @@ async fn integration_works() {
         .exists_by_name("Ngo Dinh Diem".to_string())
         .await;
     println!("is existing is {}", is_existing);
-    assert_eq!(2 + 2, 4);
+    let result = 4;
+    assert_eq!(result, 4);
     println!("finished integration test");
     // let _ = pg.stop_db();
 }
