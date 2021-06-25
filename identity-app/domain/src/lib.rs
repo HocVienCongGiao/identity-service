@@ -23,6 +23,10 @@ mod tests {
             }
             false
         }
+
+        async fn insert(&self, name: String, country: String) -> bool {
+            todo!()
+        }
     }
 
     #[test]
