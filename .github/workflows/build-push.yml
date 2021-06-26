@@ -172,7 +172,7 @@ jobs:
     env:
       TFE_TOKEN: ${{ secrets.TFE_TOKEN }}
 
-    needs: [test]
+#    needs: [test]
     steps:
       - name: Install Musl-gcc
         run: |
