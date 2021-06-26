@@ -117,7 +117,7 @@ jobs:
         run: |
           sudo apt update -y
           sudo apt install -y musl-tools
-
+          sudo apt-get install pkg-config libssl-dev
       - name: Set up Rust
         uses: hecrj/setup-rust-action@v1
         with:
@@ -136,7 +136,6 @@ jobs:
       - name: Build and Push for Dev
         working-directory: identity-lambda
         run: |
-          sudo apt-get install pkg-config libssl-dev
           cargo build --release --target x86_64-unknown-linux-musl
           cp ./target/x86_64-unknown-linux-musl/release/test1 ./bootstrap && zip test1.zip bootstrap
           cp ./target/x86_64-unknown-linux-musl/release/test2 ./bootstrap && zip test2.zip bootstrap
