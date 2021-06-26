@@ -5,7 +5,6 @@ on:
     branches:
       - dev
       - prod
-      - feature/apply_as_example_service
 
 jobs:
   check_lambda_files:
@@ -106,12 +105,11 @@ jobs:
   # deploy on pushes to master branch
   # assumes aws credentials (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY) are set in github secrets
   push_dev:
-    if: github.ref == 'refs/heads/feature/apply_as_example_service'
-#    if: github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
     env:
       TFE_TOKEN: ${{ secrets.TFE_TOKEN }}
-#    needs: [test]
+    needs: [test]
     steps:
       - name: Install Musl-gcc
         run: |
@@ -134,6 +132,7 @@ jobs:
       - name: Build and Push for Dev
         working-directory: identity-lambda
         run: |
+#          From line 135 to line 155 is for fixing open ssl issue
           sudo apt install -y pkg-config libssl-dev
           sudo ln -s /usr/include/x86_64-linux-gnu/asm /usr/include/x86_64-linux-musl/asm
           sudo ln -s /usr/include/asm-generic /usr/include/x86_64-linux-musl/asm-generic
@@ -166,13 +165,12 @@ jobs:
           ./scripts/terraform-enterprise-push.sh lambda/terraform HocVienCongGiao/dev-sg-lambda-services-hvcg-example-service
 
   push_prod:
-    if: github.ref == 'refs/heads/feature/apply_as_example_service'
-#    if: github.ref == 'refs/heads/prod'
+    if: github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest
     env:
       TFE_TOKEN: ${{ secrets.TFE_TOKEN }}
 
-#    needs: [test]
+    needs: [test]
     steps:
       - name: Install Musl-gcc
         run: |
@@ -197,6 +195,7 @@ jobs:
       - name: Build and Push for Prod
         working-directory: identity-lambda
         run: |
+#          From line 197 to line 216 is for fixing open ssl issue
           sudo apt install -y pkg-config libssl-dev
           sudo ln -s /usr/include/x86_64-linux-gnu/asm /usr/include/x86_64-linux-musl/asm
           sudo ln -s /usr/include/asm-generic /usr/include/x86_64-linux-musl/asm-generic
