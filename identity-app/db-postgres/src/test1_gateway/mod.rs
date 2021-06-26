@@ -24,6 +24,6 @@ impl domain::boundaries::Test1DbGateway for Test1SimpleRepository {
 
     async fn insert(&self, name: String, country: String) -> bool {
         let result = query::save(&(*self).client, name.clone(), country.clone()).await;
-        return result.is_ok()
+        return result.is_ok();
     }
 }
