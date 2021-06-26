@@ -66,7 +66,7 @@ pub async fn main(mut client: Client) -> Result<Client, Error> {
 
     let query = client.query_one(
         "
-            SELECT * FROM example__author_initial      
+            SELECT * FROM identity__author_initial
             WHERE id = $1        
     ",
         &[&2],
@@ -123,8 +123,7 @@ mod tests {
     #[tokio::test]
     async fn it_works() {
         initialise();
-        let result = 4;
-        assert_eq!(result, 4);
+        assert_eq!(2 + 2, 4);
         println!("finished test1");
     }
 }

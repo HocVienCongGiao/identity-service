@@ -3,7 +3,7 @@ use tokio_postgres::{Client, Error, Row};
 
 pub async fn find_one_by_name(client: &Client, name: String) -> Result<Row, Error> {
     let stmt = (*client)
-        .prepare("SELECT * FROM example__author_initial WHERE name = $1")
+        .prepare("SELECT * FROM identity__author_initial WHERE name = $1")
         .await
         .unwrap();
 
@@ -14,7 +14,7 @@ pub async fn find_one_by_name(client: &Client, name: String) -> Result<Row, Erro
 
 pub async fn save(client: &Client, name: String, country: String) -> Result<u64, Error> {
     let stmt = (*client)
-        .prepare("INSERT into example__author_initial(name, country) VALUES ($1, $2)")
+        .prepare("INSERT into identity__author_initial(name, country) VALUES ($1, $2)")
         .await
         .unwrap();
 
