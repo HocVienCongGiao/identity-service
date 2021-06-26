@@ -123,14 +123,21 @@ jobs:
           sudo ln -s /usr/include/linux /usr/include/x86_64-linux-musl/linux
           sudo mkdir /musl
           sudo apt-get install wget
-          wget https://github.com/openssl/openssl/archive/OpenSSL_1_1_1f.tar.gz
-          tar zxvf OpenSSL_1_1_1f.tar.gz
+          sudo wget https://github.com/openssl/openssl/archive/OpenSSL_1_1_1f.tar.gz
+          echo nhut1
+          sudo tar zxvf OpenSSL_1_1_1f.tar.gz
+          echo nhut2
           cd openssl-OpenSSL_1_1_1f/
-          CC="musl-gcc -fPIE -pie" ./Configure no-shared no-async --prefix=/musl --openssldir=/musl/ssl linux-x86_64
+          echo nhut3
+          sudo CC="musl-gcc -fPIE -pie" ./Configure no-shared no-async --prefix=/musl --openssldir=/musl/ssl linux-x86_64
+          echo nhut4
           sudo apt-get install build-essential
-          make depend
-          make -j$(nproc)
-          make install
+          echo nhut5
+          sudo make depend
+          echo nhut6
+          sudo make -j$(nproc)
+          echo nhut7
+          sudo make install
           export PKG_CONFIG_ALLOW_CROSS=1
           export OPENSSL_STATIC=true
           export OPENSSL_DIR=/musl
