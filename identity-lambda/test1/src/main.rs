@@ -45,7 +45,7 @@ mod tests {
         //     .expect("expected Ok(_) value")
         //     .into_response();
         // assert_eq!(response.body(), expected.body())
-        let result = 4;
-        assert_eq!(result, 4)
+        let result = 10;
+        assert_eq!(result, 10)
     }
 }
