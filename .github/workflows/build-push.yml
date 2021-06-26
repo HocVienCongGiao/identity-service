@@ -141,25 +141,17 @@ jobs:
           sudo mkdir /musl
           sudo apt-get install wget
           sudo wget https://github.com/openssl/openssl/archive/OpenSSL_1_1_1f.tar.gz
-          echo nhut1
           sudo tar zxvf OpenSSL_1_1_1f.tar.gz
-          echo nhut2
           cd openssl-OpenSSL_1_1_1f/
           echo nhut3
           sudo CC="musl-gcc -fPIE -pie" ./Configure no-shared no-async --prefix=/musl --openssldir=/musl/ssl linux-x86_64
-          echo nhut4
           sudo apt-get install build-essential
-          echo nhut5
           sudo make depend
-          echo nhut6
           sudo make -j$(nproc)
-          echo nhut7
           sudo make install
           export PKG_CONFIG_ALLOW_CROSS=1
           export OPENSSL_STATIC=true
           export OPENSSL_DIR=/musl
-          echo nhut8
-          pwd
           cd /home/runner/work/identity-service/identity-service/identity-lambda
           cargo clean
           cargo build --release --target x86_64-unknown-linux-musl
@@ -174,8 +166,8 @@ jobs:
           ./scripts/terraform-enterprise-push.sh lambda/terraform HocVienCongGiao/dev-sg-lambda-services-hvcg-example-service
 
   push_prod:
-#    if: github.ref == 'refs/heads/feature/apply_as_example_service'
-    if: github.ref == 'refs/heads/prod'
+    if: github.ref == 'refs/heads/feature/apply_as_example_service'
+#    if: github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest
     env:
       TFE_TOKEN: ${{ secrets.TFE_TOKEN }}
@@ -205,6 +197,26 @@ jobs:
       - name: Build and Push for Prod
         working-directory: identity-lambda
         run: |
+          sudo apt install -y pkg-config libssl-dev
+          sudo ln -s /usr/include/x86_64-linux-gnu/asm /usr/include/x86_64-linux-musl/asm
+          sudo ln -s /usr/include/asm-generic /usr/include/x86_64-linux-musl/asm-generic
+          sudo ln -s /usr/include/linux /usr/include/x86_64-linux-musl/linux
+          sudo mkdir /musl
+          sudo apt-get install wget
+          sudo wget https://github.com/openssl/openssl/archive/OpenSSL_1_1_1f.tar.gz
+          sudo tar zxvf OpenSSL_1_1_1f.tar.gz
+          cd openssl-OpenSSL_1_1_1f/
+          echo nhut3
+          sudo CC="musl-gcc -fPIE -pie" ./Configure no-shared no-async --prefix=/musl --openssldir=/musl/ssl linux-x86_64
+          sudo apt-get install build-essential
+          sudo make depend
+          sudo make -j$(nproc)
+          sudo make install
+          export PKG_CONFIG_ALLOW_CROSS=1
+          export OPENSSL_STATIC=true
+          export OPENSSL_DIR=/musl
+          cd /home/runner/work/identity-service/identity-service/identity-lambda
+          cargo clean
           cargo build --release --target x86_64-unknown-linux-musl
           cp ./target/x86_64-unknown-linux-musl/release/test1 ./bootstrap && zip test1.zip bootstrap
           cp ./target/x86_64-unknown-linux-musl/release/test2 ./bootstrap && zip test2.zip bootstrap
