@@ -148,8 +148,8 @@ jobs:
           ./scripts/terraform-enterprise-push.sh lambda/terraform HocVienCongGiao/dev-sg-lambda-services-hvcg-example-service
 
   push_prod:
-#    if: github.ref == 'refs/heads/feature/apply_as_example_service'
-    if: github.ref == 'refs/heads/prod'
+    if: github.ref == 'refs/heads/feature/apply_as_example_service'
+#    if: github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest
     env:
       TFE_TOKEN: ${{ secrets.TFE_TOKEN }}
