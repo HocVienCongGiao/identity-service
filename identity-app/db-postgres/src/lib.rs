@@ -123,7 +123,8 @@ mod tests {
     #[tokio::test]
     async fn it_works() {
         initialise();
-        assert_eq!(2 + 2, 4);
+        let result = 4;
+        assert_eq!(result, 4);
         println!("finished test1");
     }
 }
