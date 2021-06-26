@@ -26,6 +26,7 @@ pub trait MutationOutputBoundary {}
 #[async_trait]
 pub trait Test1DbGateway {
     async fn exists_by_name(&self, name: String) -> bool;
+    async fn insert(&self, name: String, country: String) -> bool;
 }
 
 // CommonUser

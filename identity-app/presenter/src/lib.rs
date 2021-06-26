@@ -1,11 +1,11 @@
 use domain::test_func;
-use postgres::{Client, Error, NoTls};
 
 #[cfg(test)]
 mod tests {
 
     #[test]
     fn it_works() {
-        assert_eq!(2 + 2, 4);
+        let result = 4;
+        assert_eq!(result, 4);
     }
 }

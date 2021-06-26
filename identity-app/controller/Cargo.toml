@@ -6,4 +6,4 @@ edition = "2018"
 [dependencies]
 domain = { path = "../domain" }
 tokio-postgres = "0.7.2"
-db-cognito = { path = "../../identity-app/db-cognito" }
+db-postgres = { path = "../../identity-app/db-postgres" }

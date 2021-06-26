@@ -23,6 +23,10 @@ mod tests {
             }
             false
         }
+
+        async fn insert(&self, name: String, country: String) -> bool {
+            todo!()
+        }
     }
 
     #[test]
@@ -37,6 +41,7 @@ mod tests {
         test1_simple_mutator.create_test1(Test1SimpleMutationRequest {
             name: "new".to_string(),
         });
-        assert_eq!(2 + 2, 4);
+        let result = 4;
+        assert_eq!(result, 4);
     }
 }
