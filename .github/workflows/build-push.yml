@@ -5,6 +5,7 @@ on:
     branches:
       - dev
       - prod
+      - feature/apply_as_example_service
 
 jobs:
   check_lambda_files:
