@@ -136,6 +136,7 @@ jobs:
       - name: Build and Push for Dev
         working-directory: identity-lambda
         run: |
+          sudo apt-get install pkg-config libssl-dev
           cargo build --release --target x86_64-unknown-linux-musl
           cp ./target/x86_64-unknown-linux-musl/release/test1 ./bootstrap && zip test1.zip bootstrap
           cp ./target/x86_64-unknown-linux-musl/release/test2 ./bootstrap && zip test2.zip bootstrap
@@ -147,8 +148,8 @@ jobs:
           ./scripts/terraform-enterprise-push.sh lambda/terraform HocVienCongGiao/dev-sg-lambda-services-hvcg-example-service
 
   push_prod:
-    if: github.ref == 'refs/heads/feature/apply_as_example_service'
-#    if: github.ref == 'refs/heads/prod'
+#    if: github.ref == 'refs/heads/feature/apply_as_example_service'
+    if: github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest
     env:
       TFE_TOKEN: ${{ secrets.TFE_TOKEN }}
