@@ -142,7 +142,6 @@ jobs:
           sudo wget https://github.com/openssl/openssl/archive/OpenSSL_1_1_1f.tar.gz
           sudo tar zxvf OpenSSL_1_1_1f.tar.gz
           cd openssl-OpenSSL_1_1_1f/
-          echo nhut3
           sudo CC="musl-gcc -fPIE -pie" ./Configure no-shared no-async --prefix=/musl --openssldir=/musl/ssl linux-x86_64
           sudo apt-get install build-essential
           sudo make depend
@@ -205,7 +204,6 @@ jobs:
           sudo wget https://github.com/openssl/openssl/archive/OpenSSL_1_1_1f.tar.gz
           sudo tar zxvf OpenSSL_1_1_1f.tar.gz
           cd openssl-OpenSSL_1_1_1f/
-          echo nhut3
           sudo CC="musl-gcc -fPIE -pie" ./Configure no-shared no-async --prefix=/musl --openssldir=/musl/ssl linux-x86_64
           sudo apt-get install build-essential
           sudo make depend
