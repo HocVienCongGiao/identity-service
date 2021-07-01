@@ -4,6 +4,8 @@ use tokio_postgres::{Client, Error, NoTls};
 pub mod config;
 mod migration;
 pub mod test1_gateway;
+pub mod user_gateway;
+
 pub async fn connect() -> Client {
     let config = config::Config::new();
     println!("Connecting with config {:?}", config);
