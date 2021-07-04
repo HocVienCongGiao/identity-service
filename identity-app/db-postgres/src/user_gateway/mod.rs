@@ -1,5 +1,7 @@
 use async_trait::async_trait;
 use tokio_postgres::Client;
+use domain::entity::user::User;
+use std::borrow::Borrow;
 
 mod mutation;
 mod query;
@@ -18,13 +20,31 @@ impl domain::boundaries::UserDbGateway for UserRepository {
         }
         let row = result.unwrap();
         let name_found: String = row.get("username");
-        println!("ROW IS {}", name);
-        name_found == name
+        println!("ROW IS {}", username);
+        name_found == username
     }
 
     async fn insert(&self, user: User) -> bool {
-        let result = mutation::save(
+        let save_identity__user = mutation::save_identity__user(
             &(*self).client, user).await;
-        return result.is_ok();
+
+        let user_username = user;
+        let save_identity__user_username = mutation::save_identity__user_username(
+            &(*self).client, *user_username).await;
+
+        let save_identity__user_email = mutation::save_identity__user_email(
+            &(*self).client, user).await;
+
+        let save_identity__user_phone = mutation::save_identity__user_phone(
+            &(*self).client, user).await;
+
+        let save_identity__user_enabled = mutation::save_identity__user_enabled(
+            &(*self).client, user).await;
+
+        return save_identity__user.is_ok() &&
+            save_identity__user_username.is_ok() &&
+            save_identity__user_email.is_ok() &&
+            save_identity__user_phone.is_ok() &&
+            save_identity__user_enabled.is_ok();
     }
 }

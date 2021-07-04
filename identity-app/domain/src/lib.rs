@@ -3,7 +3,7 @@ pub fn test_func() {
 }
 
 pub mod boundaries;
-mod entity;
+pub mod entity;
 pub mod interactors;
 
 #[cfg(test)]

@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use uuid::Uuid;
 use crate::entity::user::User;
 
 #[async_trait]
@@ -21,13 +22,9 @@ pub struct Test1SimpleQueryRequest {
     pub name: String,
 }
 
-pub struct UserMutationRequest {
-    pub id: Uuid,
-}
-
 pub struct UserDbRequest {
-    pub id: Option<Uuid>,
-    pub username: Option<String>,
+    pub id: Uuid,
+    pub username: String,
     pub email: Option<String>,
     pub phone: Option<String>
 }
@@ -37,16 +34,12 @@ pub struct Test1SimpleQueryResponse {
     pub status: u16,
 }
 
-pub struct UserSimpleMutationResponse {
-    pub id: Option<uuid>,
-}
-
 pub struct UserDbResponse {
-    pub id: Option<Uuid>,
-    pub username: Option<String>,
-    pub email: Option<String>,
-    pub phone: Option<String>,
-    pub enabled: Option<bool>
+    pub id: Uuid,
+    pub username: String,
+    pub email: String,
+    pub phone: String,
+    pub enabled: bool
 }
 
 pub trait MutationOutputBoundary {}

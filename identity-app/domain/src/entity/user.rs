@@ -1,8 +1,10 @@
-pub(crate) struct User {
-    pub(crate) id: i32,
-    pub(crate) username: String,
-    pub(crate) email: String,
-    pub(crate) phone: String,
+use uuid::Uuid;
+
+pub struct User {
+    pub id: Uuid,
+    pub username: String,
+    pub email: String,
+    pub phone: String,
     pub(crate) enabled: bool,
 }
 
