@@ -169,6 +169,7 @@ version = "0.1.5"
 dependencies = [
  "db-postgres",
  "domain",
+ "hvcg_iam_openapi_identity",
  "tokio-postgres",
 ]
 
@@ -232,6 +233,7 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "futures",
+ "uuid",
 ]
 
 [[package]]
@@ -562,6 +564,33 @@ dependencies = [
  "serde_urlencoded",
  "swagger",
  "url",
+]
+
+[[package]]
+name = "hvcg_iam_openapi_identity"
+version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "24c2f90f2578f416b6acc10001a799253b54bb9f6f4ccb4bb875eaf7fd786c72"
+dependencies = [
+ "async-trait",
+ "chrono",
+ "futures",
+ "hyper",
+ "hyper-openssl",
+ "hyper-tls",
+ "lazy_static",
+ "log 0.4.8",
+ "mime 0.3.16",
+ "native-tls",
+ "openssl",
+ "percent-encoding 2.1.0",
+ "regex",
+ "serde",
+ "serde_ignored",
+ "serde_json",
+ "swagger",
+ "url",
+ "uuid",
 ]
 
 [[package]]
@@ -2116,6 +2145,22 @@ dependencies = [
  "idna",
  "matches",
  "percent-encoding 2.1.0",
+]
+
+[[package]]
+name = "user"
+version = "0.1.0"
+dependencies = [
+ "controller",
+ "dotenv",
+ "hvcg_example_openapi_entity",
+ "hvcg_iam_openapi_identity",
+ "lambda_http",
+ "log 0.4.8",
+ "serde",
+ "serde_json",
+ "tokio 1.6.0",
+ "uuid",
 ]
 
 [[package]]

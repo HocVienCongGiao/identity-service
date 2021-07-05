@@ -24,13 +24,12 @@ impl domain::boundaries::UserDbGateway for UserRepository {
         name_found == username
     }
 
-    async fn insert(&self, user: User) -> bool {
+    async fn insert(&self, user: &User) -> bool {
         let save_identity__user = mutation::save_identity__user(
             &(*self).client, user).await;
 
-        let user_username = user;
         let save_identity__user_username = mutation::save_identity__user_username(
-            &(*self).client, *user_username).await;
+            &(*self).client, user).await;
 
         let save_identity__user_email = mutation::save_identity__user_email(
             &(*self).client, user).await;

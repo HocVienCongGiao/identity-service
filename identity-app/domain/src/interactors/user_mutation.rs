@@ -27,15 +27,21 @@ impl boundaries::UserSimpleMutationInputBoundary for UserSimpleMutationInteracto
                 enabled: true,
             };
 
-            let user_result_wait = futures::executor::block_on((*self).user_db_gateway.insert(user));
+            let user_result_wait = futures::executor::block_on((*self).user_db_gateway.insert(&user));
 
             if user_result_wait {
                 return UserDbResponse {
-                    id: request.id,
-                    username: request.username.clone(),
-                    email: "".to_string(), //TODO need to fix this
-                    phone: "".to_string(), //TODO need to fix this
-                    enabled: true
+
+                    // id: user.id.clone(),
+                    // username: user.username.clone(),
+                    // email: user.email.clone(),
+                    // phone: user.phone.clone(),
+                    // enabled: true
+                    id: Default::default(),
+                    username: "".to_string(),
+                    email: "".to_string(),
+                    phone: "".to_string(),
+                    enabled: false
                 };
             }
         }

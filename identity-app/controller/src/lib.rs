@@ -5,7 +5,7 @@ use hvcg_iam_openapi_identity::models::User;
 
 pub mod openapi;
 
-pub async fn create_user(user: User) -> User{
+pub async fn create_user(user: &User) -> User{
     let client = db_postgres::connect().await;
     let user_repository = UserRepository { client };
     let user_db_gateway = Box::new(user_repository);
@@ -27,13 +27,13 @@ impl ToOpenApi<User> for UserDbResponse {
     }
 }
 
-impl ToModel<UserDbRequest> for User {
+impl ToModel<UserDbRequest> for &User {
     fn to_model(&self) -> UserDbRequest {
         UserDbRequest {
-            id: self.id?,
+            id: self.id.unwrap(),
             username: self.username.to_string(),
-            email: Option::from(self.email.to_string()),
-            phone: Option::from(self.phone.to_string())
+            email: self.email.clone(),
+            phone: self.phone.clone()
         }
     }
 }

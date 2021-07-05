@@ -53,7 +53,7 @@ pub trait Test1DbGateway {
 #[async_trait]
 pub trait UserDbGateway {
     async fn exists_by_username(&self, username: String) -> bool;
-    async fn insert(&self, user: User) -> bool;
+    async fn insert(&self, user: &User) -> bool;
 }
 // CommonUser
 // CommonUserFactory

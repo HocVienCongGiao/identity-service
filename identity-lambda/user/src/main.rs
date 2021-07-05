@@ -8,18 +8,6 @@ use hvcg_iam_openapi_identity::models::User;
 
 type Error = Box<dyn std::error::Error + Sync + Send + 'static>;
 
-#[derive(Debug,Deserialize,Default)]
-struct UserRequest {
-    #[serde(default)]
-    id: Uuid,
-    #[serde(default)]
-    username: String,
-    #[serde(default)]
-    email: String,
-    #[serde(default)]
-    phone: String
-}
-
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     lambda::run(handler(create_user)).await?;
@@ -27,31 +15,23 @@ async fn main() -> Result<(), Error> {
 }
 
 async fn create_user(request: Request, context: Context) -> Result<impl IntoResponse, Error> {
-    let lambda_user_request: UserRequest = request_test.payload()
-        .unwrap_or_else(|_parse_err| None)
-        .unwrap_or_default();
+    let lambda_user_request: User = request.payload().unwrap_or_else(|_parse_err| None).unwrap();
+        // .unwrap_or_else(|_parse_err| None)
+        // .unwrap_or_default();
 
     println!("{}", format!(
-        lambda_user_request.id,
-        lambda_user_request.username,
-        lambda_user_request.email,
-        lambda_user_request.phone
+        "{}", lambda_user_request.clone().to_string()
     ));
 
     if request.method() != method::Method::POST {
-        return Ok(Response::builder()
-            .body(Body::Empty)
-            .expect("unable to build http::Response"));
+        println!("Request method is not in post method");
+        return Ok(json!("Request method is in not post method"))
+
     }
 
-    let result = controller::create_user(User {
-        id: Option::from(lambda_user_request.id),
-        username: lambda_user_request.username,
-        email: Option::from(lambda_user_request.email),
-        phone: Option::from(lambda_user_request.phone)
-    });
+    let result = controller::create_user(&lambda_user_request);
 
-    Ok(IntoResponse::into_response(result))
+    return Ok(json!("User is created"))
 }
 
 

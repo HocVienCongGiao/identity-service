@@ -4,7 +4,7 @@ use domain::entity::user::User;
 
 pub async fn save_identity__user(
     client: &Client,
-    user: User
+    user: &User
 ) -> Result<u64, Error> {
     let stmt = (*client)
         .prepare(
@@ -19,7 +19,7 @@ pub async fn save_identity__user(
 
 pub async fn save_identity__user_username(
     client: &Client,
-    user: User
+    user: &User
 ) -> Result<u64, Error> {
     let stmt = (*client)
         .prepare(
@@ -35,7 +35,7 @@ pub async fn save_identity__user_username(
 
 pub async fn save_identity__user_email(
     client: &Client,
-    user: User
+    user: &User
 ) -> Result<u64, Error> {
     let stmt = (*client)
         .prepare(
@@ -51,7 +51,7 @@ pub async fn save_identity__user_email(
 
 pub async fn save_identity__user_phone(
     client: &Client,
-    user: User
+    user: &User
 ) -> Result<u64, Error> {
     let stmt = (*client)
         .prepare(
@@ -67,7 +67,7 @@ pub async fn save_identity__user_phone(
 
 pub async fn save_identity__user_enabled(
     client: &Client,
-    user: User
+    user: &User
 ) -> Result<u64, Error> {
     let stmt = (*client)
         .prepare(
