@@ -1,6 +1,7 @@
+use async_trait::async_trait;
+
 use crate::boundaries;
 use crate::boundaries::{Test1DbGateway, Test1SimpleQueryRequest, Test1SimpleQueryResponse};
-use async_trait::async_trait;
 
 pub struct Test1SimpleQueryInteractor<A: Test1DbGateway> {
     db_gateway: A,

@@ -7,51 +7,19 @@ use serde_json::json;
 use uuid::Uuid;
 
 type Error = Box<dyn std::error::Error + Sync + Send + 'static>;
-
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     lambda::run(handler(create_user)).await?;
     Ok(())
 }
 
-async fn create_user(request: Request, context: Context) -> Result<impl IntoResponse, Error> {
-    let lambda_user_request: User = request.payload().unwrap_or_else(|_parse_err| None).unwrap();
-        // .unwrap_or_else(|_parse_err| None)
-        // .unwrap_or_default();
-
-    let serialized_user = serde_json::to_string(&lambda_user_request).unwrap();
-    println!("{}", serialized_user);
-
-    if request.method() != method::Method::POST {
-        println!("Request method is not in post method");
-        return Ok(json!("Request method is in not post method"))
-
-    }
-
-    let result = controller::create_user(&lambda_user_request);
-
-    return Ok(json!("User is created"))
-    // Example code
-    // async fn func(event: Request, _: Context) -> Result<impl IntoResponse, Error> {
-    //     Ok(match event.query_string_parameters().get("first_name") {
-    //         Some(first_name) => format!("Hello, {}!", first_name).into_response(),
-    //         _ => Response::builder()
-    //             .status(400)
-    //             .body("Empty first name".into())
-    //             .expect("failed to render response"),
-    //     })
-    // }
-}
-
-
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-    use std::path::PathBuf;
-
     use hvcg_iam_openapi_identity::models::User;
     use lambda_http::{RequestExt, Response};
     use lambda_http::http::Method;
+    use std::collections::HashMap;
+    use std::path::PathBuf;
 
     use super::*;
 

@@ -1,7 +1,9 @@
+use std::borrow::Borrow;
+
 use async_trait::async_trait;
 use tokio_postgres::Client;
+
 use domain::entity::user::User;
-use std::borrow::Borrow;
 
 mod mutation;
 mod query;
@@ -25,25 +27,26 @@ impl domain::boundaries::UserDbGateway for UserRepository {
     }
 
     async fn insert(&self, user: &User) -> bool {
-        let save_identity__user = mutation::save_identity__user(
+        println!("Start insert user to db");
+        let save_identity_user = mutation::save_identity_user(
             &(*self).client, user).await;
 
-        let save_identity__user_username = mutation::save_identity__user_username(
+        let save_identity_user_username = mutation::save_identity_user_username(
             &(*self).client, user).await;
 
-        let save_identity__user_email = mutation::save_identity__user_email(
+        let save_identity_user_email = mutation::save_identity_user_email(
             &(*self).client, user).await;
 
-        let save_identity__user_phone = mutation::save_identity__user_phone(
+        let save_identity_user_phone = mutation::save_identity_user_phone(
             &(*self).client, user).await;
 
-        let save_identity__user_enabled = mutation::save_identity__user_enabled(
+        let save_identity_user_enabled = mutation::save_identity_user_enabled(
             &(*self).client, user).await;
 
-        return save_identity__user.is_ok() &&
-            save_identity__user_username.is_ok() &&
-            save_identity__user_email.is_ok() &&
-            save_identity__user_phone.is_ok() &&
-            save_identity__user_enabled.is_ok();
+        return save_identity_user.is_ok() &&
+            save_identity_user_username.is_ok() &&
+            save_identity_user_email.is_ok() &&
+            save_identity_user_phone.is_ok() &&
+            save_identity_user_enabled.is_ok();
     }
 }

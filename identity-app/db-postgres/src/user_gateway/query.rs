@@ -1,5 +1,5 @@
-use tokio_postgres::types::ToSql;
 use tokio_postgres::{Client, Error, Row};
+use tokio_postgres::types::ToSql;
 
 pub async fn find_one_by_username(client: &Client, username: String) -> Result<Row, Error> {
     let stmt = (*client)

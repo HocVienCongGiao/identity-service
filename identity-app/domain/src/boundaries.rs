@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use uuid::Uuid;
+
 use crate::entity::user::User;
 
 #[async_trait]

@@ -1,11 +1,12 @@
+use async_trait::async_trait;
+use futures::executor::block_on;
+
 use crate::boundaries;
 use crate::boundaries::{
     UserDbGateway,
-    UserDbResponse,
     UserDbRequest,
+    UserDbResponse,
 };
-use async_trait::async_trait;
-use futures::executor::block_on;
 
 pub struct UserSimpleMutationInteractor {
     user_db_gateway: Box<dyn UserDbGateway>,
@@ -27,23 +28,25 @@ impl boundaries::UserSimpleMutationInputBoundary for UserSimpleMutationInteracto
                 enabled: true,
             };
 
-            let user_result_wait = futures::executor::block_on((*self).user_db_gateway.insert(&user));
+            (*self).user_db_gateway.insert(&user);
 
-            if user_result_wait {
-                return UserDbResponse {
+            // let user_result_wait = futures::executor::block_on((*self).user_db_gateway.insert(&user));
 
-                    // id: user.id.clone(),
-                    // username: user.username.clone(),
-                    // email: user.email.clone(),
-                    // phone: user.phone.clone(),
-                    // enabled: true
-                    id: Default::default(),
-                    username: "".to_string(),
-                    email: "".to_string(),
-                    phone: "".to_string(),
-                    enabled: false
-                };
-            }
+            // if user_result_wait {
+            //     return UserDbResponse {
+            //
+            //         // id: user.id.clone(),
+            //         // username: user.username.clone(),
+            //         // email: user.email.clone(),
+            //         // phone: user.phone.clone(),
+            //         // enabled: true
+            //         id: Default::default(),
+            //         username: "".to_string(),
+            //         email: "".to_string(),
+            //         phone: "".to_string(),
+            //         enabled: false
+            //     };
+            // }
         }
 
         return UserDbResponse {

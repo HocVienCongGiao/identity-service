@@ -1,4 +1,4 @@
-use lambda_http::{handler, lambda, Context, IntoResponse, Request};
+use lambda_http::{Context, handler, IntoResponse, lambda, Request};
 use serde_json::json;
 
 type Error = Box<dyn std::error::Error + Sync + Send + 'static>;
@@ -26,8 +26,9 @@ async fn test1(_: Request, _: Context) -> Result<impl IntoResponse, Error> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::path::PathBuf;
+
+    use super::*;
 
     #[tokio::test]
     async fn test1_handles() {

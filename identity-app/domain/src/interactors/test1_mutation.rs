@@ -1,7 +1,8 @@
-use crate::boundaries;
-use crate::boundaries::{Test1DbGateway, Test1SimpleMutationRequest, Test1SimpleMutationResponse};
 use async_trait::async_trait;
 use futures::executor::block_on;
+
+use crate::boundaries;
+use crate::boundaries::{Test1DbGateway, Test1SimpleMutationRequest, Test1SimpleMutationResponse};
 
 pub struct Test1SimpleMutationInteractor {
     db_gateway: Box<dyn Test1DbGateway>,

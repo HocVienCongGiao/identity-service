@@ -1,5 +1,6 @@
-use domain::test_func;
 use tokio_postgres::{Client, Error, NoTls};
+
+use domain::test_func;
 
 pub mod config;
 mod migration;
@@ -108,9 +109,10 @@ pub async fn main(mut client: Client) -> Result<Client, Error> {
 
 #[cfg(test)]
 mod tests {
-    use crate::main;
     use std::path::PathBuf;
     use std::sync::Once;
+
+    use crate::main;
 
     static INIT: Once = Once::new();
 
