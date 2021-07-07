@@ -30,23 +30,24 @@ impl domain::boundaries::UserDbGateway for UserRepository {
         println!("Start insert user to db");
         let save_identity_user = mutation::save_identity_user(
             &(*self).client, user).await;
-
-        let save_identity_user_username = mutation::save_identity_user_username(
-            &(*self).client, user).await;
-
-        let save_identity_user_email = mutation::save_identity_user_email(
-            &(*self).client, user).await;
-
-        let save_identity_user_phone = mutation::save_identity_user_phone(
-            &(*self).client, user).await;
-
-        let save_identity_user_enabled = mutation::save_identity_user_enabled(
-            &(*self).client, user).await;
-
-        return save_identity_user.is_ok() &&
-            save_identity_user_username.is_ok() &&
-            save_identity_user_email.is_ok() &&
-            save_identity_user_phone.is_ok() &&
-            save_identity_user_enabled.is_ok();
+        println!("save_identity_user: {}",save_identity_user.is_ok());
+        return save_identity_user.is_ok();
+        // let save_identity_user_username = mutation::save_identity_user_username(
+        //     &(*self).client, user).await;
+        //
+        // let save_identity_user_email = mutation::save_identity_user_email(
+        //     &(*self).client, user).await;
+        //
+        // let save_identity_user_phone = mutation::save_identity_user_phone(
+        //     &(*self).client, user).await;
+        //
+        // let save_identity_user_enabled = mutation::save_identity_user_enabled(
+        //     &(*self).client, user).await;
+        //
+        // return save_identity_user.is_ok() &&
+        //     save_identity_user_username.is_ok() &&
+        //     save_identity_user_email.is_ok() &&
+        //     save_identity_user_phone.is_ok() &&
+        //     save_identity_user_enabled.is_ok();
     }
 }

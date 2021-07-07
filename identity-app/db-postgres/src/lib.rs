@@ -1,13 +1,31 @@
-use tokio_postgres::{Client, Error, NoTls};
+use tokio_postgres::{Client, Error, NoTls, Connection, Socket};
 
 use domain::test_func;
+use std::sync::Once;
+use std::path::PathBuf;
+use tokio_postgres::tls::NoTlsStream;
 
 pub mod config;
 mod migration;
 pub mod test1_gateway;
 pub mod user_gateway;
 
-pub async fn connect() -> Client {
+struct ClientConfig {
+    client: Option<&'static Client>,
+    connection: Option<&'static Connection<Socket, NoTlsStream>>
+}
+static INIT: Once = Once::new();
+static mut CLIENT_CONFIG: ClientConfig = ClientConfig {
+    client: None,
+    connection: None
+};
+
+
+async unsafe fn expensive_computation() -> ClientConfig {
+    if !CLIENT_CONFIG.client.is_none() {
+        return CLIENT_CONFIG
+    }
+
     let config = config::Config::new();
     println!("Connecting with config {:?}", config);
     let result = tokio_postgres::connect(
@@ -15,11 +33,11 @@ pub async fn connect() -> Client {
             "user={} password={} host={} port={} dbname={}",
             config.db_user, config.db_password, config.db_host, config.db_port, config.db_name
         )
-        .as_str(),
+            .as_str(),
         //         tokio_postgres::connect("postgresql://postgres:password@localhost/test", NoTls).await?;
         NoTls,
     )
-    .await;
+        .await;
 
     let (client, connection) = result.unwrap();
     // The connection object performs the actual communication with the database,
@@ -29,8 +47,21 @@ pub async fn connect() -> Client {
             eprintln!("connection error: {}", e);
         }
     });
-    client
-    // p%40ssword
+
+    let client_config = ClientConfig{
+        client: Option::from(client),
+        connection: None
+    };
+
+    CLIENT_CONFIG = &client_config;
+
+    CLIENT_CONFIG
+
+}
+
+pub async unsafe fn connect() -> Client {
+    let client_config = expensive_computation().await;
+    return client_config.client.unwrap();
 }
 pub async fn migrate(mut client: Client) -> Client {
     // migration::migrations::runner()

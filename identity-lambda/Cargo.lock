@@ -170,7 +170,9 @@ dependencies = [
  "db-postgres",
  "domain",
  "hvcg_iam_openapi_identity",
+ "tokio 1.6.0",
  "tokio-postgres",
+ "uuid",
 ]
 
 [[package]]
@@ -1259,6 +1261,7 @@ dependencies = [
  "bytes 1.0.1",
  "fallible-iterator",
  "postgres-protocol",
+ "uuid",
 ]
 
 [[package]]

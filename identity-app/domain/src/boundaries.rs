@@ -12,8 +12,9 @@ pub trait Test1SimpleMutationInputBoundary {
     fn create_test1(&self, request: Test1SimpleMutationRequest) -> Test1SimpleMutationResponse;
 }
 
+#[async_trait]
 pub trait UserSimpleMutationInputBoundary {
-    fn create_user(&self, request: UserDbRequest) -> UserDbResponse;
+    async fn create_user(&self, request: UserDbRequest) -> UserDbResponse;
 }
 
 pub struct Test1SimpleMutationRequest {

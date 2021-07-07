@@ -18,4 +18,4 @@ controller = { path = "../../identity-app/controller" }
 dotenv = "0.15.0"
 hvcg_iam_openapi_identity = "0.0.1"
 log = "^0.4"
-uuid = "0.8"
+uuid = {version = "0.8", features = ["v4"]}

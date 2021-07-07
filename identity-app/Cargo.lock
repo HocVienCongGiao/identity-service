@@ -136,7 +136,9 @@ dependencies = [
  "db-postgres",
  "domain",
  "hvcg_iam_openapi_identity",
+ "tokio 1.6.0",
  "tokio-postgres",
+ "uuid",
 ]
 
 [[package]]
@@ -183,7 +185,7 @@ dependencies = [
  "dotenv",
  "tokio 1.6.0",
  "tokio-postgres",
- "uuid 0.5.1",
+ "uuid",
 ]
 
 [[package]]
@@ -201,7 +203,7 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "futures",
- "uuid 0.8.2",
+ "uuid",
 ]
 
 [[package]]
@@ -480,7 +482,7 @@ dependencies = [
  "serde_json",
  "swagger",
  "url",
- "uuid 0.8.2",
+ "uuid",
 ]
 
 [[package]]
@@ -982,6 +984,7 @@ dependencies = [
  "bytes 1.0.1",
  "fallible-iterator",
  "postgres-protocol",
+ "uuid",
 ]
 
 [[package]]
@@ -1294,7 +1297,7 @@ dependencies = [
  "serde",
  "serde_json",
  "slog",
- "uuid 0.8.2",
+ "uuid",
 ]
 
 [[package]]
@@ -1565,12 +1568,6 @@ dependencies = [
  "matches",
  "percent-encoding 2.1.0",
 ]
-
-[[package]]
-name = "uuid"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bcc7e3b898aa6f6c08e5295b6c89258d1331e9ac578cc992fb818759951bdc22"
 
 [[package]]
 name = "uuid"

@@ -5,14 +5,15 @@ use domain::boundaries::{UserDbGateway, UserDbRequest, UserDbResponse, UserSimpl
 
 pub mod openapi;
 
-pub async fn create_user(user: &User) -> User{
+pub async unsafe fn create_user(user: &User) -> User{
     let client = db_postgres::connect().await;
     let user_repository = UserRepository { client };
-    let user_db_gateway = Box::new(user_repository);
+
     println!("nhuthuynh");
     // TODO debug at here
-    // let result = domain::interactors::user_mutation::UserSimpleMutationInteractor::new(user_db_gateway)
-    //     .create_user(user.to_model());
+    let user_request = user.to_model();
+    let user_interactor = domain::interactors::user_mutation::UserSimpleMutationInteractor::new(user_repository);
+    let result = user_interactor.create_user(user_request).await;
     // return result.to_openapi();
     return User {
         id: None,
@@ -62,7 +63,8 @@ mod tests {
     use uuid::Uuid;
 
     #[tokio::test]
-    async fn user_controller_test() {
+    async unsafe fn user_controller_test() {
+
         create_user(&User {
             id: Option::from(Uuid::new_v4()),
             username: "test".to_string(),

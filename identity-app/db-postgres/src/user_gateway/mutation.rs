@@ -13,8 +13,8 @@ pub async fn save_identity_user(
         )
         .await
         .unwrap();
-
-    let params: &[&(dyn ToSql + Sync)] = &[&user.id.to_string()];
+    print!("id: {}", user.id);
+    let params: &[&(dyn ToSql + Sync)] = &[&user.id];
     client.execute(&stmt, params).await
 }
 
