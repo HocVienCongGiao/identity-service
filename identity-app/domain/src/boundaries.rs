@@ -25,7 +25,6 @@ pub struct Test1SimpleQueryRequest {
 }
 
 pub struct UserDbRequest {
-    pub id: Uuid,
     pub username: String,
     pub email: Option<String>,
     pub phone: Option<String>

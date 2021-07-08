@@ -7,6 +7,7 @@ use crate::boundaries::{
     UserDbRequest,
     UserDbResponse,
 };
+use uuid::Uuid;
 
 pub struct UserSimpleMutationInteractor<A: UserDbGateway> {
     db_gateway: A,
@@ -17,55 +18,44 @@ impl<A> boundaries::UserSimpleMutationInputBoundary for UserSimpleMutationIntera
     where
         A: UserDbGateway + Sync + Send, {
     async fn create_user(&self, request: UserDbRequest) -> UserDbResponse {
-        println!("user simple mutation input boundary {}", request.username);
-            let user = crate::entity::user::User {
-                id: request.id.clone(),
-                username: request.username.clone(),
-                email: request.email.unwrap(),
-                phone: request.phone.unwrap(),
-                enabled: true,
-            };
-        (*self).db_gateway.insert(&user).await;
-        // if (*self).db_gateway.exists_by_username(request.username.clone()) {
-        //     println!("user with this {} already exists", request.username);
-        // } else {
-        //     println!("new user, all is good");
-        //     let user = crate::entity::user::User {
-        //         id: request.id.clone(),
-        //         username: request.username.clone(),
-        //         email: request.email.unwrap(),
-        //         phone: request.phone.unwrap(),
-        //         enabled: true,
-        //     };
-        //
-        //     (*self).db_gateway.insert(&user);
-
-            // let user_result_wait = futures::executor::block_on((*self).user_db_gateway.insert(&user));
-
-            // if user_result_wait {
-            //     return UserDbResponse {
-            //
-            //         // id: user.id.clone(),
-            //         // username: user.username.clone(),
-            //         // email: user.email.clone(),
-            //         // phone: user.phone.clone(),
-            //         // enabled: true
-            //         id: Default::default(),
-            //         username: "".to_string(),
-            //         email: "".to_string(),
-            //         phone: "".to_string(),
-            //         enabled: false
-            //     };
-            // }
-        // }
-
-        return UserDbResponse {
+        let empty_user_response =  UserDbResponse {
             id: Default::default(),
             username: "".to_string(),
             email: "".to_string(),
             phone: "".to_string(),
             enabled: false,
         };
+
+        println!("user simple mutation input boundary {}", request.username);
+
+        if (*self).db_gateway.exists_by_username(request.username.clone()).await {
+            println!("user with this {} already exists", request.username);
+            return empty_user_response
+        }
+
+        println!("new user, all is good");
+        let user = crate::entity::user::User {
+            id: Uuid::new_v4(),
+            username: request.username.clone(),
+            email: request.email,
+            phone: request.phone,
+            enabled: true,
+        };
+
+        let user_result_wait = (*self).db_gateway.insert(&user).await;
+        println!("user_result_wait {}", user_result_wait);
+
+        return if user_result_wait {
+            UserDbResponse {
+                id: user.id.clone(),
+                username: user.username,
+                email: user.email.unwrap(),
+                phone: user.phone.unwrap(),
+                enabled: false
+            }
+        } else {
+            empty_user_response
+        }
     }
 }
 

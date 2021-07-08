@@ -20,7 +20,7 @@ async fn create_user(request: Request, context: Context) -> Result<impl IntoResp
         // .unwrap_or_default();
 
     let serialized_user = serde_json::to_string(&lambda_user_request).unwrap();
-    println!("{}", serialized_user);
+    println!("serialized_user: {}", serialized_user);
 
     if request.method() != method::Method::POST {
         println!("Request method is not in post method");
@@ -28,9 +28,16 @@ async fn create_user(request: Request, context: Context) -> Result<impl IntoResp
 
     }
 
-    let result = controller::create_user(&lambda_user_request);
+    let result = controller::create_user(&lambda_user_request).await;
 
-    return Ok(json!("User is created"))
+    println!("result id {}", result.id.unwrap_or_default());
+
+    if result.id.is_none() {
+        return Ok(json!("Failed to insert user"))
+    }
+
+
+    return Ok(json!(result))
     // Example code
     // async fn func(event: Request, _: Context) -> Result<impl IntoResponse, Error> {
     //     Ok(match event.query_string_parameters().get("first_name") {
@@ -58,8 +65,8 @@ mod tests {
     #[tokio::test]
     async fn create_user_handles() {
         let user_request = User {
-            id: Option::from(Uuid::new_v4()),
-            username: "nhuthuynh".to_string(),
+            id: None,
+            username: "test_user".to_string() + &*Uuid::new_v4().to_string(),
             email: Option::from("nhut_cargo@gmail.com".to_string()),
             phone: Option::from("0909686868".to_string()),
         };
@@ -78,7 +85,8 @@ mod tests {
         let request = Request::from_parts(parts, Body::from(serialized_user));
         let expected = json!({"message": "Validation successful"}).into_response();
         let response = create_user(request, Context::default()).await.expect("expected Ok(_) value").into_response();
-        // assert_eq!(response.body(), expected.body())
+
+        assert_eq!(response.body(), expected.body())
     }
 
 }

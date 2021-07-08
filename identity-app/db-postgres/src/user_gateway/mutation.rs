@@ -13,7 +13,8 @@ pub async fn save_identity_user(
         )
         .await
         .unwrap();
-    print!("id: {}", user.id);
+    println!("id: {}", user.id);
+
     let params: &[&(dyn ToSql + Sync)] = &[&user.id];
     client.execute(&stmt, params).await
 }
@@ -30,7 +31,7 @@ pub async fn save_identity_user_username(
         .unwrap();
 
     // let stmt = block_on(stmt_future).unwrap();
-    let params: &[&(dyn ToSql + Sync)] = &[&user.id.to_string(), &user.username];
+    let params: &[&(dyn ToSql + Sync)] = &[&user.id, &user.username];
     client.execute(&stmt, params).await
 }
 
@@ -45,8 +46,7 @@ pub async fn save_identity_user_email(
         .await
         .unwrap();
 
-    // let stmt = block_on(stmt_future).unwrap();
-    let params: &[&(dyn ToSql + Sync)] = &[&user.id.to_string(), &user.email];
+    let params: &[&(dyn ToSql + Sync)] = &[&user.id, &user.email];
     client.execute(&stmt, params).await
 }
 
@@ -62,7 +62,7 @@ pub async fn save_identity_user_phone(
         .unwrap();
 
     // let stmt = block_on(stmt_future).unwrap();
-    let params: &[&(dyn ToSql + Sync)] = &[&user.id.to_string(), &user.phone];
+    let params: &[&(dyn ToSql + Sync)] = &[&user.id, &user.phone];
     client.execute(&stmt, params).await
 }
 
@@ -78,6 +78,6 @@ pub async fn save_identity_user_enabled(
         .unwrap();
 
     // let stmt = block_on(stmt_future).unwrap();
-    let params: &[&(dyn ToSql + Sync)] = &[&user.id.to_string()];
+    let params: &[&(dyn ToSql + Sync)] = &[&user.id];
     client.execute(&stmt, params).await
 }
