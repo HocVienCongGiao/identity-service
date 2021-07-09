@@ -2,11 +2,7 @@ use async_trait::async_trait;
 use futures::executor::block_on;
 
 use crate::boundaries;
-use crate::boundaries::{
-    UserDbGateway,
-    UserDbRequest,
-    UserDbResponse,
-};
+use crate::boundaries::{UserDbGateway, UserDbRequest, UserDbResponse};
 use uuid::Uuid;
 
 pub struct UserSimpleMutationInteractor<A: UserDbGateway> {
@@ -15,10 +11,11 @@ pub struct UserSimpleMutationInteractor<A: UserDbGateway> {
 
 #[async_trait]
 impl<A> boundaries::UserSimpleMutationInputBoundary for UserSimpleMutationInteractor<A>
-    where
-        A: UserDbGateway + Sync + Send, {
+where
+    A: UserDbGateway + Sync + Send,
+{
     async fn create_user(&self, request: UserDbRequest) -> UserDbResponse {
-        let empty_user_response =  UserDbResponse {
+        let empty_user_response = UserDbResponse {
             id: Default::default(),
             username: "".to_string(),
             email: "".to_string(),
@@ -28,9 +25,13 @@ impl<A> boundaries::UserSimpleMutationInputBoundary for UserSimpleMutationIntera
 
         println!("user simple mutation input boundary {}", request.username);
 
-        if (*self).db_gateway.exists_by_username(request.username.clone()).await {
+        if (*self)
+            .db_gateway
+            .exists_by_username(request.username.clone())
+            .await
+        {
             println!("user with this {} already exists", request.username);
-            return empty_user_response
+            return empty_user_response;
         }
 
         println!("new user, all is good");
@@ -51,17 +52,17 @@ impl<A> boundaries::UserSimpleMutationInputBoundary for UserSimpleMutationIntera
                 username: user.username,
                 email: user.email.unwrap(),
                 phone: user.phone.unwrap(),
-                enabled: false
+                enabled: false,
             }
         } else {
             empty_user_response
-        }
+        };
     }
 }
 
 impl<A> UserSimpleMutationInteractor<A>
-    where
-        A: UserDbGateway + Sync + Send,
+where
+    A: UserDbGateway + Sync + Send,
 {
     pub fn new(db_gateway: A) -> Self {
         UserSimpleMutationInteractor { db_gateway }

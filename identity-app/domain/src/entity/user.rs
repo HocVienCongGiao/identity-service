@@ -10,10 +10,7 @@ pub struct User {
 
 impl User {
     pub(crate) fn is_valid(&self) -> bool {
-        println!(
-            "checking if id {} is valid",
-            (*self).username
-        );
+        println!("checking if id {} is valid", (*self).username);
         true
     }
 }

@@ -25,12 +25,11 @@ mod tests {
             .prepare("SELECT * FROM identity__user_view")
             .await
             .unwrap();
-        
+
         let result = connect.query_one(&stmt, &[]).await;
 
         let row = result.unwrap();
         let username_found: String = row.get("username");
-        println!("ROW IS {}",username_found);
+        println!("ROW IS {}", username_found);
     }
-
 }

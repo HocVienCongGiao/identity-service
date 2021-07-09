@@ -27,7 +27,7 @@ pub struct Test1SimpleQueryRequest {
 pub struct UserDbRequest {
     pub username: String,
     pub email: Option<String>,
-    pub phone: Option<String>
+    pub phone: Option<String>,
 }
 
 pub struct Test1SimpleMutationResponse {}
@@ -40,7 +40,7 @@ pub struct UserDbResponse {
     pub username: String,
     pub email: String,
     pub phone: String,
-    pub enabled: bool
+    pub enabled: bool,
 }
 
 pub trait MutationOutputBoundary {}

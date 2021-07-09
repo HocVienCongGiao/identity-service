@@ -29,30 +29,41 @@ impl domain::boundaries::UserDbGateway for UserRepository {
     async fn insert(&self, user: &User) -> bool {
         println!("Start insert user to db");
 
-        let save_identity_user = mutation::save_identity_user(
-            &(*self).client, user).await;
-        println!("save_identity_user: {}",save_identity_user.is_ok());
+        let save_identity_user = mutation::save_identity_user(&(*self).client, user).await;
+        println!("save_identity_user: {}", save_identity_user.is_ok());
 
-        let save_identity_user_username = mutation::save_identity_user_username(
-            &(*self).client, user).await;
-        println!("save_identity_user_username: {}",save_identity_user_username.is_ok());
+        let save_identity_user_username =
+            mutation::save_identity_user_username(&(*self).client, user).await;
+        println!(
+            "save_identity_user_username: {}",
+            save_identity_user_username.is_ok()
+        );
 
-        let save_identity_user_email = mutation::save_identity_user_email(
-            &(*self).client, user).await;
-        println!("save_identity_user_email: {}",save_identity_user_email.is_ok());
+        let save_identity_user_email =
+            mutation::save_identity_user_email(&(*self).client, user).await;
+        println!(
+            "save_identity_user_email: {}",
+            save_identity_user_email.is_ok()
+        );
 
-        let save_identity_user_phone = mutation::save_identity_user_phone(
-            &(*self).client, user).await;
-        println!("save_identity_user_phone: {}",save_identity_user_phone.is_ok());
+        let save_identity_user_phone =
+            mutation::save_identity_user_phone(&(*self).client, user).await;
+        println!(
+            "save_identity_user_phone: {}",
+            save_identity_user_phone.is_ok()
+        );
 
-        let save_identity_user_enabled = mutation::save_identity_user_enabled(
-            &(*self).client, user).await;
-        println!("save_identity_user_enabled: {}",save_identity_user_enabled.is_ok());
+        let save_identity_user_enabled =
+            mutation::save_identity_user_enabled(&(*self).client, user).await;
+        println!(
+            "save_identity_user_enabled: {}",
+            save_identity_user_enabled.is_ok()
+        );
 
-        return save_identity_user.is_ok() &&
-            save_identity_user_username.is_ok() &&
-            save_identity_user_email.is_ok() &&
-            save_identity_user_phone.is_ok() &&
-            save_identity_user_enabled.is_ok();
+        return save_identity_user.is_ok()
+            && save_identity_user_username.is_ok()
+            && save_identity_user_email.is_ok()
+            && save_identity_user_phone.is_ok()
+            && save_identity_user_enabled.is_ok();
     }
 }

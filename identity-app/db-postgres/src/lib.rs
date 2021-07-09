@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 use std::sync::Once;
 
-use tokio_postgres::{Client, Connection, Error, NoTls, Socket};
 use tokio_postgres::tls::NoTlsStream;
+use tokio_postgres::{Client, Connection, Error, NoTls, Socket};
 
 use domain::test_func;
 
@@ -11,7 +11,7 @@ mod migration;
 pub mod test1_gateway;
 pub mod user_gateway;
 
-pub async  fn connect() -> Client {
+pub async fn connect() -> Client {
     let config = config::Config::new();
     println!("Connecting with config {:?}", config);
     let result = tokio_postgres::connect(
@@ -19,10 +19,10 @@ pub async  fn connect() -> Client {
             "user={} password={} host={} port={} dbname={}",
             config.db_user, config.db_password, config.db_host, config.db_port, config.db_name
         )
-            .as_str(),
+        .as_str(),
         NoTls,
     )
-        .await;
+    .await;
 
     let (client, connection) = result.unwrap();
     // The connection object performs the actual communication with the database,
