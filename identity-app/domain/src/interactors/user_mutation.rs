@@ -25,6 +25,11 @@ where
 
         println!("user simple mutation input boundary {}", request.username);
 
+        if request.username.is_empty() {
+            println!("Cannot process with empty username");
+            return empty_user_response;
+        }
+
         if (*self)
             .db_gateway
             .exists_by_username(request.username.clone())
@@ -48,7 +53,7 @@ where
 
         return if user_result_wait {
             UserDbResponse {
-                id: user.id.clone(),
+                id: user.id,
                 username: user.username,
                 email: user.email.unwrap(),
                 phone: user.phone.unwrap(),

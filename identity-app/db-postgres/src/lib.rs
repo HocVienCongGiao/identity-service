@@ -42,8 +42,6 @@ mod tests {
     use std::path::PathBuf;
     use std::sync::Once;
 
-    use crate::main;
-
     static INIT: Once = Once::new();
 
     fn initialise() {
