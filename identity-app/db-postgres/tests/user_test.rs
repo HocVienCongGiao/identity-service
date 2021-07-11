@@ -26,10 +26,8 @@ mod tests {
             .await
             .unwrap();
 
-        let result = connect.query_one(&stmt, &[]).await;
+        let result = connect.execute(&stmt, &[]).await;
 
-        let row = result.unwrap();
-        let username_found: String = row.get("username");
-        println!("ROW IS {}", username_found);
+        assert_eq!(result.is_ok(), true)
     }
 }

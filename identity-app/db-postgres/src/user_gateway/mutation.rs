@@ -1,5 +1,5 @@
 use tokio_postgres::types::ToSql;
-use tokio_postgres::{Client, Error, Row};
+use tokio_postgres::{Client, Error};
 
 use domain::entity::user::User;
 

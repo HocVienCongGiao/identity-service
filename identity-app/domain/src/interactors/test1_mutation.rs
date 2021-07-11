@@ -1,4 +1,3 @@
-use async_trait::async_trait;
 use futures::executor::block_on;
 
 use crate::boundaries;

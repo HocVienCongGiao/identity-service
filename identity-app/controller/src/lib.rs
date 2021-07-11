@@ -1,9 +1,7 @@
 use hvcg_iam_openapi_identity::models::User;
 
 use db_postgres::user_gateway::UserRepository;
-use domain::boundaries::{
-    UserDbGateway, UserDbRequest, UserDbResponse, UserSimpleMutationInputBoundary,
-};
+use domain::boundaries::{UserDbRequest, UserDbResponse, UserSimpleMutationInputBoundary};
 
 pub mod openapi;
 
@@ -63,13 +61,15 @@ pub trait ToModel<T> {
 
 #[cfg(test)]
 mod tests {
-    use crate::create_user;
+    use hvcg_iam_openapi_identity::models::User;
+    use uuid::Uuid;
+
     use db_postgres::user_gateway::UserRepository;
     use domain::boundaries::{
         UserDbGateway, UserDbRequest, UserDbResponse, UserSimpleMutationInputBoundary,
     };
-    use hvcg_iam_openapi_identity::models::User;
-    use uuid::Uuid;
+
+    use crate::create_user;
 
     #[tokio::test]
     async fn user_controller_test() {

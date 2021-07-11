@@ -7,10 +7,3 @@ pub struct User {
     pub phone: Option<String>,
     pub(crate) enabled: bool,
 }
-
-impl User {
-    pub(crate) fn is_valid(&self) -> bool {
-        println!("checking if id {} is valid", (*self).username);
-        true
-    }
-}

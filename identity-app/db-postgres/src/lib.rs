@@ -1,10 +1,4 @@
-use std::path::PathBuf;
-use std::sync::Once;
-
-use tokio_postgres::tls::NoTlsStream;
-use tokio_postgres::{Client, Connection, Error, NoTls, Socket};
-
-use domain::test_func;
+use tokio_postgres::{Client, NoTls};
 
 pub mod config;
 mod migration;
