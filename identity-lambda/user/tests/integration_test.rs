@@ -92,7 +92,7 @@ mod tests {
 
         let deserialized_user: User = serde_json::from_slice(response.body()).unwrap();
 
-        assert_eq!(!deserialized_user.id.is_none(), true);
+        assert!(!deserialized_user.id.is_none(), true);
         assert_eq!(
             deserialized_user.username,
             "test_user".to_string() + &*test_suffix
