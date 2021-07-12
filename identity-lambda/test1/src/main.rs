@@ -26,8 +26,9 @@ async fn test1(_: Request, _: Context) -> Result<impl IntoResponse, Error> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use std::path::PathBuf;
+
+    use super::*;
 
     #[tokio::test]
     async fn test1_handles() {

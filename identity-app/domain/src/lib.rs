@@ -3,15 +3,16 @@ pub fn test_func() {
 }
 
 pub mod boundaries;
-mod entity;
+pub mod entity;
 pub mod interactors;
 
 #[cfg(test)]
 mod tests {
+    use async_trait::async_trait;
+
     use crate::boundaries::{
         Test1DbGateway, Test1SimpleMutationInputBoundary, Test1SimpleMutationRequest,
     };
-    use async_trait::async_trait;
 
     struct Test1DbGatewayStub {}
 

@@ -31,3 +31,4 @@ node_modules
 .serverless
 target
 .idea
+Cargo.lock

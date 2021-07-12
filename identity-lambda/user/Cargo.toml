@@ -1,0 +1,23 @@
+[package]
+name = "user"
+version = "0.1.0"
+authors = ["nhuthm080280 <nhuthm080280@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { version = "1", features = ["macros"] }
+lambda_http = { git = "https://github.com/awslabs/aws-lambda-rust-runtime/", branch = "master" }
+serde = { version = "1.0", features = ["derive"] }
+
+# serde_json is just for the example, not required in general
+serde_json = "1.0"
+jsonwebtoken = "7.2.0"
+hvcg_example_openapi_entity = "1.0"
+controller = { path = "../../identity-app/controller" }
+dotenv = "0.15.0"
+hvcg_iam_openapi_identity = "0.0.1"
+log = "^0.4"
+uuid = {version = "0.8", features = ["v4"]}
+rand = "0.8"

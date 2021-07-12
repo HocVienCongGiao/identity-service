@@ -1,10 +1,11 @@
+use std::time::SystemTime;
+
 use chrono::prelude::*;
 use rusoto_cognito_idp::{
     AdminCreateUserRequest, AdminDeleteUserRequest, CognitoIdentityProvider,
     CognitoIdentityProviderClient, ListUsersRequest,
 };
 use rusoto_core::{Client, Region};
-use std::time::SystemTime;
 
 async fn cognito() {
     // let dispatcher = HttpClient::new().expect("failed to create request dispatcher");
