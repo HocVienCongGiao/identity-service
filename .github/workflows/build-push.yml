@@ -123,30 +123,30 @@ jobs:
         path: ./db-service
         ref: development
         token: ${{ secrets.GH_OAUTH_TOKEN }}
-      - name: Setup python
-        working-directory: ./db-service
-        env:
-          DB_NAME: dev_hocvien
-          DB_PASSWORD: 123456
-          DB_USER: hocvien_dev
-          DB_HOST: 0.0.0.0
-        run: |
-          echo "prepare"
-          sudo apt-get update -y &&
-          sudo apt-get install -y postgresql-server-dev-all gcc python3-dev musl-dev
-          echo "install python"
-          pip install -r ./requirements.txt --target ./lambda/terraform/module/python
-          echo "copy python files in lamda folder"
-          cp -R ./lambda/*.py ./lambda/terraform/module/python/
-          echo "copy python files in shared_db_app folder"
-          cp -R ./shared_db_app ./lambda/terraform/module/python/
-          echo "copy python files in shared_db_app folder"
-          cp -R ./migrations ./lambda/terraform/module/python/
-          echo "all files in shared_db_app python folder"
-          ls -l ./lambda/terraform/module/python/
-          cd ./lambda/terraform/module/python/ && python -c 'from shared_db_app.migration import migrate; migrate()'
-          echo "migrate successfully"
-          psql -h 0.0.0.0 -U hocvien_dev -d dev_hocvien -p 5432 -c 'SELECT * FROM public.identity__user' -w
+    - name: Setup python
+      working-directory: ./db-service
+      env:
+        DB_NAME: dev_hocvien
+        DB_PASSWORD: 123456
+        DB_USER: hocvien_dev
+        DB_HOST: 0.0.0.0
+      run: |
+        echo "prepare"
+        sudo apt-get update -y &&
+        sudo apt-get install -y postgresql-server-dev-all gcc python3-dev musl-dev
+        echo "install python"
+        pip install -r ./requirements.txt --target ./lambda/terraform/module/python
+        echo "copy python files in lamda folder"
+        cp -R ./lambda/*.py ./lambda/terraform/module/python/
+        echo "copy python files in shared_db_app folder"
+        cp -R ./shared_db_app ./lambda/terraform/module/python/
+        echo "copy python files in shared_db_app folder"
+        cp -R ./migrations ./lambda/terraform/module/python/
+        echo "all files in shared_db_app python folder"
+        ls -l ./lambda/terraform/module/python/
+        cd ./lambda/terraform/module/python/ && python -c 'from shared_db_app.migration import migrate; migrate()'
+        echo "migrate successfully"
+        psql -h 0.0.0.0 -U hocvien_dev -d dev_hocvien -p 5432 -c 'SELECT * FROM public.identity__user' -w
     - name: Test lambda
       working-directory: ./rust-service/identity-lambda
       run: cargo test
