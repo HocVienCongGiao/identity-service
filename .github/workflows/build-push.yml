@@ -151,7 +151,7 @@ jobs:
       working-directory: ./rust-service/identity-lambda
       run: cargo test
     - name: Test components
-      working-directory: identity-app
+      working-directory: ./rust-service/identity-app
       run: cargo test
 
   # deploy on pushes to master branch
