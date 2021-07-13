@@ -216,7 +216,7 @@ jobs:
       - name: Deploy Terraform Config
         run: |
           chmod +x ./scripts/terraform-enterprise-push.sh
-          ./scripts/terraform-enterprise-push.sh lambda/terraform HocVienCongGiao/dev-sg-lambda-services-hvcg-example-service
+          ./scripts/terraform-enterprise-push.sh identity-lambda/terraform HocVienCongGiao/dev-sg-lambda-services-hvcg-identity-service
 
   push_prod:
     if: github.ref == 'refs/heads/prod'
