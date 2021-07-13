@@ -136,6 +136,6 @@ mod tests {
 
         // Then
         // Checking error log
-        println!("create_user_failed completed!!")
+        println!("create_user_failed completed!!!")
     }
 }
