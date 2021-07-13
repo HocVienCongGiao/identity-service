@@ -1,1 +1,1 @@
-service_name = "example-service"
+service_name = "identity-service"
