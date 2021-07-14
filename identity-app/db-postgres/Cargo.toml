@@ -11,7 +11,7 @@ domain = { path = "../domain", version = "0.1.0" }
 #refinery = { version = "0.5", features = ["tokio-postgres"] }
 #pg-embed = { version = "0.3" }
 async-trait = "0.1.50"
+uuid = {version = "0.8", features = ["v4"]}
 
 [dev-dependencies]
 dotenv = "0.15.0"
-uuid = {version = "0.8", features = ["v4"]}

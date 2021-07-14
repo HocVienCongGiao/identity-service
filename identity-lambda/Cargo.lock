@@ -22,6 +22,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4d25d88fd6b8041580a654f9d0c581a047baee2b3efee13275f2fc392fc75034"
 
 [[package]]
+name = "async-stream"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "171374e7e3b2504e0e5236e3b59260560f9fe94bfe9ac39ba5e4e929c5590625"
+dependencies = [
+ "async-stream-impl",
+ "futures-core",
+]
+
+[[package]]
+name = "async-stream-impl"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "648ed8c8d2ce5409ccd57453d9d1b214b342a0d69376a6feda1fd6cae3299308"
+dependencies = [
+ "proc-macro2 1.0.26",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "async-trait"
 version = "0.1.50"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -176,7 +197,7 @@ dependencies = [
  "db-postgres",
  "domain",
  "hvcg_iam_openapi_identity",
- "tokio 1.6.0",
+ "tokio 1.8.1",
  "tokio-postgres",
  "uuid",
 ]
@@ -222,8 +243,9 @@ version = "0.1.5"
 dependencies = [
  "async-trait",
  "domain",
- "tokio 1.6.0",
+ "tokio 1.8.1",
  "tokio-postgres",
+ "uuid",
 ]
 
 [[package]]
@@ -540,10 +562,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "http-body"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "60daa14be0e0786db0f03a9e57cb404c9d756eed2b6c62b9ea98ec5743ec75a9"
+dependencies = [
+ "bytes 1.0.1",
+ "http",
+ "pin-project-lite 0.2.6",
+]
+
+[[package]]
 name = "httparse"
 version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f3a87b616e37e93c22fb19bcd386f02f3af5ea98a25670ad0fce773de23c5e68"
+
+[[package]]
+name = "httpdate"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6456b8a6c8f33fee7d958fcd1b60d55b11940a79e63ae87013e6d22e26034440"
 
 [[package]]
 name = "hvcg_example_openapi_entity"
@@ -554,7 +593,7 @@ dependencies = [
  "async-trait",
  "chrono",
  "futures",
- "hyper",
+ "hyper 0.13.6",
  "hyper-openssl",
  "hyper-tls",
  "lazy_static",
@@ -569,21 +608,21 @@ dependencies = [
  "serde",
  "serde_ignored",
  "serde_json",
- "serde_urlencoded",
+ "serde_urlencoded 0.6.1",
  "swagger",
  "url",
 ]
 
 [[package]]
 name = "hvcg_iam_openapi_identity"
-version = "0.0.2"
+version = "0.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f8cc1a2dfc0b6f54d3a271df744a9ca1961469f2d8ef83c96350ef2508065cb"
+checksum = "b5b63ec5c803248e40d1c56d3ae023876ba0e1c74d07e3fdc9adaffe202116e5"
 dependencies = [
  "async-trait",
  "chrono",
  "futures",
- "hyper",
+ "hyper 0.13.6",
  "hyper-openssl",
  "hyper-tls",
  "lazy_static",
@@ -613,7 +652,7 @@ dependencies = [
  "futures-util",
  "h2",
  "http",
- "http-body",
+ "http-body 0.3.1",
  "httparse",
  "itoa",
  "log 0.4.8",
@@ -622,6 +661,29 @@ dependencies = [
  "time",
  "tokio 0.2.21",
  "tower-service",
+ "want",
+]
+
+[[package]]
+name = "hyper"
+version = "0.14.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7728a72c4c7d72665fde02204bcbd93b247721025b222ef78606f14513e0fd03"
+dependencies = [
+ "bytes 1.0.1",
+ "futures-channel",
+ "futures-core",
+ "futures-util",
+ "http",
+ "http-body 0.4.2",
+ "httparse",
+ "httpdate",
+ "itoa",
+ "pin-project-lite 0.2.6",
+ "socket2 0.4.0",
+ "tokio 1.8.1",
+ "tower-service",
+ "tracing",
  "want",
 ]
 
@@ -651,7 +713,7 @@ dependencies = [
  "antidote",
  "bytes 0.5.5",
  "http",
- "hyper",
+ "hyper 0.13.6",
  "linked_hash_set",
  "once_cell",
  "openssl",
@@ -668,7 +730,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d979acc56dcb5b8dddba3917601745e877576475aa046df3226eabdecef78eed"
 dependencies = [
  "bytes 0.5.5",
- "hyper",
+ "hyper 0.13.6",
  "native-tls",
  "tokio 0.2.21",
  "tokio-tls",
@@ -761,7 +823,7 @@ dependencies = [
  "futures",
  "genawaiter",
  "http",
- "hyper",
+ "hyper 0.13.6",
  "lambda-attributes",
  "serde",
  "serde_json",
@@ -794,7 +856,41 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
- "serde_urlencoded",
+ "serde_urlencoded 0.6.1",
+]
+
+[[package]]
+name = "lambda_http"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "53d2f5bbdf23c5b73faa7fccf8014642f9817a674a09e714511930bd868cbc19"
+dependencies = [
+ "base64 0.13.0",
+ "http",
+ "lambda_runtime",
+ "serde",
+ "serde_json",
+ "serde_urlencoded 0.7.0",
+]
+
+[[package]]
+name = "lambda_runtime"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f9b08856997d11ca8122121b26b17a27ef1dce689d71ccd754e051f2417aebdd"
+dependencies = [
+ "async-stream",
+ "bytes 1.0.1",
+ "futures",
+ "http",
+ "hyper 0.14.10",
+ "serde",
+ "serde_json",
+ "tokio 1.8.1",
+ "tokio-stream",
+ "tower-service",
+ "tracing",
+ "tracing-error",
 ]
 
 [[package]]
@@ -1731,6 +1827,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_urlencoded"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "edfa57a7f8d9c1d260a549e7224100f6c43d43f9103e06dd8b4095a9b2b43ce9"
+dependencies = [
+ "form_urlencoded",
+ "itoa",
+ "ryu",
+ "serde",
+]
+
+[[package]]
 name = "sha2"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1855,7 +1963,7 @@ dependencies = [
  "base64 0.12.3",
  "chrono",
  "futures",
- "hyper",
+ "hyper 0.13.6",
  "hyper-old-types",
  "hyper-openssl",
  "hyper-tls",
@@ -1911,18 +2019,18 @@ dependencies = [
  "controller",
  "dotenv",
  "hvcg_example_openapi_entity",
- "lambda_http",
+ "lambda_http 0.2.0-beta.1",
  "serde_json",
- "tokio 1.6.0",
+ "tokio 1.8.1",
 ]
 
 [[package]]
 name = "test2"
 version = "0.1.5"
 dependencies = [
- "lambda_http",
+ "lambda_http 0.2.0-beta.1",
  "serde_json",
- "tokio 1.6.0",
+ "tokio 1.8.1",
 ]
 
 [[package]]
@@ -1967,9 +2075,9 @@ dependencies = [
 
 [[package]]
 name = "tokio"
-version = "1.6.0"
+version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd3076b5c8cc18138b8f8814895c11eb4de37114a5d127bafdc5e55798ceef37"
+checksum = "98c8b05dc14c75ea83d63dd391100353789f5f24b8b3866542a5e85c8be8e985"
 dependencies = [
  "autocfg 1.0.0",
  "bytes 1.0.1",
@@ -2036,8 +2144,19 @@ dependencies = [
  "postgres-protocol",
  "postgres-types",
  "socket2 0.4.0",
- "tokio 1.6.0",
+ "tokio 1.8.1",
  "tokio-util 0.6.7",
+]
+
+[[package]]
+name = "tokio-stream"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7b2f3f698253f03119ac0102beaa64f67a67e08074d03a22d18784104543727f"
+dependencies = [
+ "futures-core",
+ "pin-project-lite 0.2.6",
+ "tokio 1.8.1",
 ]
 
 [[package]]
@@ -2075,7 +2194,7 @@ dependencies = [
  "futures-sink",
  "log 0.4.8",
  "pin-project-lite 0.2.6",
- "tokio 1.6.0",
+ "tokio 1.8.1",
 ]
 
 [[package]]
@@ -2097,6 +2216,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "01ebdc2bb4498ab1ab5f5b73c5803825e60199229ccba0698170e3be0e7f959f"
 dependencies = [
  "cfg-if 1.0.0",
+ "log 0.4.8",
  "pin-project-lite 0.2.6",
  "tracing-attributes",
  "tracing-core",
@@ -2248,12 +2368,10 @@ dependencies = [
  "hvcg_example_openapi_entity",
  "hvcg_iam_openapi_identity",
  "jsonwebtoken",
- "lambda_http",
- "log 0.4.8",
- "rand 0.8.3",
+ "lambda_http 0.3.0",
  "serde",
  "serde_json",
- "tokio 1.6.0",
+ "tokio 1.8.1",
  "uuid",
 ]
 

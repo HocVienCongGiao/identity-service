@@ -8,16 +8,14 @@ edition = "2018"
 
 [dependencies]
 tokio = { version = "1", features = ["macros"] }
-lambda_http = { git = "https://github.com/awslabs/aws-lambda-rust-runtime/", branch = "master" }
-serde = { version = "1.0", features = ["derive"] }
-
+#lambda_http = { git = "https://github.com/awslabs/aws-lambda-rust-runtime/", branch = "master" }
+lambda_http = "0.3.0"
 # serde_json is just for the example, not required in general
 serde_json = "1.0"
+controller = { path = "../../identity-app/controller" }
 jsonwebtoken = "7.2.0"
 hvcg_example_openapi_entity = "1.0"
-controller = { path = "../../identity-app/controller" }
-dotenv = "0.15.0"
-hvcg_iam_openapi_identity = "0.0.3"
-log = "^0.4"
+serde = { version = "1.0", features = ["derive"] }
 uuid = {version = "0.8", features = ["v4"]}
-rand = "0.8"
+hvcg_iam_openapi_identity = "0.0.3"
+dotenv = "0.15.0"
