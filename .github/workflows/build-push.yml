@@ -281,4 +281,3 @@ jobs:
 
 #         aws s3 cp target/lambda/release/notification.zip s3://891616054205-ap-southeast-1-aws-lambda/terraform-api/latest/notification.zip          
 #         aws s3 rm --recursive s3://479284709538-us-west-2-aws-lambda/terraform-api/latest
-
