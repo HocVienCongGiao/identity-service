@@ -278,6 +278,10 @@ jobs:
           aws s3 cp ./test1.zip s3://891616054205-ap-southeast-1-aws-lambda/prod-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/test1.zip
           aws s3 cp ./test2.zip s3://891616054205-ap-southeast-1-aws-lambda/prod-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/test2.zip
           aws s3 cp ./user.zip s3://891616054205-ap-southeast-1-aws-lambda/prod-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/user.zip
+      - name: Deploy Terraform Config
+        run: |
+          chmod +x ./scripts/terraform-enterprise-push.sh
+          ./scripts/terraform-enterprise-push.sh identity-lambda/terraform HocVienCongGiao/prod-sg-lambda-services-hvcg-identity-service
 
 #         aws s3 cp target/lambda/release/notification.zip s3://891616054205-ap-southeast-1-aws-lambda/terraform-api/latest/notification.zip          
 #         aws s3 rm --recursive s3://479284709538-us-west-2-aws-lambda/terraform-api/latest
