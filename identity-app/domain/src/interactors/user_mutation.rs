@@ -101,7 +101,7 @@ impl crate::entity::user::User {
 
     fn to_user_mutation_response(&self) -> UserMutationResponse {
         UserMutationResponse {
-            id: self.id.clone(),
+            id: self.id,
             username: self.username.clone(),
             email: self.email.clone().unwrap(),
             phone: self.phone.clone().unwrap(),
