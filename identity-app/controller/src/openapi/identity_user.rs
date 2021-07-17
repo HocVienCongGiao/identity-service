@@ -1,6 +1,6 @@
-pub use domain::boundaries::{UserMutationResponse};
-pub use hvcg_iam_openapi_identity::models::User;
 use domain::boundaries::UserMutationRequest;
+pub use domain::boundaries::UserMutationResponse;
+pub use hvcg_iam_openapi_identity::models::User;
 
 pub fn create_saint() {
     println!("Creating User in Controller OpenApi saint.rs")
@@ -34,4 +34,3 @@ pub trait ToOpenApi<T> {
 pub trait ToModel<T> {
     fn to_model(&self) -> T;
 }
-

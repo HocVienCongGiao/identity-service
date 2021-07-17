@@ -18,9 +18,9 @@ mod tests {
 
     use hvcg_iam_openapi_identity::models::User;
     use jsonwebtoken::TokenData;
-    use lambda_http::{Context, http};
-    use lambda_http::{Body, IntoResponse};
     use lambda_http::http::HeaderValue;
+    use lambda_http::{http, Context};
+    use lambda_http::{Body, IntoResponse};
     use regex::Regex;
     use uuid::Uuid;
 
@@ -149,7 +149,7 @@ mod tests {
             id: None,
             username: "test".to_string().add(&*test_suffix),
             email: Option::from("test".to_string().add(&*test_suffix)),
-            phone: Option::from("+84 939332766".to_string())
+            phone: Option::from("+84 939332766".to_string()),
         };
 
         let serialized_user = serde_json::to_string(&user_request).unwrap();
@@ -179,7 +179,7 @@ mod tests {
             id: None,
             username: "test".to_string().add(&*test_suffix),
             email: Option::from("test@gmail.com".to_string()),
-            phone: Option::from("+84 9393327667".to_string())
+            phone: Option::from("+84 9393327667".to_string()),
         };
 
         let serialized_user = serde_json::to_string(&user_request).unwrap();

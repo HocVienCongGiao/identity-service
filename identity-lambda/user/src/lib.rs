@@ -1,5 +1,5 @@
-use hvcg_iam_openapi_identity::models::User;
 use domain::boundaries::UserMutationError;
+use hvcg_iam_openapi_identity::models::User;
 use jsonwebtoken::TokenData;
 use lambda_http::http::header::{
     ACCESS_CONTROL_ALLOW_HEADERS, ACCESS_CONTROL_ALLOW_METHODS, ACCESS_CONTROL_ALLOW_ORIGIN,
@@ -65,15 +65,14 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
 
     match result {
         Ok(_) => status_code = 200,
-        Err(UserMutationError::UniqueConstraintViolationError(..)) => {
-            status_code = 503
-        }
+        Err(UserMutationError::UniqueConstraintViolationError(..)) => status_code = 503,
         Err(UserMutationError::InvalidUser) => status_code = 405,
         Err(UserMutationError::InvalidEmail) => status_code = 405,
         Err(UserMutationError::InvalidPhone) => status_code = 405,
         Err(UserMutationError::ExistedUser) => status_code = 400,
-        Err(UserMutationError::UnknownError)
-        | Err(UserMutationError::IdCollisionError) => status_code = 500,
+        Err(UserMutationError::UnknownError) | Err(UserMutationError::IdCollisionError) => {
+            status_code = 500
+        }
     }
 
     user_response = result.map(Some).unwrap_or_else(|e| {
@@ -93,10 +92,7 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
                 .into(),
         )
         .expect("unable to build http::Response");
-    println!(
-        "user response {:?}",
-        serde_json::to_string(&user_response)
-    );
+    println!("user response {:?}", serde_json::to_string(&user_response));
 
     Ok(response)
 }

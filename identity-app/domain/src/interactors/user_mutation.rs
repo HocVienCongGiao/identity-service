@@ -2,7 +2,10 @@ use async_trait::async_trait;
 use uuid::Uuid;
 
 use crate::boundaries;
-use crate::boundaries::{DbError, UserDbGateway, UserDbResponse, UserMutationError, UserMutationRequest, UserMutationResponse};
+use crate::boundaries::{
+    DbError, UserDbGateway, UserDbResponse, UserMutationError, UserMutationRequest,
+    UserMutationResponse,
+};
 use regex::Regex;
 
 pub struct UserSimpleMutationInteractor<A: UserDbGateway> {
@@ -11,8 +14,8 @@ pub struct UserSimpleMutationInteractor<A: UserDbGateway> {
 
 #[async_trait]
 impl<A> boundaries::UserSimpleMutationInputBoundary for UserSimpleMutationInteractor<A>
-    where
-        A: UserDbGateway + Sync + Send,
+where
+    A: UserDbGateway + Sync + Send,
 {
     async fn create_user(
         &self,
@@ -55,7 +58,11 @@ impl<A> boundaries::UserSimpleMutationInputBoundary for UserSimpleMutationIntera
 
         if !is_not_valid_username {
             println!("This user is valid");
-            (*self).db_gateway.insert(&user).await.map(|_| user.to_user_mutation_response())
+            (*self)
+                .db_gateway
+                .insert(&user)
+                .await
+                .map(|_| user.to_user_mutation_response())
                 .map_err(|err| err.to_user_mutation_error())
         } else {
             Err(UserMutationError::UnknownError)
@@ -64,8 +71,8 @@ impl<A> boundaries::UserSimpleMutationInputBoundary for UserSimpleMutationIntera
 }
 
 impl<A> UserSimpleMutationInteractor<A>
-    where
-        A: UserDbGateway + Sync + Send,
+where
+    A: UserDbGateway + Sync + Send,
 {
     pub fn new(db_gateway: A) -> Self {
         UserSimpleMutationInteractor { db_gateway }
@@ -104,20 +111,17 @@ impl crate::entity::user::User {
 }
 
 impl crate::interactors::user_mutation::UserMutationRequest {
-
     fn is_not_valid_email_format(&self) -> bool {
         let email_regex = Regex::new(
-            r"^([a-z0-9_+]([a-z0-9_+.]*[a-z0-9_+])?)@([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6})"
-        ).unwrap();
+            r"^([a-z0-9_+]([a-z0-9_+.]*[a-z0-9_+])?)@([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6})",
+        )
+        .unwrap();
 
         !email_regex.is_match(&*self.email.clone().unwrap())
-
     }
 
     fn is_not_valid_phone_format(&self) -> bool {
-        let phone_regex = Regex::new(
-            r"^(\+84 [0-9]{9}$)"
-        ).unwrap();
+        let phone_regex = Regex::new(r"^(\+84 [0-9]{9}$)").unwrap();
 
         !phone_regex.is_match(&*self.phone.clone().unwrap())
     }

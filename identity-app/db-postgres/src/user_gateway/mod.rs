@@ -1,8 +1,8 @@
 use async_trait::async_trait;
 use tokio_postgres::Client;
 
-use domain::entity::user::User;
 use domain::boundaries::DbError;
+use domain::entity::user::User;
 
 mod mutation;
 mod query;
@@ -45,17 +45,13 @@ impl domain::boundaries::UserDbGateway for UserRepository {
         let save_identity_user_email =
             mutation::save_identity_user_email(&(*self).client, user).await;
         if save_identity_user_email.is_err() {
-            return Err(DbError::UniqueConstraintViolationError(
-                "email".to_string(),
-            ));
+            return Err(DbError::UniqueConstraintViolationError("email".to_string()));
         }
 
         let save_identity_user_phone =
             mutation::save_identity_user_phone(&(*self).client, user).await;
         if save_identity_user_phone.is_err() {
-            return Err(DbError::UniqueConstraintViolationError(
-                "phone".to_string(),
-            ));
+            return Err(DbError::UniqueConstraintViolationError("phone".to_string()));
         }
 
         let save_identity_user_enabled =
@@ -65,6 +61,5 @@ impl domain::boundaries::UserDbGateway for UserRepository {
         }
 
         Ok(())
-
     }
 }

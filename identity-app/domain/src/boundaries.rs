@@ -14,7 +14,10 @@ pub trait Test1SimpleMutationInputBoundary {
 
 #[async_trait]
 pub trait UserSimpleMutationInputBoundary {
-    async fn create_user(&self, request: UserMutationRequest) -> Result<UserMutationResponse, UserMutationError>;
+    async fn create_user(
+        &self,
+        request: UserMutationRequest,
+    ) -> Result<UserMutationResponse, UserMutationError>;
 }
 
 pub struct Test1SimpleMutationRequest {
