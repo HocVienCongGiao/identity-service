@@ -47,7 +47,7 @@ mod tests {
         let user_request = User {
             id: None,
             username: "test_user".to_string() + &*test_suffix,
-            email: Option::from("nhut_cargo@gmail.com".to_string()),
+            email: Option::from("nhutcargo@gmail.com".to_string()),
             phone: Option::from("+84 939686970".to_string()),
         };
 
@@ -103,11 +103,11 @@ mod tests {
         );
         assert_eq!(
             deserialized_user.email,
-            Option::from("nhut_cargo@gmail.com".to_string() + &*test_suffix)
+            Option::from("nhutcargo@gmail.com".to_string())
         );
         assert_eq!(
             deserialized_user.phone,
-            Option::from("+84 909686868".to_string() + &*test_suffix)
+            Option::from("+84 939686970".to_string())
         );
     }
 
@@ -138,7 +138,7 @@ mod tests {
             .into_response();
 
         // Then
-        assert_eq!(response.status(), 503);
+        assert_eq!(response.status(), 405);
     }
 
     #[tokio::test]

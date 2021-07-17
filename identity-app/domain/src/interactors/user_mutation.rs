@@ -117,12 +117,20 @@ impl crate::interactors::user_mutation::UserMutationRequest {
         )
         .unwrap();
 
+        if self.email.is_none() {
+            println!("Email is none");
+            return true
+        }
+
         !email_regex.is_match(&*self.email.clone().unwrap())
     }
 
     fn is_not_valid_phone_format(&self) -> bool {
         let phone_regex = Regex::new(r"^(\+84 [0-9]{9}$)").unwrap();
-
+        if self.phone.is_none() {
+            println!("Phone is none");
+            return true
+        }
         !phone_regex.is_match(&*self.phone.clone().unwrap())
     }
 }
