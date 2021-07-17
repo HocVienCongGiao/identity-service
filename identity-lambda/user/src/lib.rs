@@ -1,4 +1,5 @@
 use hvcg_iam_openapi_identity::models::User;
+use domain::boundaries::UserMutationError;
 use jsonwebtoken::TokenData;
 use lambda_http::http::header::{
     ACCESS_CONTROL_ALLOW_HEADERS, ACCESS_CONTROL_ALLOW_METHODS, ACCESS_CONTROL_ALLOW_ORIGIN,
@@ -59,15 +60,26 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
 
     let status_code: u16;
 
-    let user_response = controller::create_user(&lambda_user_request.unwrap()).await;
+    let user_response: Option<controller::openapi::identity_user::User>;
+    let result = controller::create_user(&lambda_user_request.unwrap()).await;
 
-    println!("result id {}", user_response.id.unwrap_or_default());
-
-    if user_response.id.is_none() {
-        status_code = StatusCode::INTERNAL_SERVER_ERROR.as_u16()
-    } else {
-        status_code = StatusCode::OK.as_u16()
+    match result {
+        Ok(_) => status_code = 200,
+        Err(UserMutationError::UniqueConstraintViolationError(..)) => {
+            status_code = 503
+        }
+        Err(UserMutationError::InvalidUser) => status_code = 405,
+        Err(UserMutationError::InvalidEmail) => status_code = 405,
+        Err(UserMutationError::InvalidPhone) => status_code = 405,
+        Err(UserMutationError::ExistedUser) => status_code = 400,
+        Err(UserMutationError::UnknownError)
+        | Err(UserMutationError::IdCollisionError) => status_code = 500,
     }
+
+    user_response = result.map(Some).unwrap_or_else(|e| {
+        println!("{:?}", e);
+        None
+    });
 
     let response: Response<Body> = Response::builder()
         .header(CONTENT_TYPE, "application/json")
@@ -77,12 +89,14 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
         .status(status_code)
         .body(
             serde_json::to_string(&user_response)
-                .expect("unable to serialize user_json::Value")
+                .expect("unable to serialize serde_json::Value")
                 .into(),
         )
         .expect("unable to build http::Response");
-
-    println!("user response {:?}", serde_json::to_string(&user_response));
+    println!(
+        "user response {:?}",
+        serde_json::to_string(&user_response)
+    );
 
     Ok(response)
 }

@@ -2,6 +2,7 @@ use async_trait::async_trait;
 use tokio_postgres::Client;
 
 use domain::entity::user::User;
+use domain::boundaries::DbError;
 
 mod mutation;
 mod query;
@@ -24,57 +25,46 @@ impl domain::boundaries::UserDbGateway for UserRepository {
         name_found == username
     }
 
-    async fn insert(&self, user: &User) -> bool {
+    async fn insert(&self, user: &User) -> Result<(), DbError> {
         println!("Start insert user to db");
 
         let save_identity_user = mutation::save_identity_user(&(*self).client, user).await;
         if save_identity_user.is_err() {
-            panic!(
-                "Problem insert identity user: {:?}",
-                save_identity_user.err()
-            )
+            return Err(DbError::UnknownError);
         }
 
         let save_identity_user_username =
             mutation::save_identity_user_username(&(*self).client, user).await;
+
         if save_identity_user_username.is_err() {
-            panic!(
-                "Problem insert identity user name : {:?}",
-                save_identity_user_username.err()
-            )
+            return Err(DbError::UniqueConstraintViolationError(
+                "user_name".to_string(),
+            ));
         }
 
         let save_identity_user_email =
             mutation::save_identity_user_email(&(*self).client, user).await;
         if save_identity_user_email.is_err() {
-            panic!(
-                "Problem insert identity email : {:?}",
-                save_identity_user_email.err()
-            )
+            return Err(DbError::UniqueConstraintViolationError(
+                "email".to_string(),
+            ));
         }
 
         let save_identity_user_phone =
             mutation::save_identity_user_phone(&(*self).client, user).await;
         if save_identity_user_phone.is_err() {
-            panic!(
-                "Problem insert identity phone : {:?}",
-                save_identity_user_phone.err()
-            )
+            return Err(DbError::UniqueConstraintViolationError(
+                "phone".to_string(),
+            ));
         }
 
         let save_identity_user_enabled =
             mutation::save_identity_user_enabled(&(*self).client, user).await;
         if save_identity_user_enabled.is_err() {
-            panic!(
-                "Problem insert identity enabled : {:?}",
-                save_identity_user_enabled.err()
-            )
+            return Err(DbError::UnknownError);
         }
 
-        return save_identity_user.is_ok()
-            && save_identity_user_username.is_ok()
-            && save_identity_user_email.is_ok()
-            && save_identity_user_phone.is_ok()
-            && save_identity_user_enabled.is_ok();
+        Ok(())
+
     }
 }

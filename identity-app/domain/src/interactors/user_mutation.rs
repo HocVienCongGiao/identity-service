@@ -1,8 +1,9 @@
 use async_trait::async_trait;
+use uuid::Uuid;
 
 use crate::boundaries;
-use crate::boundaries::{UserDbGateway, UserDbRequest, UserDbResponse};
-use uuid::Uuid;
+use crate::boundaries::{DbError, UserDbGateway, UserDbResponse, UserMutationError, UserMutationRequest, UserMutationResponse};
+use regex::Regex;
 
 pub struct UserSimpleMutationInteractor<A: UserDbGateway> {
     db_gateway: A,
@@ -10,23 +11,28 @@ pub struct UserSimpleMutationInteractor<A: UserDbGateway> {
 
 #[async_trait]
 impl<A> boundaries::UserSimpleMutationInputBoundary for UserSimpleMutationInteractor<A>
-where
-    A: UserDbGateway + Sync + Send,
+    where
+        A: UserDbGateway + Sync + Send,
 {
-    async fn create_user(&self, request: UserDbRequest) -> UserDbResponse {
-        let empty_user_response = UserDbResponse {
-            id: Default::default(),
-            username: "".to_string(),
-            email: "".to_string(),
-            phone: "".to_string(),
-            enabled: false,
-        };
-
-        println!("user simple mutation input boundary {}", request.username);
-
-        if request.username.is_empty() {
+    async fn create_user(
+        &self,
+        request: UserMutationRequest,
+    ) -> Result<UserMutationResponse, UserMutationError> {
+        println!("user mutation input boundary {}", request.username);
+        let is_not_valid_username = request.username.is_empty();
+        if is_not_valid_username {
             println!("Cannot process with empty username");
-            return empty_user_response;
+            return Err(UserMutationError::InvalidUser);
+        }
+
+        if request.is_not_valid_email_format() {
+            println!("Email is not in valid format");
+            return Err(UserMutationError::InvalidEmail);
+        }
+
+        if request.is_not_valid_phone_format() {
+            println!("Phone is not in valid format");
+            return Err(UserMutationError::InvalidPhone);
         }
 
         if (*self)
@@ -35,7 +41,7 @@ where
             .await
         {
             println!("user with this {} already exists", request.username);
-            return empty_user_response;
+            return Err(UserMutationError::ExistedUser);
         }
 
         println!("new user, all is good");
@@ -47,28 +53,72 @@ where
             enabled: true,
         };
 
-        let user_result_wait = (*self).db_gateway.insert(&user).await;
-        println!("user_result_wait {}", user_result_wait);
-
-        return if user_result_wait {
-            UserDbResponse {
-                id: user.id,
-                username: user.username,
-                email: user.email.unwrap(),
-                phone: user.phone.unwrap(),
-                enabled: false,
-            }
+        if !is_not_valid_username {
+            println!("This user is valid");
+            (*self).db_gateway.insert(&user).await.map(|_| user.to_user_mutation_response())
+                .map_err(|err| err.to_user_mutation_error())
         } else {
-            empty_user_response
-        };
+            Err(UserMutationError::UnknownError)
+        }
     }
 }
 
 impl<A> UserSimpleMutationInteractor<A>
-where
-    A: UserDbGateway + Sync + Send,
+    where
+        A: UserDbGateway + Sync + Send,
 {
     pub fn new(db_gateway: A) -> Self {
         UserSimpleMutationInteractor { db_gateway }
+    }
+}
+
+impl DbError {
+    fn to_user_mutation_error(&self) -> UserMutationError {
+        match self {
+            DbError::UniqueConstraintViolationError(field) => {
+                UserMutationError::UniqueConstraintViolationError(field.to_string())
+            }
+            DbError::UnknownError => UserMutationError::UnknownError,
+        }
+    }
+}
+
+impl crate::entity::user::User {
+    fn to_user_db_request(&self) -> UserMutationRequest {
+        UserMutationRequest {
+            username: self.username.clone(),
+            email: self.email.clone(),
+            phone: self.phone.clone(),
+        }
+    }
+
+    fn to_user_mutation_response(&self) -> UserMutationResponse {
+        UserMutationResponse {
+            id: self.id.clone(),
+            username: self.username.clone(),
+            email: self.email.clone().unwrap(),
+            phone: self.phone.clone().unwrap(),
+            enabled: self.enabled,
+        }
+    }
+}
+
+impl crate::interactors::user_mutation::UserMutationRequest {
+
+    fn is_not_valid_email_format(&self) -> bool {
+        let email_regex = Regex::new(
+            r"^([a-z0-9_+]([a-z0-9_+.]*[a-z0-9_+])?)@([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6})"
+        ).unwrap();
+
+        !email_regex.is_match(&*self.email.clone().unwrap())
+
+    }
+
+    fn is_not_valid_phone_format(&self) -> bool {
+        let phone_regex = Regex::new(
+            r"^(\+84 [0-9]{9}$)"
+        ).unwrap();
+
+        !phone_regex.is_match(&*self.phone.clone().unwrap())
     }
 }

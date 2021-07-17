@@ -1,62 +1,23 @@
 use hvcg_iam_openapi_identity::models::User;
 
 use db_postgres::user_gateway::UserRepository;
-use domain::boundaries::{UserDbRequest, UserDbResponse, UserSimpleMutationInputBoundary};
+use domain::boundaries::{UserMutationRequest, UserDbResponse, UserSimpleMutationInputBoundary, UserMutationError};
+use crate::openapi::identity_user::{ToModel, ToOpenApi};
 
 pub mod openapi;
 
-pub async fn create_user(user: &User) -> User {
+pub async fn create_user(user: &User) -> Result<openapi::identity_user::User, UserMutationError> {
     let client = db_postgres::connect().await;
     let user_repository = UserRepository { client };
     let user_request = user.to_model();
 
     let user_interactor =
-        domain::interactors::user_mutation::UserSimpleMutationInteractor::new(user_repository);
+        domain::interactors::user_mutation::
+        UserSimpleMutationInteractor::new(user_repository);
 
-    let result = user_interactor.create_user(user_request).await;
+    let response = user_interactor.create_user(user_request).await;
 
-    println!("controller result id {}", result.id);
-
-    if result.id.is_nil() {
-        println!("Did not insert insert successfully.");
-        return User {
-            id: None,
-            username: "".to_string(),
-            email: None,
-            phone: None,
-        };
-    }
-
-    result.to_openapi()
-}
-
-impl ToOpenApi<User> for UserDbResponse {
-    fn to_openapi(&self) -> hvcg_iam_openapi_identity::models::User {
-        User {
-            id: Option::from(self.id),
-            username: self.username.to_string(),
-            email: Option::from(self.email.to_string()),
-            phone: Option::from(self.phone.to_string()),
-        }
-    }
-}
-
-impl ToModel<UserDbRequest> for &User {
-    fn to_model(&self) -> UserDbRequest {
-        UserDbRequest {
-            username: self.username.to_string(),
-            email: self.email.clone(),
-            phone: self.phone.clone(),
-        }
-    }
-}
-
-pub trait ToOpenApi<T> {
-    fn to_openapi(&self) -> T;
-}
-
-pub trait ToModel<T> {
-    fn to_model(&self) -> T;
+    response.map(|res| res.to_openapi())
 }
 
 #[cfg(test)]
@@ -66,7 +27,7 @@ mod tests {
 
     use db_postgres::user_gateway::UserRepository;
     use domain::boundaries::{
-        UserDbGateway, UserDbRequest, UserDbResponse, UserSimpleMutationInputBoundary,
+        UserDbGateway, UserMutationRequest, UserDbResponse, UserSimpleMutationInputBoundary,
     };
 
     use crate::create_user;

@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+
 #[derive(Deserialize, Serialize)]
 struct TokenPayload {
     // Despite the struct field being named `username`, it is going to come
@@ -11,16 +12,19 @@ struct TokenPayload {
 
 #[cfg(test)]
 mod tests {
-    use crate::TokenPayload;
-    use hvcg_iam_openapi_identity::models::User;
-    use jsonwebtoken::TokenData;
-    use lambda_http::http::HeaderValue;
-    use lambda_http::{http, Context};
-    use lambda_http::{Body, IntoResponse};
     use std::ops::Add;
     use std::path::PathBuf;
     use std::sync::Once;
+
+    use hvcg_iam_openapi_identity::models::User;
+    use jsonwebtoken::TokenData;
+    use lambda_http::{Context, http};
+    use lambda_http::{Body, IntoResponse};
+    use lambda_http::http::HeaderValue;
+    use regex::Regex;
     use uuid::Uuid;
+
+    use crate::TokenPayload;
 
     static INIT: Once = Once::new();
 
@@ -43,8 +47,8 @@ mod tests {
         let user_request = User {
             id: None,
             username: "test_user".to_string() + &*test_suffix,
-            email: Option::from("nhut_cargo@gmail.com".to_string() + &*test_suffix),
-            phone: Option::from("+84 909686868".to_string() + &*test_suffix),
+            email: Option::from("nhut_cargo@gmail.com".to_string()),
+            phone: Option::from("+84 939686970".to_string()),
         };
 
         let serialized_user = serde_json::to_string(&user_request).unwrap();
@@ -108,7 +112,6 @@ mod tests {
     }
 
     #[tokio::test]
-    #[should_panic]
     async fn create_user_failed() {
         // Given
         let test_suffix = Uuid::new_v4().to_string();
@@ -129,13 +132,72 @@ mod tests {
             .unwrap();
 
         // When
-        user::create_user(request, Context::default())
+        let response = user::create_user(request, Context::default())
             .await
             .expect("expected Ok(_) value")
             .into_response();
 
         // Then
-        // Checking error log
-        println!("create_user_failed completed!!!")
+        assert_eq!(response.status(), 503);
+    }
+
+    #[tokio::test]
+    async fn create_user_invalid_email_format_failed() {
+        // Given
+        let test_suffix = Uuid::new_v4().to_string();
+        let user_request = User {
+            id: None,
+            username: "test".to_string().add(&*test_suffix),
+            email: Option::from("test".to_string().add(&*test_suffix)),
+            phone: Option::from("+84 939332766".to_string())
+        };
+
+        let serialized_user = serde_json::to_string(&user_request).unwrap();
+
+        let request = http::Request::builder()
+            .uri("https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/user")
+            .method("POST")
+            .header("Content-Type", "application/json")
+            .body(Body::from(serialized_user))
+            .unwrap();
+
+        // When
+        let response = user::create_user(request, Context::default())
+            .await
+            .expect("expected Ok(_) value")
+            .into_response();
+
+        // Then
+        assert_eq!(response.status(), 405);
+    }
+
+    #[tokio::test]
+    async fn create_user_invalid_phone_format_failed() {
+        // Given
+        let test_suffix = Uuid::new_v4().to_string();
+        let user_request = User {
+            id: None,
+            username: "test".to_string().add(&*test_suffix),
+            email: Option::from("test@gmail.com".to_string()),
+            phone: Option::from("+84 9393327667".to_string())
+        };
+
+        let serialized_user = serde_json::to_string(&user_request).unwrap();
+
+        let request = http::Request::builder()
+            .uri("https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/user")
+            .method("POST")
+            .header("Content-Type", "application/json")
+            .body(Body::from(serialized_user))
+            .unwrap();
+
+        // When
+        let response = user::create_user(request, Context::default())
+            .await
+            .expect("expected Ok(_) value")
+            .into_response();
+
+        // Then
+        assert_eq!(response.status(), 405);
     }
 }

@@ -263,6 +263,7 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "futures",
+ "regex",
  "uuid",
 ]
 
@@ -2364,11 +2365,13 @@ name = "user"
 version = "0.1.0"
 dependencies = [
  "controller",
+ "domain",
  "dotenv",
  "hvcg_example_openapi_entity",
  "hvcg_iam_openapi_identity",
  "jsonwebtoken",
  "lambda_http 0.3.0",
+ "regex",
  "serde",
  "serde_json",
  "tokio 1.8.1",

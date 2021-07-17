@@ -14,7 +14,7 @@ pub trait Test1SimpleMutationInputBoundary {
 
 #[async_trait]
 pub trait UserSimpleMutationInputBoundary {
-    async fn create_user(&self, request: UserDbRequest) -> UserDbResponse;
+    async fn create_user(&self, request: UserMutationRequest) -> Result<UserMutationResponse, UserMutationError>;
 }
 
 pub struct Test1SimpleMutationRequest {
@@ -24,7 +24,7 @@ pub struct Test1SimpleQueryRequest {
     pub name: String,
 }
 
-pub struct UserDbRequest {
+pub struct UserMutationRequest {
     pub username: String,
     pub email: Option<String>,
     pub phone: Option<String>,
@@ -43,6 +43,14 @@ pub struct UserDbResponse {
     pub enabled: bool,
 }
 
+pub struct UserMutationResponse {
+    pub id: Uuid,
+    pub username: String,
+    pub email: String,
+    pub phone: String,
+    pub enabled: bool,
+}
+
 pub trait MutationOutputBoundary {}
 
 #[async_trait]
@@ -54,8 +62,26 @@ pub trait Test1DbGateway {
 #[async_trait]
 pub trait UserDbGateway {
     async fn exists_by_username(&self, username: String) -> bool;
-    async fn insert(&self, user: &User) -> bool;
+    async fn insert(&self, user: &User) -> Result<(), DbError>;
 }
+
+#[derive(Debug)]
+pub enum UserMutationError {
+    UniqueConstraintViolationError(String),
+    IdCollisionError,
+    InvalidUser,
+    InvalidEmail,
+    InvalidPhone,
+    ExistedUser,
+    UnknownError,
+}
+
+#[derive(Debug)]
+pub enum DbError {
+    UniqueConstraintViolationError(String),
+    UnknownError,
+}
+
 // CommonUser
 // CommonUserFactory
 // JpaUser
