@@ -8,6 +8,7 @@ use lambda_http::http::header::{
 use lambda_http::http::{method, HeaderValue, StatusCode};
 use lambda_http::{Body, Context, IntoResponse, Request, RequestExt, Response};
 use serde::{Deserialize, Serialize};
+use db_cognito::insert_cognito_user;
 
 type Error = Box<dyn std::error::Error + Sync + Send + 'static>;
 
@@ -94,6 +95,8 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
         .expect("unable to build http::Response");
     println!("user response {:?}", serde_json::to_string(&user_response));
 
+    // Insert user to cognito
+    insert_cognito_user(serialized_user);
     Ok(response)
 }
 

@@ -7,7 +7,7 @@ use rusoto_cognito_idp::{
 };
 use rusoto_core::{Client, Region};
 
-async fn cognito() {
+pub async fn insert_cognito_user(serialized_user: String) {
     // let dispatcher = HttpClient::new().expect("failed to create request dispatcher");
     // let default_provider_result = ProfileProvider::new();
     // let mut default_provider = default_provider_result.unwrap();
@@ -91,7 +91,7 @@ mod tests {
 
     #[tokio::test]
     async fn crud_users() {
-        crate::cognito().await;
+        crate::insert_cognito_user().await;
         let result = 4;
         assert_eq!(result, 4);
     }
