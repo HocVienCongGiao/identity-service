@@ -47,8 +47,8 @@ mod tests {
         let user_request = User {
             id: None,
             username: "test_user".to_string() + &*test_suffix,
-            email: Option::from("nhutcargo@gmail.com".to_string()),
-            phone: Option::from("+84 939686970".to_string()),
+            email: Option::from("nhutcargo@gmail.com".to_string().add(&*test_suffix)),
+            phone: Option::from("+84 939686970".to_string().add(&*test_suffix)),
         };
 
         let serialized_user = serde_json::to_string(&user_request).unwrap();

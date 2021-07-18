@@ -410,8 +410,15 @@ name = "db-cognito"
 version = "0.1.5"
 dependencies = [
  "chrono",
+ "domain",
+ "hvcg_iam_openapi_identity",
+ "jsonwebtoken",
+ "lambda_http 0.3.0",
+ "regex",
  "rusoto_cognito_idp",
  "rusoto_core",
+ "serde",
+ "serde_json",
  "tokio 1.8.1",
 ]
 

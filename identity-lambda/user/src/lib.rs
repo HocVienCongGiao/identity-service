@@ -96,7 +96,7 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
     println!("user response {:?}", serde_json::to_string(&user_response));
 
     // Insert user to cognito
-    insert_cognito_user(serialized_user);
+    insert_cognito_user(&response.body().clone()).await;
     Ok(response)
 }
 
