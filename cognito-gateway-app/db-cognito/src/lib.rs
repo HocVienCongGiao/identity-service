@@ -1,10 +1,13 @@
 use std::time::SystemTime;
 
 use chrono::prelude::*;
-use rusoto_cognito_idp::{AdminCreateUserRequest, AdminDeleteUserRequest, CognitoIdentityProvider, CognitoIdentityProviderClient, ListUsersRequest, AttributeType};
-use rusoto_core::{Client, Region};
 use hvcg_iam_openapi_identity::models::User;
 use lambda_http::{Body, Context, IntoResponse, Request, RequestExt, Response};
+use rusoto_cognito_idp::{
+    AdminCreateUserRequest, AdminDeleteUserRequest, AttributeType, CognitoIdentityProvider,
+    CognitoIdentityProviderClient, ListUsersRequest,
+};
+use rusoto_core::{Client, Region};
 
 pub async fn insert_cognito_user() {
     // let dispatcher = HttpClient::new().expect("failed to create request dispatcher");
@@ -94,20 +97,20 @@ fn set_user_attributes(deserialized_user: User) -> (Vec<AttributeType>) {
     let mut user_attributes = Vec::new();
     let email = AttributeType {
         name: "email".to_string(),
-        value: Option::from(deserialized_user.email)
+        value: Option::from(deserialized_user.email),
     };
     let email_verified = AttributeType {
         name: "email_verified".to_string(),
-        value: Option::from("true".to_string())
+        value: Option::from("true".to_string()),
     };
 
     let phone = AttributeType {
         name: "phone".to_string(),
-        value: Option::from(deserialized_user.phone)
+        value: Option::from(deserialized_user.phone),
     };
     let phone_verified = AttributeType {
         name: "phone_verified".to_string(),
-        value: Option::from("true".to_string())
+        value: Option::from("true".to_string()),
     };
 
     user_attributes.push(email);
@@ -120,7 +123,7 @@ fn set_user_attributes(deserialized_user: User) -> (Vec<AttributeType>) {
 #[cfg(test)]
 mod tests {
     use hvcg_iam_openapi_identity::models::User;
-    use lambda_http::{Response, Body};
+    use lambda_http::{Body, Response};
 
     #[tokio::test]
     async fn crud_users() {
