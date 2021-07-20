@@ -109,7 +109,7 @@ mod tests {
             deserialized_user.phone,
             Option::from("+84 939686970".to_string())
         );
-        println!("Create user successfully.")
+        println!("Create user successfully!")
     }
 
     #[tokio::test]
