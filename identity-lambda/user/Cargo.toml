@@ -13,6 +13,7 @@ lambda_http = "0.3.0"
 # serde_json is just for the example, not required in general
 serde_json = "1.0"
 controller = { path = "../../identity-app/controller" }
+db-cognito = { path = "../../cognito-gateway-app/db-cognito"}
 jsonwebtoken = "7.2.0"
 hvcg_example_openapi_entity = "1.0"
 serde = { version = "1.0", features = ["derive"] }
