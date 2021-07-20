@@ -28,15 +28,15 @@ where
             return Err(UserMutationError::InvalidUser);
         }
 
-        // if request.is_not_valid_email_format() {
-        //     println!("Email is not in valid format");
-        //     return Err(UserMutationError::InvalidEmail);
-        // }
-        //
-        // if request.is_not_valid_phone_format() {
-        //     println!("Phone is not in valid format");
-        //     return Err(UserMutationError::InvalidPhone);
-        // }
+        if request.is_not_valid_email_format() {
+            println!("Email is not in valid format");
+            return Err(UserMutationError::InvalidEmail);
+        }
+
+        if request.is_not_valid_phone_format() {
+            println!("Phone is not in valid format");
+            return Err(UserMutationError::InvalidPhone);
+        }
 
         if (*self)
             .db_gateway
