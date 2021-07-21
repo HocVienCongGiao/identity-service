@@ -1,4 +1,4 @@
-use db_cognito::insert_cognito_user;
+use db_cognito::insert_user_to_dynamodb;
 use domain::boundaries::UserMutationError;
 use hvcg_iam_openapi_identity::models::User;
 use jsonwebtoken::TokenData;
@@ -96,6 +96,9 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
     println!("user response {:?}", serde_json::to_string(&user_response));
 
     // TODO Insert user to cognito
+    let insert_dynamodb_result = db_cognito::insert_user_to_dynamodb(&response.body()).await;
+    println!("Insert dynamodb result: {}", insert_dynamodb_result);
+
     Ok(response)
 }
 
