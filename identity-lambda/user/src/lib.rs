@@ -96,10 +96,14 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
     println!("user response {:?}", serde_json::to_string(&user_response));
 
     // TODO Insert user to cognito
-    let insert_dynamodb_result = db_cognito::insert_user_to_dynamodb(&response.body()).await;
+    let insert_dynamodb_result = db_cognito::insert_user_to_dynamodb(&user_response).await;
     println!("Insert dynamodb result: {}", insert_dynamodb_result);
-
-    Ok(response)
+    return if insert_dynamodb_result {
+        Ok(response)    
+    } else {
+        Err(Box::new(("failed to insert to dynamodb")))
+    }
+    
 }
 
 fn empty_response(_req: Request) -> Response<Body> {
