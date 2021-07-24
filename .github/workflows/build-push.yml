@@ -219,6 +219,12 @@ jobs:
           cp ./target/x86_64-unknown-linux-musl/release/user ./bootstrap && zip user.zip bootstrap
           rm bootstrap
           aws s3 cp ./user.zip s3://891616054205-ap-southeast-1-aws-lambda/dev-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/user.zip
+          cd /home/runner/work/identity-service/identity-service/identity-dynamodb-lambda
+          cargo clean
+          cargo build --release --target x86_64-unknown-linux-musl
+          cp ./target/x86_64-unknown-linux-musl/release/user-table ./bootstrap && zip user-table.zip bootstrap
+          rm bootstrap
+          aws s3 cp ./user-table.zip s3://891616054205-ap-southeast-1-aws-lambda/dev-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/user-table.zip
       - name: App Deploy Terraform Config
         run: |
           chmod +x ./scripts/terraform-enterprise-push.sh
