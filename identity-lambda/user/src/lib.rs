@@ -80,6 +80,15 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
         None
     });
 
+
+    let insert_dynamodb_result =
+        db_cognito::insert_user_to_dynamodb(Option::from(&user_response)).await;
+    println!("Insert dynamodb result: {}", insert_dynamodb_result);
+
+    if !insert_dynamodb_result {
+        println!("Error while insert to dynamodb")
+    }
+
     let response: Response<Body> = Response::builder()
         .header(CONTENT_TYPE, "application/json")
         .header(ACCESS_CONTROL_ALLOW_ORIGIN, "*")
@@ -94,14 +103,8 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
         .expect("unable to build http::Response");
     println!("user response {:?}", serde_json::to_string(&user_response));
 
-    let insert_dynamodb_result =
-        db_cognito::insert_user_to_dynamodb(Option::from(&user_response)).await;
-    println!("Insert dynamodb result: {}", insert_dynamodb_result);
-    return if insert_dynamodb_result {
-        Ok(response)
-    } else {
-        Err(Box::new(("failed to insert to dynamodb")))
-    };
+    Ok(response)
+
 }
 
 fn empty_response(_req: Request) -> Response<Body> {
