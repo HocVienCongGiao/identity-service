@@ -36,7 +36,7 @@ mod tests {
         });
     }
 
-    #[tokio::test]
+    // #[tokio::test]
     async fn create_user_success() {
         initialise();
         println!("is it working?");
@@ -112,7 +112,7 @@ mod tests {
         println!("Create user successfully!")
     }
 
-    #[tokio::test]
+    // #[tokio::test]
     async fn create_user_failed() {
         // Given
         let test_suffix = Uuid::new_v4().to_string();
@@ -142,7 +142,7 @@ mod tests {
         assert_eq!(response.status(), 405);
     }
 
-    #[tokio::test]
+    // #[tokio::test]
     async fn create_user_invalid_email_format_failed() {
         // Given
         let test_suffix = Uuid::new_v4().to_string();
@@ -172,7 +172,7 @@ mod tests {
         assert_eq!(response.status(), 405);
     }
 
-    #[tokio::test]
+    // #[tokio::test]
     async fn create_user_invalid_phone_format_failed() {
         // Given
         let test_suffix = Uuid::new_v4().to_string();
