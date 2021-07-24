@@ -220,8 +220,8 @@ jobs:
       - name: DynamoDB Deploy Terraform Config
         run: |
           echo TODO
-#          chmod +x ./scripts/terraform-enterprise-push.sh
-#          ./scripts/terraform-enterprise-push.sh cognito-gateway-app/terraform HocVienCongGiao/dev-sg-lambda-processors-dynamodb-identity-service
+          chmod +x ./scripts/terraform-enterprise-push.sh
+          ./scripts/terraform-enterprise-push.sh identity-dynamodb-lambda/terraform HocVienCongGiao/dev-sg-lambda-processors-dynamodb-identity-service
   push_prod:
     if: github.ref == 'refs/heads/prod'
     runs-on: ubuntu-latest

@@ -404,6 +404,7 @@ dependencies = [
  "hvcg_iam_openapi_identity",
  "jsonwebtoken",
  "lambda_http",
+ "lambda_runtime 0.3.0 (git+https://github.com/awslabs/aws-lambda-rust-runtime/?branch=master)",
  "regex",
  "rusoto_cognito_idp",
  "rusoto_core 0.42.0",
@@ -1152,7 +1153,7 @@ checksum = "53d2f5bbdf23c5b73faa7fccf8014642f9817a674a09e714511930bd868cbc19"
 dependencies = [
  "base64 0.13.0",
  "http 0.2.4",
- "lambda_runtime",
+ "lambda_runtime 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
  "serde_json",
  "serde_urlencoded",
@@ -1163,6 +1164,25 @@ name = "lambda_runtime"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f9b08856997d11ca8122121b26b17a27ef1dce689d71ccd754e051f2417aebdd"
+dependencies = [
+ "async-stream",
+ "bytes 1.0.1",
+ "futures 0.3.15",
+ "http 0.2.4",
+ "hyper 0.14.10",
+ "serde",
+ "serde_json",
+ "tokio 1.8.1",
+ "tokio-stream",
+ "tower-service",
+ "tracing",
+ "tracing-error",
+]
+
+[[package]]
+name = "lambda_runtime"
+version = "0.3.0"
+source = "git+https://github.com/awslabs/aws-lambda-rust-runtime/?branch=master#797f0ab285fbaafe284f7a0df4cceb2ae0e3d3d4"
 dependencies = [
  "async-stream",
  "bytes 1.0.1",
