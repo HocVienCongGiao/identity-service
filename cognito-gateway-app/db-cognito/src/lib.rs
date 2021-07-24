@@ -76,7 +76,7 @@ pub async fn insert_user_to_dynamodb(user: Option<&User>) -> bool {
 
     if result.is_err() {
         println!("put_item() result {:#?}", result.as_ref().err());
-        return false
+        return false;
     }
 
     println!("put_item() result {:#?}", result.as_ref().unwrap());
