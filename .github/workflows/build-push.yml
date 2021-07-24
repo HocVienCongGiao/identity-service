@@ -59,7 +59,7 @@ jobs:
         working-directory: cognito-gateway-app
         run: cargo fmt --all -- --check
       -
-        working-directory: identitiy-dynamodb-lambda
+        working-directory: identity-dynamodb-lambda
         run: cargo fmt --all -- --check
   lint:
     runs-on: ubuntu-latest
