@@ -1,2 +1,3 @@
 /db-cognito/data/postgres/*.zip
 .env
+Cargo.lock

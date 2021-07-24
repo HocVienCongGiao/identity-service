@@ -1,134 +1,126 @@
+use std::collections::hash_map::DefaultHasher;
+use std::collections::HashMap;
+use std::hash::{Hash, Hasher};
 use std::time::SystemTime;
 
 use chrono::prelude::*;
 use hvcg_iam_openapi_identity::models::User;
 use lambda_http::{Body, Context, IntoResponse, Request, RequestExt, Response};
-use rusoto_cognito_idp::{
-    AdminCreateUserRequest, AdminDeleteUserRequest, AttributeType, CognitoIdentityProvider,
-    CognitoIdentityProviderClient, ListUsersRequest,
-};
-use rusoto_core::{Client, Region};
+use rusoto_core::credential::EnvironmentProvider;
+use rusoto_core::{HttpClient, Region};
+use rusoto_dynamodb::{AttributeValue, DynamoDb, DynamoDbClient, ListTablesInput, PutItemInput};
+use uuid::Uuid;
 
-pub async fn insert_cognito_user() {
-    // let dispatcher = HttpClient::new().expect("failed to create request dispatcher");
-    // let default_provider_result = ProfileProvider::new();
-    // let mut default_provider = default_provider_result.unwrap();
-    // default_provider.set_profile("hvcg");
-    // let aws_client = Client::new_with(default_provider, dispatcher);
-    let aws_client = Client::shared();
-    let user_pool_id = "ap-southeast-1_9QWSYGzXk".to_string();
-    let rusoto_cognito_idp_client =
-        CognitoIdentityProviderClient::new_with_client(aws_client, Region::ApSoutheast1);
+pub async fn insert_user_to_dynamodb(user: Option<&User>) -> bool {
+    let client = DynamoDbClient::new_with(
+        HttpClient::new().unwrap(),
+        EnvironmentProvider::default(),
+        Region::ApSoutheast1,
+    );
 
-    // Create a normal DateTime from the NaiveDateTime
-    let now_datetime: DateTime<Utc> = SystemTime::now().into();
+    let user_table_name = "dev-sg_UserTable".to_string();
 
-    // TODO Can remove this code if not use
-    // let deserialized_user: User = serde_json::from_slice(&*response_body).unwrap();
-    // let user_attributes = set_user_attributes(deserialized_user);
+    let user_dynamodb = user.unwrap();
 
-    let test_username =
-        "dev-test-user".to_string() + now_datetime.format("%H%M%S%f").to_string().as_str();
+    let mut user_attributes = HashMap::new();
+    let random_uuid = Uuid::new_v4();
+    println!("random uuid {}", random_uuid);
 
-    let admin_create_user_request = AdminCreateUserRequest {
-        desired_delivery_mediums: None,
-        force_alias_creation: None,
-        message_action: None,
-        temporary_password: None,
-        user_attributes: None,
-        user_pool_id: user_pool_id.clone(),
-        username: test_username.clone(),
-        validation_data: None,
-    };
-    let _ = rusoto_cognito_idp_client
-        .admin_create_user(admin_create_user_request)
+    user_attributes.insert(
+        String::from("HashKey"),
+        AttributeValue {
+            s: Some(hash(random_uuid).to_string()),
+            ..Default::default()
+        },
+    );
+
+    user_attributes.insert(
+        String::from("id"),
+        AttributeValue {
+            s: Some(user_dynamodb.id.unwrap().to_string()),
+            ..Default::default()
+        },
+    );
+
+    user_attributes.insert(
+        String::from("username"),
+        AttributeValue {
+            s: Some(user_dynamodb.username.clone()),
+            ..Default::default()
+        },
+    );
+
+    user_attributes.insert(
+        String::from("email"),
+        AttributeValue {
+            s: Some(user_dynamodb.email.clone().unwrap()),
+            ..Default::default()
+        },
+    );
+
+    user_attributes.insert(
+        String::from("phone"),
+        AttributeValue {
+            s: Some(user_dynamodb.phone.clone().unwrap()),
+            ..Default::default()
+        },
+    );
+
+    let result = client
+        .put_item(PutItemInput {
+            table_name: user_table_name,
+            item: user_attributes,
+            ..PutItemInput::default()
+        })
         .sync();
 
-    let list_user_request = ListUsersRequest {
-        attributes_to_get: None,
-        filter: None,
-        limit: None,
-        pagination_token: None,
-        user_pool_id: user_pool_id.clone(),
-    };
-    match rusoto_cognito_idp_client
-        .list_users(list_user_request)
-        .sync()
-    {
-        Ok(response) => match response.users {
-            Some(user_types) => {
-                println!("User Type here");
-                for user_type in user_types {
-                    let naive = NaiveDateTime::from_timestamp(
-                        user_type.user_create_date.unwrap() as i64,
-                        0,
-                    );
-
-                    // Create a normal DateTime from the NaiveDateTime
-                    let datetime: DateTime<Utc> = DateTime::from_utc(naive, Utc);
-
-                    // Format the datetime how you want
-                    let user_created_date = datetime.format("%Y-%m-%d %H:%M:%S");
-
-                    println!(
-                        "Username: {} - Created at: {:?}",
-                        user_type.username.unwrap(),
-                        user_created_date
-                    )
-                }
-            }
-            None => println!("No buckets in region!"),
-        },
-        Err(error) => {
-            println!("Error: {:?}", error);
-        }
+    if result.is_err() {
+        println!("put_item() result {:#?}", result.as_ref().err());
+        return false
     }
 
-    let admin_delete_user_request = AdminDeleteUserRequest {
-        user_pool_id,
-        username: test_username,
-    };
-    let _ = rusoto_cognito_idp_client
-        .admin_delete_user(admin_delete_user_request)
-        .sync();
-}
+    println!("put_item() result {:#?}", result.as_ref().unwrap());
 
-fn set_user_attributes(deserialized_user: User) -> (Vec<AttributeType>) {
-    let mut user_attributes = Vec::new();
-    let email = AttributeType {
-        name: "email".to_string(),
-        value: Option::from(deserialized_user.email),
-    };
-    let email_verified = AttributeType {
-        name: "email_verified".to_string(),
-        value: Option::from("true".to_string()),
-    };
-
-    let phone = AttributeType {
-        name: "phone".to_string(),
-        value: Option::from(deserialized_user.phone),
-    };
-    let phone_verified = AttributeType {
-        name: "phone_verified".to_string(),
-        value: Option::from("true".to_string()),
-    };
-
-    user_attributes.push(email);
-    user_attributes.push(email_verified);
-    user_attributes.push(phone);
-    user_attributes.push(phone_verified);
-    user_attributes
+    result.is_ok()
 }
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+    use std::env;
+
     use hvcg_iam_openapi_identity::models::User;
-    use lambda_http::{Body, Response};
+    use rusoto_core::credential::EnvironmentProvider;
+    use rusoto_core::{HttpClient, Region};
+    use rusoto_dynamodb::{
+        AttributeValue, DynamoDb, DynamoDbClient, ListTablesInput, PutItemInput,
+    };
+    use uuid::Uuid;
+
+    use crate::{hash, insert_user_to_dynamodb};
 
     #[tokio::test]
     async fn crud_users() {
-        crate::insert_cognito_user().await;
-        let result = 4;
-        assert_eq!(result, 4);
+        let table_name = "dev-sg_UserTable".to_string();
+
+        let user_dynamodb = &User {
+            id: Option::from(Uuid::new_v4()),
+            username: "123".to_string(),
+            email: Option::from(Uuid::new_v4().to_string()),
+            phone: Option::from(Uuid::new_v4().to_string()),
+        };
+
+        let result = insert_user_to_dynamodb(Option::from(user_dynamodb)).await;
+
+        println!("insert to dynamo db result {}", result);
     }
+}
+
+fn hash<T>(obj: T) -> u64
+where
+    T: Hash,
+{
+    let mut hasher = DefaultHasher::new();
+    obj.hash(&mut hasher);
+    hasher.finish()
 }
