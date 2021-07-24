@@ -40,6 +40,7 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
         .headers()
         .get("authorization")
         .unwrap_or(&empty_header_value);
+    let status_code: u16;
 
     if !auth_header_value.is_empty() {
         let auth_header_str = auth_header_value.to_str().unwrap();
@@ -53,12 +54,14 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
         groups = token_payload.groups;
         println!("Actual username {:?}", username);
         println!("Actual groups include {:?}", groups);
+
+        if username.is_empty() || groups.is_empty() {
+            status_code = 403
+        }
     }
 
     let serialized_user = serde_json::to_string(&lambda_user_request).unwrap();
     println!("serialized_user: {}", serialized_user);
-
-    let status_code: u16;
 
     let user_response: Option<controller::openapi::identity_user::User>;
     let result = controller::create_user(&lambda_user_request.unwrap()).await;
