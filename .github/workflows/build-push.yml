@@ -281,12 +281,12 @@ jobs:
           cd /home/runner/work/identity-service/identity-service/identity-lambda
           cargo clean
           cargo build --release --target x86_64-unknown-linux-musl
-          cp ./target/x86_64-unknown-linux-musl/release/test1 ./bootstrap && zip test1.zip bootstrap
-          cp ./target/x86_64-unknown-linux-musl/release/test2 ./bootstrap && zip test2.zip bootstrap
+#          cp ./target/x86_64-unknown-linux-musl/release/test1 ./bootstrap && zip test1.zip bootstrap
+#          cp ./target/x86_64-unknown-linux-musl/release/test2 ./bootstrap && zip test2.zip bootstrap
           cp ./target/x86_64-unknown-linux-musl/release/user ./bootstrap && zip user.zip bootstrap
 
-          aws s3 cp ./test1.zip s3://891616054205-ap-southeast-1-aws-lambda/prod-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/test1.zip
-          aws s3 cp ./test2.zip s3://891616054205-ap-southeast-1-aws-lambda/prod-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/test2.zip
+#          aws s3 cp ./test1.zip s3://891616054205-ap-southeast-1-aws-lambda/prod-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/test1.zip
+#          aws s3 cp ./test2.zip s3://891616054205-ap-southeast-1-aws-lambda/prod-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/test2.zip
           aws s3 cp ./user.zip s3://891616054205-ap-southeast-1-aws-lambda/prod-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/user.zip
 
 #         aws s3 cp target/lambda/release/notification.zip s3://891616054205-ap-southeast-1-aws-lambda/terraform-api/latest/notification.zip          
