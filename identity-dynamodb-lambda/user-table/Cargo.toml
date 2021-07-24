@@ -1,5 +1,5 @@
 [package]
-name = "db-cognito"
+name = "user-table"
 version = "0.1.5"
 edition = "2018"
 
