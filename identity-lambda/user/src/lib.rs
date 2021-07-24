@@ -56,7 +56,7 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
         println!("Actual groups include {:?}", groups);
 
         if username.is_empty() || groups.is_empty() {
-            status_code = 403
+            println!("User token is not valid");
         }
     }
 
