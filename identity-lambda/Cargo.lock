@@ -2816,27 +2816,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "test1"
-version = "0.1.5"
-dependencies = [
- "controller",
- "dotenv",
- "hvcg_example_openapi_entity",
- "lambda_http",
- "serde_json",
- "tokio 1.8.1",
-]
-
-[[package]]
-name = "test2"
-version = "0.1.5"
-dependencies = [
- "lambda_http",
- "serde_json",
- "tokio 1.8.1",
-]
-
-[[package]]
 name = "time"
 version = "0.1.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
