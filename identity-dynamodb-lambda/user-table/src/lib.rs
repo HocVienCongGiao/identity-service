@@ -81,8 +81,7 @@ pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
     let rusoto_cognito_idp_client =
         CognitoIdentityProviderClient::new_with_client(aws_client, Region::ApSoutheast1);
 
-    let mut user_attributes: Option<Vec<AttributeType>>;
-    user_attributes.insert(vec![
+    let mut user_attributes: Vec<AttributeType> = vec![
         AttributeType {
             name: "email".to_string(),
             value: email,
@@ -91,16 +90,16 @@ pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
             name: "phone".to_string(),
             value: phone,
         },
-    ]);
+    ];
 
     let admin_create_user_request = AdminCreateUserRequest {
         desired_delivery_mediums: None,
         force_alias_creation: None,
         message_action: None,
         temporary_password: None,
-        user_attributes: None,
-        user_pool_id: user_pool_id.clone(),
-        username: username.unwrap().clone(),
+        user_attributes: Option::from(user_attributes),
+        user_pool_id,
+        username: username.unwrap(),
         validation_data: None,
     };
 
@@ -108,11 +107,11 @@ pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
         .admin_create_user(admin_create_user_request)
         .sync();
     if result_cognito.is_err() {
-        println!("Error: {:?}", result.err());
+        println!("Error: {:?}", result_cognito.as_ref().err());
     }
 
     Ok(json!({
-        "message": format!("Cognito insert result, {:?}!", result_cognito)
+        "message": format!("Cognito insert result, {:?}!", result_cognito.unwrap())
     }))
 }
 
