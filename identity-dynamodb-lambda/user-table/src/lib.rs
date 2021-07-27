@@ -130,51 +130,46 @@ mod tests {
 
     #[tokio::test]
     async fn create_user_success() {
-        env::set_var("AWS_ACCESS_KEY_ID", "AKIA47GDVJO6TNULSQ73");
-        env::set_var(
-            "AWS_SECRET_ACCESS_KEY",
-            "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",
-        );
         // Get item by hash key
-        let client = DynamoDbClient::new_with(
-            HttpClient::new().unwrap(),
-            EnvironmentProvider::default(),
-            Region::ApSoutheast1,
-        );
-
-        // Filter condition
-
-        let mut query_condition = HashMap::new();
-        query_condition.insert(
-            String::from("HashKey"),
-            AttributeValue {
-                s: Option::from("6790795613568784684".to_string()),
-                ..Default::default()
-            },
-        );
-
-        let user_table_name = "dev-sg_UserTable".to_string();
-        let user = client
-            .get_item(GetItemInput {
-                attributes_to_get: None,
-                consistent_read: None,
-                expression_attribute_names: None,
-                key: query_condition,
-                projection_expression: None,
-                return_consumed_capacity: None,
-                table_name: user_table_name,
-            })
-            .sync();
-
-        let test = user
-            .unwrap()
-            .item
-            .unwrap()
-            .get("username")
-            .and_then(|value| value.s.clone())
-            .unwrap();
-
-        println!("user_dynamodb {:?}", test);
+        // let client = DynamoDbClient::new_with(
+        //     HttpClient::new().unwrap(),
+        //     EnvironmentProvider::default(),
+        //     Region::ApSoutheast1,
+        // );
+        //
+        // // Filter condition
+        //
+        // let mut query_condition = HashMap::new();
+        // query_condition.insert(
+        //     String::from("HashKey"),
+        //     AttributeValue {
+        //         s: Option::from("6790795613568784684".to_string()),
+        //         ..Default::default()
+        //     },
+        // );
+        //
+        // let user_table_name = "dev-sg_UserTable".to_string();
+        // let user = client
+        //     .get_item(GetItemInput {
+        //         attributes_to_get: None,
+        //         consistent_read: None,
+        //         expression_attribute_names: None,
+        //         key: query_condition,
+        //         projection_expression: None,
+        //         return_consumed_capacity: None,
+        //         table_name: user_table_name,
+        //     })
+        //     .sync();
+        //
+        // let test = user
+        //     .unwrap()
+        //     .item
+        //     .unwrap()
+        //     .get("username")
+        //     .and_then(|value| value.s.clone())
+        //     .unwrap();
+        //
+        // println!("user_dynamodb {:?}", test);
 
         // let mut records: Map<String, Value> = Default::default();
         // let mut aws_object: Map<String, Value> = Default::default();
