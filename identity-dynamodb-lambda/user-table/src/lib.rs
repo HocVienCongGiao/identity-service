@@ -1,5 +1,4 @@
 use lambda_runtime::{Context, Error};
-use serde_json::{json, Value};
 use rusoto_cognito_idp::{
     AdminCreateUserRequest, AttributeType, CognitoIdentityProvider, CognitoIdentityProviderClient,
 };
@@ -8,6 +7,7 @@ use rusoto_core::{Client, HttpClient, Region};
 use rusoto_dynamodb::{
     AttributeValue, DynamoDb, DynamoDbClient, GetItemInput, ListTablesInput, PutItemInput,
 };
+use serde_json::{json, Value};
 use std::collections::HashMap;
 
 pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
