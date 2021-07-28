@@ -77,7 +77,7 @@ pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
 
     // Insert user to cognito
     let aws_client = Client::shared();
-    let user_pool_id = "ap-southeast-1_vmFHg7JIC".to_string();
+    let user_pool_id = "ap-southeast-1_9QWSYGzXk".to_string();
     let rusoto_cognito_idp_client =
         CognitoIdentityProviderClient::new_with_client(aws_client, Region::ApSoutheast1);
 
