@@ -68,29 +68,16 @@ pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
         .unwrap()
         .get("email")
         .and_then(|value| value.s.clone());
-    let phone = user
-        .unwrap()
-        .item
-        .unwrap()
-        .get("phone")
-        .and_then(|value| value.s.clone());
-
     // Insert user to cognito
     let aws_client = Client::shared();
     let user_pool_id = "ap-southeast-1_9QWSYGzXk".to_string();
     let rusoto_cognito_idp_client =
         CognitoIdentityProviderClient::new_with_client(aws_client, Region::ApSoutheast1);
 
-    let mut user_attributes: Vec<AttributeType> = vec![
-        AttributeType {
-            name: "email".to_string(),
-            value: email,
-        },
-        AttributeType {
-            name: "phone".to_string(),
-            value: phone,
-        },
-    ];
+    let mut user_attributes: Vec<AttributeType> = vec![AttributeType {
+        name: "email".to_string(),
+        value: email,
+    }];
 
     let admin_create_user_request = AdminCreateUserRequest {
         desired_delivery_mediums: None,
@@ -120,15 +107,18 @@ mod tests {
     use std::collections::HashMap;
 
     use crate::func;
+    use rusoto_cognito_idp::{
+        AdminCreateUserRequest, AttributeType, CognitoIdentityProvider,
+        CognitoIdentityProviderClient,
+    };
     use rusoto_core::credential::EnvironmentProvider;
-    use rusoto_core::{HttpClient, Region, Client};
+    use rusoto_core::{Client, HttpClient, Region};
     use rusoto_dynamodb::{
         AttributeValue, DynamoDb, DynamoDbClient, GetItemInput, ListTablesInput, PutItemInput,
     };
     use serde_json::{json, Map, Value};
     use std::env;
     use std::path::PathBuf;
-    use rusoto_cognito_idp::{AdminCreateUserRequest, AttributeType, CognitoIdentityProviderClient, CognitoIdentityProvider};
     use std::sync::Once;
 
     static INIT: Once = Once::new();
@@ -141,10 +131,13 @@ mod tests {
         });
     }
 
-    #[tokio::test]
+    // #[tokio::test]
     async fn create_user_success() {
         initialise();
-        env::set_var("AWS_ACCESS_KEY_ID", std::env::var("AWS_ACCESS_KEY_ID").unwrap());
+        env::set_var(
+            "AWS_ACCESS_KEY_ID",
+            std::env::var("AWS_ACCESS_KEY_ID").unwrap(),
+        );
         env::set_var(
             "AWS_SECRET_ACCESS_KEY",
             std::env::var("AWS_SECRET_ACCESS_KEY").unwrap(),
@@ -154,21 +147,22 @@ mod tests {
         let mut aws_object: Map<String, Value> = Default::default();
         let mut hash_key_object: Map<String, Value> = Default::default();
         let mut hash_key_object_details: Map<String, Value> = Default::default();
-        hash_key_object_details.insert("S".to_string(), Value::String("6790795613568784684".to_string()));
-        hash_key_object.insert("HashKey".to_string(),
-                               Value::Object(hash_key_object_details));
+        hash_key_object_details.insert(
+            "S".to_string(),
+            Value::String("11905088586532604268".to_string()),
+        );
+        hash_key_object.insert(
+            "HashKey".to_string(),
+            Value::Object(hash_key_object_details),
+        );
         // "Keys": Object({"HashKey": Object({"S": String("11905088586532604268")})})
         aws_object.insert("Keys".to_string(), Value::Object(hash_key_object));
         records.insert(
             "Records".parse().unwrap(),
-            Value::Array(
-                vec![Value::Object(aws_object)]
-            )
+            Value::Array(vec![Value::Object(aws_object)]),
         );
 
-        let event = Value::Object(
-            records
-        );
+        let event = Value::Object(records);
 
         let mut hash_key = event["Records"]
             .get(0)
@@ -239,16 +233,10 @@ mod tests {
         let rusoto_cognito_idp_client =
             CognitoIdentityProviderClient::new_with_client(aws_client, Region::ApSoutheast1);
 
-        let mut user_attributes: Vec<AttributeType> = vec![
-            AttributeType {
-                name: "email".to_string(),
-                value: email,
-            },
-            AttributeType {
-                name: "phone_number".to_string(),
-                value: Option::from("+84369140916".to_string()),
-            }
-        ];
+        let mut user_attributes: Vec<AttributeType> = vec![AttributeType {
+            name: "email".to_string(),
+            value: email,
+        }];
 
         let admin_create_user_request = AdminCreateUserRequest {
             desired_delivery_mediums: None,
@@ -269,6 +257,5 @@ mod tests {
         }
 
         println!("Result: {:?}", result_cognito.unwrap())
-
     }
 }
