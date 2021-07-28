@@ -127,6 +127,15 @@ mod tests {
     };
     use serde_json::{json, Map, Value};
     use std::env;
+    use std::path::PathBuf;
+
+    fn initialise() {
+        INIT.call_once(|| {
+            let my_path = PathBuf::new().join(".env.test");
+            dotenv::from_path(my_path.as_path()).ok();
+            println!("testing env {}", std::env::var("HELLO").unwrap());
+        });
+    }
 
     #[tokio::test]
     async fn create_user_success() {
