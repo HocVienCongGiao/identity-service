@@ -83,7 +83,7 @@ pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
         desired_delivery_mediums: None,
         force_alias_creation: None,
         message_action: None,
-        temporary_password: None,
+        temporary_password: Option::from(email.unwrap()),
         user_attributes: Option::from(user_attributes),
         user_pool_id,
         username: username.unwrap(),
@@ -107,10 +107,7 @@ mod tests {
     use std::collections::HashMap;
 
     use crate::func;
-    use rusoto_cognito_idp::{
-        AdminCreateUserRequest, AttributeType, CognitoIdentityProvider,
-        CognitoIdentityProviderClient,
-    };
+    use rusoto_cognito_idp::{AdminCreateUserRequest, AttributeType, CognitoIdentityProvider, CognitoIdentityProviderClient, AdminSetUserPasswordRequest};
     use rusoto_core::credential::EnvironmentProvider;
     use rusoto_core::{Client, HttpClient, Region};
     use rusoto_dynamodb::{
@@ -242,7 +239,7 @@ mod tests {
             desired_delivery_mediums: None,
             force_alias_creation: None,
             message_action: None,
-            temporary_password: None,
+            temporary_password: Option::from(email.unwrap()),
             user_attributes: Option::from(user_attributes),
             user_pool_id,
             username: username.unwrap(),
