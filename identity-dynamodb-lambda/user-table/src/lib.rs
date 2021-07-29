@@ -89,7 +89,7 @@ pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
         desired_delivery_mediums: None,
         force_alias_creation: None,
         message_action: None,
-        temporary_password: phone,
+        temporary_password: Option::from("Hvcg@123456789".to_string()),
         user_attributes: Option::from(user_attributes),
         user_pool_id,
         username: username.unwrap(),
@@ -248,10 +248,60 @@ mod tests {
             desired_delivery_mediums: None,
             force_alias_creation: None,
             message_action: None,
-            temporary_password: phone,
+            temporary_password: Option::from("Hvcg@123456789".to_string()),
             user_attributes: Option::from(user_attributes),
             user_pool_id,
             username: username.unwrap(),
+            validation_data: None,
+        };
+
+        let result_cognito = rusoto_cognito_idp_client
+            .admin_create_user(admin_create_user_request)
+            .sync();
+        if result_cognito.is_err() {
+            println!("Error: {:?}", result_cognito.as_ref().err());
+        }
+
+        println!("Result: {:?}", result_cognito.unwrap())
+    }
+
+    // #[tokio::test]
+    async fn create_user_success_single() {
+        initialise();
+        env::set_var(
+            "AWS_ACCESS_KEY_ID",
+            std::env::var("AWS_ACCESS_KEY_ID").unwrap(),
+        );
+        env::set_var(
+            "AWS_SECRET_ACCESS_KEY",
+            std::env::var("AWS_SECRET_ACCESS_KEY").unwrap(),
+        );
+
+        let username = "nhuthm005".to_string();
+
+        let email = "nhuthm005@gmail.com".to_string();
+
+        let password = "Hvcg@123456789".to_string();
+
+        // Insert user to cognito
+        let aws_client = Client::shared();
+        let user_pool_id = "ap-southeast-1_9QWSYGzXk".to_string();
+        let rusoto_cognito_idp_client =
+            CognitoIdentityProviderClient::new_with_client(aws_client, Region::ApSoutheast1);
+
+        let mut user_attributes: Vec<AttributeType> = vec![AttributeType {
+            name: "email".to_string(),
+            value: Option::from(email),
+        }];
+
+        let admin_create_user_request = AdminCreateUserRequest {
+            desired_delivery_mediums: None,
+            force_alias_creation: None,
+            message_action: None,
+            temporary_password: Option::from(password),
+            user_attributes: Option::from(user_attributes),
+            user_pool_id,
+            username,
             validation_data: None,
         };
 
