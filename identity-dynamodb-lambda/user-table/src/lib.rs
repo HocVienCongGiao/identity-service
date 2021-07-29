@@ -68,6 +68,12 @@ pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
         .unwrap()
         .get("email")
         .and_then(|value| value.s.clone());
+    let phone = user
+        .unwrap()
+        .item
+        .unwrap()
+        .get("phone")
+        .and_then(|value| value.s.clone());
     // Insert user to cognito
     let aws_client = Client::shared();
     let user_pool_id = "ap-southeast-1_9QWSYGzXk".to_string();
@@ -83,7 +89,7 @@ pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
         desired_delivery_mediums: None,
         force_alias_creation: None,
         message_action: None,
-        temporary_password: Option::from(email.unwrap()),
+        temporary_password: phone,
         user_attributes: Option::from(user_attributes),
         user_pool_id,
         username: username.unwrap(),
@@ -242,7 +248,7 @@ mod tests {
             desired_delivery_mediums: None,
             force_alias_creation: None,
             message_action: None,
-            temporary_password: Option::from(email.unwrap()),
+            temporary_password: phone,
             user_attributes: Option::from(user_attributes),
             user_pool_id,
             username: username.unwrap(),
