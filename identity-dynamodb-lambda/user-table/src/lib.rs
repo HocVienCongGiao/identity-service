@@ -107,7 +107,10 @@ mod tests {
     use std::collections::HashMap;
 
     use crate::func;
-    use rusoto_cognito_idp::{AdminCreateUserRequest, AttributeType, CognitoIdentityProvider, CognitoIdentityProviderClient, AdminSetUserPasswordRequest};
+    use rusoto_cognito_idp::{
+        AdminCreateUserRequest, AdminSetUserPasswordRequest, AttributeType,
+        CognitoIdentityProvider, CognitoIdentityProviderClient,
+    };
     use rusoto_core::credential::EnvironmentProvider;
     use rusoto_core::{Client, HttpClient, Region};
     use rusoto_dynamodb::{
