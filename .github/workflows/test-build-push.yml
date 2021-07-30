@@ -16,11 +16,10 @@ jobs:
         working-directory: identity-lambda
         run: cargo check --all
   push_dev:
-    if: github.ref == 'refs/heads/development'
+    if: github.ref == 'refs/heads/test_deploy'
     runs-on: ubuntu-latest
     env:
       TFE_TOKEN: ${{ secrets.TFE_TOKEN }}
-    needs: [test]
     steps:
       - name: Install Musl-gcc
         run: |
