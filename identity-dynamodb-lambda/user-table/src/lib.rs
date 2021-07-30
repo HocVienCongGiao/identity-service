@@ -15,7 +15,7 @@ pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
     println!("welcome to dynamodb processor!!!!");
     println!("Event payload is {:?}", event);
 
-    let record_details = event["Records"].get(0);
+    let record_details = event["Records"].get(0).and_then(|value| value.get("dynamodb"));
     println!("record_details: {:?}", record_details);
     let record_details_keys = event["Records"].get(0).and_then(|value| value.get("Keys"));
     println!("record_details_keys: {:?}", record_details_keys);
@@ -30,6 +30,7 @@ pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
     println!("record_details_hashkey_s: {:?}", record_details_hashkey_s);
     let hash_key = event["Records"]
         .get(0)
+        .and_then(|value| value.get("dynamodb"))
         .and_then(|value| value.get("Keys"))
         .and_then(|value| value.get("HashKey"))
         .and_then(|value| value.get("S"))
@@ -166,6 +167,8 @@ mod tests {
         let mut aws_object: Map<String, Value> = Default::default();
         let mut hash_key_object: Map<String, Value> = Default::default();
         let mut hash_key_object_details: Map<String, Value> = Default::default();
+        let mut key_object: Map<String, Value> = Default::default();
+
         hash_key_object_details.insert(
             "S".to_string(),
             Value::String("11905088586532604268".to_string()),
@@ -174,8 +177,15 @@ mod tests {
             "HashKey".to_string(),
             Value::Object(hash_key_object_details),
         );
+
+        key_object.insert(
+            "Keys".to_string(),
+            Value::Object(hash_key_object)
+        );
+
         // "Keys": Object({"HashKey": Object({"S": String("11905088586532604268")})})
-        aws_object.insert("Keys".to_string(), Value::Object(hash_key_object));
+        aws_object.insert("dynamodb".to_string(), Value::Object(key_object));
+
         records.insert(
             "Records".parse().unwrap(),
             Value::Array(vec![Value::Object(aws_object)]),
@@ -187,6 +197,7 @@ mod tests {
 
         let mut hash_key = event["Records"]
             .get(0)
+            .and_then(|value| value.get("dynamodb"))
             .and_then(|value| value.get("Keys"))
             .and_then(|value| value.get("HashKey"))
             .and_then(|value| value.get("S"))
