@@ -11,23 +11,9 @@ use serde_json::{json, Value};
 use std::collections::HashMap;
 
 pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
-    // let first_name = event["firstName"].as_str().unwrap_or("world");
     println!("welcome to dynamodb processor!!!!");
     println!("Event payload is {:?}", event);
 
-    let record_details = event["Records"].get(0).and_then(|value| value.get("dynamodb"));
-    println!("record_details: {:?}", record_details);
-    let record_details_keys = event["Records"].get(0).and_then(|value| value.get("Keys"));
-    println!("record_details_keys: {:?}", record_details_keys);
-    let record_details_hashkey = event["Records"].get(0)
-        .and_then(|value| value.get("Keys"))
-        .and_then(|value| value.get("HashKey"));
-    println!("record_details_hashkey: {:?}", record_details_hashkey);
-    let record_details_hashkey_s = event["Records"].get(0)
-        .and_then(|value| value.get("Keys"))
-        .and_then(|value| value.get("HashKey"))
-        .and_then(|value| value.get("S"));
-    println!("record_details_hashkey_s: {:?}", record_details_hashkey_s);
     let hash_key = event["Records"]
         .get(0)
         .and_then(|value| value.get("dynamodb"))
@@ -39,11 +25,13 @@ pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
     println!("hash_key: {}", hash_key);
 
     // Get item by hash key
-    let client = DynamoDbClient::new_with(
-        HttpClient::new().unwrap(),
-        EnvironmentProvider::default(),
-        Region::ApSoutheast1,
-    );
+    // let client = DynamoDbClient::new_with(
+    //     HttpClient::new().unwrap(),
+    //     EnvironmentProvider::default(),
+    //     Region::ApSoutheast1,
+    // );
+
+    let client = DynamoDbClient::new(Region::ApSoutheast1);
 
     // Filter condition
     let mut query_condition: HashMap<String, AttributeValue> = HashMap::new();
@@ -178,10 +166,7 @@ mod tests {
             Value::Object(hash_key_object_details),
         );
 
-        key_object.insert(
-            "Keys".to_string(),
-            Value::Object(hash_key_object)
-        );
+        key_object.insert("Keys".to_string(), Value::Object(hash_key_object));
 
         // "Keys": Object({"HashKey": Object({"S": String("11905088586532604268")})})
         aws_object.insert("dynamodb".to_string(), Value::Object(key_object));
