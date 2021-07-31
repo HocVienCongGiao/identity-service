@@ -10,7 +10,7 @@ use rusoto_dynamodb::{
 use serde_json::{json, Value};
 use std::collections::HashMap;
 
-pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
+pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
     println!("welcome to dynamodb processor!!!!");
     println!("Event payload is {:?}", event);
 
@@ -24,14 +24,15 @@ pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
         .to_string();
     println!("hash_key: {}", hash_key);
 
-    // Get item by hash key
-    // let client = DynamoDbClient::new_with(
-    //     HttpClient::new().unwrap(),
-    //     EnvironmentProvider::default(),
-    //     Region::ApSoutheast1,
-    // );
+    let function_name = context.env_config.function_name;
+    println!("function_name: {}", function_name);
 
-    let client = DynamoDbClient::new(Region::ApSoutheast1);
+    // Get item by hash key
+    let client = DynamoDbClient::new_with(
+        HttpClient::new().unwrap(),
+        EnvironmentProvider::default(),
+        Region::ApSoutheast1,
+    );
 
     // Filter condition
     let mut query_condition: HashMap<String, AttributeValue> = HashMap::new();
@@ -43,6 +44,7 @@ pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
         },
     );
     let user_table_name = "dev-sg_UserTable".to_string();
+
     let user = client
         .get_item(GetItemInput {
             attributes_to_get: None,
@@ -54,6 +56,9 @@ pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
             table_name: user_table_name,
         })
         .sync();
+
+    println!("dynamodb user: {:?}", user);
+
     let username = user
         .as_ref()
         .unwrap()
@@ -62,6 +67,7 @@ pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
         .unwrap()
         .get("username")
         .and_then(|value| value.s.clone());
+
     let email = user
         .as_ref()
         .unwrap()
@@ -70,12 +76,7 @@ pub async fn func(event: Value, _: Context) -> Result<Value, Error> {
         .unwrap()
         .get("email")
         .and_then(|value| value.s.clone());
-    let phone = user
-        .unwrap()
-        .item
-        .unwrap()
-        .get("phone")
-        .and_then(|value| value.s.clone());
+
     // Insert user to cognito
     let aws_client = Client::shared();
     let user_pool_id = "ap-southeast-1_9QWSYGzXk".to_string();
