@@ -1,0 +1,85 @@
+name: Build and Push
+
+on:
+  push:
+    branches:
+      - test_deploy
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Rust
+        uses: hecrj/setup-rust-action@v1
+      - uses: actions/checkout@v2
+      -
+        working-directory: identity-lambda
+        run: cargo check --all
+  push_dev:
+    if: github.ref == 'refs/heads/test_deploy'
+    runs-on: ubuntu-latest
+    env:
+      TFE_TOKEN: ${{ secrets.TFE_TOKEN }}
+    steps:
+      - name: Install Musl-gcc
+        run: |
+          sudo apt update -y
+          sudo apt install -y musl-tools
+      - name: Set up Rust
+        uses: hecrj/setup-rust-action@v1
+        with:
+          targets: x86_64-unknown-linux-musl
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-1
+      - name: Build and Push for Dev
+        working-directory: identity-lambda
+        # From line 135 to line 155 is for fixing open ssl issue. https://qiita.com/liubin/items/6c94f0b61f746c08b74c
+        run: |
+          sudo apt install -y pkg-config libssl-dev
+          sudo ln -s /usr/include/x86_64-linux-gnu/asm /usr/include/x86_64-linux-musl/asm
+          sudo ln -s /usr/include/asm-generic /usr/include/x86_64-linux-musl/asm-generic
+          sudo ln -s /usr/include/linux /usr/include/x86_64-linux-musl/linux
+          sudo mkdir /musl
+          sudo apt-get install wget
+          sudo wget https://github.com/openssl/openssl/archive/OpenSSL_1_1_1f.tar.gz
+          sudo tar zxvf OpenSSL_1_1_1f.tar.gz
+          cd openssl-OpenSSL_1_1_1f/
+          echo nhut3
+          sudo CC="musl-gcc -fPIE -pie" ./Configure no-shared no-async --prefix=/musl --openssldir=/musl/ssl linux-x86_64
+          sudo apt-get install build-essential
+          sudo make depend
+          sudo make -j$(nproc)
+          sudo make install
+          export PKG_CONFIG_ALLOW_CROSS=1
+          export OPENSSL_STATIC=true
+          export OPENSSL_DIR=/musl
+          cd /home/runner/work/identity-service/identity-service/identity-lambda
+          cargo clean
+          cargo build --release --target x86_64-unknown-linux-musl
+          cp ./target/x86_64-unknown-linux-musl/release/user ./bootstrap && zip user.zip bootstrap
+          rm bootstrap
+          aws s3 cp ./user.zip s3://891616054205-ap-southeast-1-aws-lambda/dev-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/user.zip
+          cd /home/runner/work/identity-service/identity-service/identity-dynamodb-lambda
+          cargo clean
+          cargo build --release --target x86_64-unknown-linux-musl
+          cp ./target/x86_64-unknown-linux-musl/release/user-table ./bootstrap && zip user-table.zip bootstrap
+          rm bootstrap
+          aws s3 cp ./user-table.zip s3://891616054205-ap-southeast-1-aws-lambda/dev-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/dynamodb/user-table.zip
+      - name: App Deploy Terraform Config
+        run: |
+          chmod +x ./scripts/terraform-enterprise-push.sh
+          ./scripts/terraform-enterprise-push.sh identity-lambda/terraform HocVienCongGiao/dev-sg-lambda-services-hvcg-identity-service
+      - name: DynamoDB Deploy Terraform Config
+        run: |
+          echo TODO
+          chmod +x ./scripts/terraform-enterprise-push.sh
+          ./scripts/terraform-enterprise-push.sh identity-dynamodb-lambda/terraform HocVienCongGiao/dev-sg-lambda-processors-dynamodb-identity-service
+
