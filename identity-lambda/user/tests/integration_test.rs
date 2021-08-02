@@ -94,27 +94,9 @@ mod tests {
             .uri("https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/user")
             .method("POST")
             .header("Content-Type", "application/json")
-            .header("authorization", token)
+            .header("authorization", "Bearer 123445")
             .body(Body::from(serialized_user))
             .unwrap();
-
-        let auth_header_value = request.headers().get("authorization").unwrap();
-
-        let auth_header_str = auth_header_value.to_str().unwrap();
-        let username: String;
-        let groups: Vec<String>;
-        if auth_header_str != "anonymous12" {
-            let jwt_token = &auth_header_str.to_string()[7..];
-            let token_data: TokenData<TokenPayload> =
-                jsonwebtoken::dangerous_insecure_decode(jwt_token).unwrap();
-            let token_payload = token_data.claims;
-            username = token_payload.username;
-            groups = token_payload.groups;
-            println!("Groups include {:?}", groups);
-        } else {
-            username = String::from("anonymous");
-        }
-        println!("token username {}", username);
 
         let mut context: Context = Context::default();
         context.env_config.function_name = "dev-sg_identity-service_users".to_string();

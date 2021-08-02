@@ -34,31 +34,7 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
         return Ok(empty_response(request));
     }
 
-    let empty_header_value = HeaderValue::from_str("").unwrap();
-
-    let auth_header_value = request
-        .headers()
-        .get("authorization")
-        .unwrap_or(&empty_header_value);
     let status_code: u16;
-
-    if !auth_header_value.is_empty() {
-        let auth_header_str = auth_header_value.to_str().unwrap();
-        let username: String;
-        let groups: Vec<String>;
-        let jwt_token = &auth_header_str.to_string()[7..];
-        let token_data: TokenData<TokenPayload> =
-            jsonwebtoken::dangerous_insecure_decode(jwt_token).unwrap();
-        let token_payload = token_data.claims;
-        username = token_payload.username;
-        groups = token_payload.groups;
-        println!("Actual username {:?}", username);
-        println!("Actual groups include {:?}", groups);
-
-        if username.is_empty() || groups.is_empty() {
-            println!("User token is not valid");
-        }
-    }
 
     let serialized_user = serde_json::to_string(&lambda_user_request).unwrap();
     println!("serialized_user: {}", serialized_user);
