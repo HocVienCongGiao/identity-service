@@ -83,13 +83,6 @@ mod tests {
 
         let serialized_user = serde_json::to_string(&user_request).unwrap();
 
-        // test authorization
-        let token = std::env::var("TOKEN_PREFIX")
-            .unwrap()
-            .add(" ")
-            .add(&*std::env::var("TOKEN").unwrap());
-        println!("full token: {}", token);
-
         let request = http::Request::builder()
             .uri("https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/user")
             .method("POST")
