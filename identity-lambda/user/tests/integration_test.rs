@@ -47,7 +47,7 @@ mod tests {
             dotenv::from_path(my_path.as_path()).ok();
             println!(
                 "testing env {}",
-                std::env::var("HELLO1").unwrap_or("".to_string())
+                std::env::var("HELLO").unwrap_or_else(|_| "".to_string())
             );
         });
     }
