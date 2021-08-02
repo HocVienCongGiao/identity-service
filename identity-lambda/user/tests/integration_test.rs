@@ -187,6 +187,7 @@ mod tests {
                 table_name: user_table_name,
             })
             .sync();
+        println!("trigger build");
     }
 
     // #[tokio::test]
