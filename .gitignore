@@ -31,3 +31,4 @@ node_modules
 .serverless
 target
 .idea
+/identity-lambda/user/.env.test

@@ -27,6 +27,12 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
     let function_name = context.env_config.function_name;
     println!("function_name: {}", function_name);
 
+    let user_table_name = if function_name.contains("dev") {
+        "dev-sg_UserTable"
+    } else {
+        "prod-sg_UserTable"
+    }.to_string();
+
     // Get item by hash key
     let client = DynamoDbClient::new_with(
         HttpClient::new().unwrap(),
@@ -43,7 +49,6 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
             ..Default::default()
         },
     );
-    let user_table_name = "dev-sg_UserTable".to_string();
 
     let user = client
         .get_item(GetItemInput {
@@ -141,7 +146,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn create_user_success() {
+    async fn get_user_success() {
         initialise();
         env::set_var(
             "AWS_ACCESS_KEY_ID",

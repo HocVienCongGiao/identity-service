@@ -83,8 +83,19 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
         None
     });
 
+    let function_name = context.env_config.function_name;
+    println!("function_name: {}", function_name);
+    let user_table_name = if function_name.contains("dev") {
+        "dev-sg_UserTable"
+    } else {
+        "prod-sg_UserTable"
+    }.to_string();
+
     let insert_dynamodb_result =
-        db_cognito::insert_user_to_dynamodb(Option::from(&user_response)).await;
+        db_cognito::insert_user_to_dynamodb(
+            Option::from(&user_response),
+            user_table_name.parse().unwrap()
+        ).await;
     println!("Insert dynamodb result: {}", insert_dynamodb_result);
 
     if !insert_dynamodb_result {

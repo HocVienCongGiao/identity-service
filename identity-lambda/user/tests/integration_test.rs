@@ -1,4 +1,6 @@
 use serde::{Deserialize, Serialize};
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 
 #[derive(Deserialize, Serialize)]
 struct TokenPayload {
@@ -22,10 +24,21 @@ mod tests {
     use lambda_http::{http, Context};
     use lambda_http::{Body, IntoResponse};
     use regex::Regex;
+    use std::env;
     use uuid::Uuid;
 
     use crate::TokenPayload;
-
+    use db_postgres::connect;
+    use rusoto_core::credential::EnvironmentProvider;
+    use rusoto_core::{HttpClient, Region};
+    use rusoto_dynamodb::{
+        AttributeValue, DeleteItemInput, DynamoDb, DynamoDbClient, GetItemInput, ListTablesInput,
+        PutItemInput,
+    };
+    use std::collections::hash_map::DefaultHasher;
+    use std::collections::HashMap;
+    use std::hash::{Hash, Hasher};
+    use tokio_postgres::types::ToSql;
     static INIT: Once = Once::new();
 
     fn initialise() {
@@ -36,10 +49,24 @@ mod tests {
         });
     }
 
-    // #[tokio::test]
+    #[tokio::test]
     async fn create_user_success() {
         initialise();
         println!("is it working?");
+        env::set_var(
+            "AWS_ACCESS_KEY_ID",
+            std::env::var("AWS_ACCESS_KEY_ID").unwrap(),
+        );
+        env::set_var(
+            "AWS_SECRET_ACCESS_KEY",
+            std::env::var("AWS_SECRET_ACCESS_KEY").unwrap(),
+        );
+
+        let client = DynamoDbClient::new_with(
+            HttpClient::new().unwrap(),
+            EnvironmentProvider::default(),
+            Region::ApSoutheast1,
+        );
 
         // Given
         let test_suffix = Uuid::new_v4().to_string();
@@ -86,7 +113,10 @@ mod tests {
         }
         println!("token username {}", username);
 
-        let response = user::create_user(request, Context::default())
+        let mut context: Context = Context::default();
+        context.env_config.function_name = "dev-sg_identity-service_users".to_string();
+
+        let response = user::create_user(request, context)
             .await
             .expect("expected Ok(_) value")
             .into_response();
@@ -109,7 +139,54 @@ mod tests {
             deserialized_user.phone,
             Option::from("+84 939686970".to_string())
         );
-        println!("Create user successfully!")
+        println!("Create user successfully!");
+
+        // delete user in postgres
+        let connect = connect().await;
+
+        let stmt = (connect)
+            .prepare(
+                "truncate identity__user_username,\
+             identity__user_phone, \
+             identity__user_email, \
+             identity__user_enabled, \
+             identity__user",
+            )
+            .await
+            .unwrap();
+
+        let id: &[&(dyn ToSql + Sync)] = &[&deserialized_user.id];
+        connect.query_one(&stmt, &[]).await;
+
+        // delete user in dynamodb
+        let hash_key = hash(deserialized_user.id);
+        println!("hash_key: {}", hash_key);
+        // Filter condition
+        let mut query_condition: HashMap<String, AttributeValue> = HashMap::new();
+        query_condition.insert(
+            String::from("HashKey"),
+            AttributeValue {
+                s: Option::from(hash_key.to_string()),
+                ..Default::default()
+            },
+        );
+
+        let user_table_name = "dev-sg_UserTable".to_string();
+
+        let result = client
+            .delete_item(DeleteItemInput {
+                condition_expression: None,
+                conditional_operator: None,
+                expected: None,
+                expression_attribute_names: None,
+                expression_attribute_values: None,
+                key: query_condition,
+                return_consumed_capacity: None,
+                return_item_collection_metrics: None,
+                return_values: None,
+                table_name: user_table_name,
+            })
+            .sync();
     }
 
     // #[tokio::test]
@@ -192,13 +269,23 @@ mod tests {
             .body(Body::from(serialized_user))
             .unwrap();
 
+        let mut context: Context = Context::default();
+        context.env_config.function_name = "dev-sg_identity-service_users".to_string();
         // When
-        let response = user::create_user(request, Context::default())
+        let response = user::create_user(request, context)
             .await
             .expect("expected Ok(_) value")
             .into_response();
 
         // Then
         assert_eq!(response.status(), 405);
+    }
+    fn hash<T>(obj: T) -> u64
+    where
+        T: Hash,
+    {
+        let mut hasher = DefaultHasher::new();
+        obj.hash(&mut hasher);
+        hasher.finish()
     }
 }
