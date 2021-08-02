@@ -31,7 +31,8 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
         "dev-sg_UserTable"
     } else {
         "prod-sg_UserTable"
-    }.to_string();
+    }
+    .to_string();
 
     // Get item by hash key
     let client = DynamoDbClient::new_with(
