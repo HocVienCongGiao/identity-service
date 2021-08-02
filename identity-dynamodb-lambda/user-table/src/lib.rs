@@ -27,12 +27,14 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
     let function_name = context.env_config.function_name;
     println!("function_name: {}", function_name);
 
-    let user_table_name = if function_name.contains("dev") {
-        "dev-sg_UserTable"
-    } else {
+    let user_table_name = if function_name.contains("prod") {
         "prod-sg_UserTable"
+    } else {
+        "dev-sg_UserTable"
     }
     .to_string();
+
+    println!("Table name: {}", user_table_name);
 
     // Get item by hash key
     let client = DynamoDbClient::new_with(
@@ -123,7 +125,7 @@ mod tests {
 
     use crate::func;
     use rusoto_cognito_idp::{
-        AdminCreateUserRequest, AdminSetUserPasswordRequest, AttributeType,
+        AdminCreateUserRequest, AdminDeleteUserRequest, AdminSetUserPasswordRequest, AttributeType,
         CognitoIdentityProvider, CognitoIdentityProviderClient,
     };
     use rusoto_core::credential::EnvironmentProvider;
@@ -142,7 +144,10 @@ mod tests {
         INIT.call_once(|| {
             let my_path = PathBuf::new().join(".env.test");
             dotenv::from_path(my_path.as_path()).ok();
-            println!("testing env {}", std::env::var("HELLO").unwrap());
+            println!(
+                "testing env {}",
+                std::env::var("HELLO").unwrap_or_else(|_| "".to_string())
+            );
         });
     }
 
@@ -196,7 +201,26 @@ mod tests {
             .unwrap()
             .to_string();
         println!("hash_key: {}", hash_key.replace("\"", ""));
+        let result = func(event, Default::default()).await;
+        println!("Result: {:?}", result.is_err());
 
+        assert!(!result.is_err());
+
+        let aws_client = Client::shared();
+        let user_pool_id = "ap-southeast-1_9QWSYGzXk".to_string();
+        let rusoto_cognito_idp_client =
+            CognitoIdentityProviderClient::new_with_client(aws_client, Region::ApSoutheast1);
+
+        let test_username = "nhutcargo001".to_string();
+        let admin_delete_user_request = AdminDeleteUserRequest {
+            user_pool_id,
+            username: test_username,
+        };
+
+        let delete_result = rusoto_cognito_idp_client
+            .admin_delete_user(admin_delete_user_request)
+            .sync();
+        println!("delete result: {:?}", delete_result)
         // // Get item by hash key
         // let client = DynamoDbClient::new_with(
         //     HttpClient::new().unwrap(),
@@ -281,55 +305,5 @@ mod tests {
         // }
         //
         // println!("Result: {:?}", result_cognito.unwrap())
-    }
-
-    // #[tokio::test]
-    async fn create_user_success_single() {
-        initialise();
-        env::set_var(
-            "AWS_ACCESS_KEY_ID",
-            std::env::var("AWS_ACCESS_KEY_ID").unwrap(),
-        );
-        env::set_var(
-            "AWS_SECRET_ACCESS_KEY",
-            std::env::var("AWS_SECRET_ACCESS_KEY").unwrap(),
-        );
-
-        let username = "nhuthm005".to_string();
-
-        let email = "nhuthm005@gmail.com".to_string();
-
-        let password = "Hvcg@123456789".to_string();
-
-        // Insert user to cognito
-        let aws_client = Client::shared();
-        let user_pool_id = "ap-southeast-1_9QWSYGzXk".to_string();
-        let rusoto_cognito_idp_client =
-            CognitoIdentityProviderClient::new_with_client(aws_client, Region::ApSoutheast1);
-
-        let mut user_attributes: Vec<AttributeType> = vec![AttributeType {
-            name: "email".to_string(),
-            value: Option::from(email),
-        }];
-
-        let admin_create_user_request = AdminCreateUserRequest {
-            desired_delivery_mediums: None,
-            force_alias_creation: None,
-            message_action: None,
-            temporary_password: Option::from(password),
-            user_attributes: Option::from(user_attributes),
-            user_pool_id,
-            username,
-            validation_data: None,
-        };
-
-        let result_cognito = rusoto_cognito_idp_client
-            .admin_create_user(admin_create_user_request)
-            .sync();
-        if result_cognito.is_err() {
-            println!("Error: {:?}", result_cognito.as_ref().err());
-        }
-
-        println!("Result: {:?}", result_cognito.unwrap())
     }
 }
