@@ -169,7 +169,9 @@ jobs:
     - name: Test components
       working-directory: ./rust-service/identity-app
       run: cargo test
-
+    - name: Test dynamodb processor
+      working-directory: ./rust-service/identity-dynamodb-lambda
+      run: cargo test
   # deploy on pushes to master branch
   # assumes aws credentials (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY) are set in github secrets
   push_dev:
