@@ -13,14 +13,12 @@ use rusoto_core::{HttpClient, Region};
 use rusoto_dynamodb::{AttributeValue, DynamoDb, DynamoDbClient, ListTablesInput, PutItemInput};
 use uuid::Uuid;
 
-pub async fn insert_user_to_dynamodb(user: Option<&User>) -> bool {
+pub async fn insert_user_to_dynamodb(user: Option<&User>, user_table_name: String) -> bool {
     let client = DynamoDbClient::new_with(
         HttpClient::new().unwrap(),
         EnvironmentProvider::default(),
         Region::ApSoutheast1,
     );
-
-    let user_table_name = "dev-sg_UserTable".to_string();
 
     let user_dynamodb = user.unwrap();
 
@@ -31,7 +29,7 @@ pub async fn insert_user_to_dynamodb(user: Option<&User>) -> bool {
     user_attributes.insert(
         String::from("HashKey"),
         AttributeValue {
-            s: Some(hash(random_uuid).to_string()),
+            s: Some(hash(user_dynamodb.id).to_string()),
             ..Default::default()
         },
     );
@@ -112,7 +110,7 @@ mod tests {
             phone: Option::from(Uuid::new_v4().to_string()),
         };
 
-        let result = insert_user_to_dynamodb(Option::from(user_dynamodb)).await;
+        let result = insert_user_to_dynamodb(Option::from(user_dynamodb), table_name).await;
 
         println!("insert to dynamo db result {}", result);
     }
