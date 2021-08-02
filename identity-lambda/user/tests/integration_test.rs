@@ -45,7 +45,7 @@ mod tests {
         INIT.call_once(|| {
             let my_path = PathBuf::new().join(".env.test");
             dotenv::from_path(my_path.as_path()).ok();
-            println!("testing env {}", std::env::var("HELLO").unwrap());
+            println!("testing env {}", std::env::var("HELLO1").unwrap_or("".to_string()));
         });
     }
 
