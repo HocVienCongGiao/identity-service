@@ -85,18 +85,19 @@ impl domain::boundaries::UserDbGateway for UserRepository {
 
     async fn get_user_by_id(&self, id: Uuid) -> Result<User, DbError> {
         let result = query::get_user_by_id(&(*self).client, id).await;
+
         println!("get_user_by_id: {}", result.is_ok());
-        return if result.is_err() {
-            Err(DbError::UnknownError)
-        } else {
-            let user = result.unwrap();
-            Ok(User {
-                id: user.get("id"),
-                username: user.get("username"),
-                email: user.get("email"),
-                phone: user.get("phone"),
-                enabled: user.get("enabled"),
-            })
-        };
+        if result.is_err() {
+            return Err(DbError::UnknownError)
+        }
+
+        let user = result.unwrap();
+        return Ok(User {
+            id: user.get("id"),
+            username: user.get("username"),
+            email: user.get("email"),
+            phone: user.get("phone"),
+            enabled: user.get("enabled"),
+        })
     }
 }
