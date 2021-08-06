@@ -154,7 +154,9 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
             Ok(json!({ "message": format!("This user did not disable.") }))
         }
     } else {
-        Ok(json!({ "message": format!("Delete function will be implemented later!") }))
+        Ok(json!({
+            "message": format!("Delete function will be implemented later!")
+        }))
     }
 }
 

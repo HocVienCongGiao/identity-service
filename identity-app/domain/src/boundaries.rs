@@ -18,14 +18,8 @@ pub trait UserSimpleMutationInputBoundary {
         &self,
         request: UserMutationRequest,
     ) -> Result<UserMutationResponse, UserMutationError>;
-    async fn deactivate_user(
-        &self,
-        id: Uuid,
-    ) -> Result<UserMutationResponse, UserMutationError>;
-    async fn get_user_by_id(
-        &self,
-        id: Uuid,
-    ) -> Result<UserMutationResponse, UserMutationError>;
+    async fn deactivate_user(&self, id: Uuid) -> Result<UserMutationResponse, UserMutationError>;
+    async fn get_user_by_id(&self, id: Uuid) -> Result<UserMutationResponse, UserMutationError>;
 }
 
 pub struct Test1SimpleMutationRequest {

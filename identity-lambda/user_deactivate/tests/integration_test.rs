@@ -88,7 +88,7 @@ mod tests {
             id: Option::from(user_id),
             username: "".to_string(),
             email: None,
-            phone: None
+            phone: None,
         };
 
         let serialized_user = serde_json::to_string(&deactivate_user_request).unwrap();
