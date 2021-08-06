@@ -80,7 +80,7 @@ impl domain::boundaries::UserDbGateway for UserRepository {
                 phone: user.get("phone"),
                 enabled: user.get("enabled"),
             })
-        }
+        };
     }
 
     async fn get_user_by_id(&self, id: Uuid) -> Result<User, DbError> {
@@ -97,6 +97,6 @@ impl domain::boundaries::UserDbGateway for UserRepository {
                 phone: user.get("phone"),
                 enabled: user.get("enabled"),
             })
-        }
+        };
     }
 }

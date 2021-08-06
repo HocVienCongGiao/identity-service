@@ -10,7 +10,10 @@ use hvcg_iam_openapi_identity::models::User;
 use lambda_http::{Body, Context, IntoResponse, Request, RequestExt, Response};
 use rusoto_core::credential::EnvironmentProvider;
 use rusoto_core::{HttpClient, Region};
-use rusoto_dynamodb::{AttributeValue, DynamoDb, DynamoDbClient, ListTablesInput, PutItemInput, UpdateItemInput, AttributeValueUpdate};
+use rusoto_dynamodb::{
+    AttributeValue, AttributeValueUpdate, DynamoDb, DynamoDbClient, ListTablesInput, PutItemInput,
+    UpdateItemInput,
+};
 use uuid::Uuid;
 
 pub async fn insert_user_to_dynamodb(user: Option<&User>, user_table_name: String) -> bool {
@@ -119,14 +122,14 @@ pub async fn deactivate_user_to_dynamodb(user: Option<&User>, user_table_name: S
             value: Option::from(AttributeValue {
                 s: Some("false".to_string()),
                 ..Default::default()
-            })
+            }),
         },
     );
 
     let result = client
         .update_item(UpdateItemInput {
             table_name: user_table_name,
-            key : user_key,
+            key: user_key,
             attribute_updates: Option::from(attribute_updates),
             ..UpdateItemInput::default()
         })
@@ -146,19 +149,18 @@ mod tests {
     use std::collections::HashMap;
     use std::env;
 
+    use crate::{deactivate_user_to_dynamodb, hash, insert_user_to_dynamodb};
     use hvcg_iam_openapi_identity::models::User;
     use rusoto_core::credential::EnvironmentProvider;
     use rusoto_core::{HttpClient, Region};
     use rusoto_dynamodb::{
         AttributeValue, DynamoDb, DynamoDbClient, ListTablesInput, PutItemInput,
     };
-    use uuid::Uuid;
     use std::ops::Add;
     use std::path::PathBuf;
     use std::sync::Once;
-    use crate::{hash, insert_user_to_dynamodb, deactivate_user_to_dynamodb};
+    use uuid::Uuid;
     static INIT: Once = Once::new();
-
 
     fn initialise() {
         INIT.call_once(|| {
@@ -218,13 +220,12 @@ mod tests {
             id: Option::from(uuid),
             username: "".to_string(),
             email: None,
-            phone: None
+            phone: None,
         };
 
         let result = deactivate_user_to_dynamodb(Option::from(user_dynamodb), table_name).await;
 
         println!("deactivate user result {}", result);
-
     }
 }
 
