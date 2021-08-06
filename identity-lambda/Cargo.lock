@@ -441,6 +441,7 @@ version = "0.1.5"
 dependencies = [
  "chrono",
  "domain",
+ "dotenv",
  "hvcg_iam_openapi_identity",
  "jsonwebtoken",
  "lambda_http",
@@ -1001,9 +1002,9 @@ dependencies = [
 
 [[package]]
 name = "hvcg_iam_openapi_identity"
-version = "0.0.3"
+version = "0.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5b63ec5c803248e40d1c56d3ae023876ba0e1c74d07e3fdc9adaffe202116e5"
+checksum = "fcdb4c1597b8ec9465dbb6657850065b6a93fe9e4e5b5c286e101b72abaca83b"
 dependencies = [
  "async-trait",
  "chrono",
@@ -3380,6 +3381,32 @@ dependencies = [
 
 [[package]]
 name = "user"
+version = "0.1.0"
+dependencies = [
+ "controller",
+ "db-cognito",
+ "db-postgres",
+ "domain",
+ "dotenv",
+ "hvcg_example_openapi_entity",
+ "hvcg_iam_openapi_identity",
+ "jsonwebtoken",
+ "lambda_http",
+ "regex",
+ "rusoto_cognito_idp",
+ "rusoto_core 0.42.0",
+ "rusoto_credential 0.43.0",
+ "rusoto_dynamodb 0.42.0",
+ "serde",
+ "serde_dynamodb",
+ "serde_json",
+ "tokio 1.8.1",
+ "tokio-postgres",
+ "uuid",
+]
+
+[[package]]
+name = "user_deactivate"
 version = "0.1.0"
 dependencies = [
  "controller",

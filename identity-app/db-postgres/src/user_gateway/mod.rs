@@ -1,8 +1,10 @@
 use async_trait::async_trait;
-use tokio_postgres::Client;
-
-use domain::boundaries::DbError;
+use domain::boundaries::{DbError, UserDbResponse};
 use domain::entity::user::User;
+use tokio_postgres::{Client, Row};
+use uuid::Uuid;
+
+use crate::user_gateway::query::get_user_by_id;
 
 mod mutation;
 mod query;
@@ -61,5 +63,40 @@ impl domain::boundaries::UserDbGateway for UserRepository {
         }
 
         Ok(())
+    }
+
+    async fn deactivate_user(&self, id: Uuid) -> Result<User, DbError> {
+        let deactivate_user = mutation::deactivate_identity_user(&(*self).client, id).await;
+        println!("deactivate_user_result: {}", deactivate_user.is_ok());
+
+        return if deactivate_user.is_err() {
+            Err(DbError::UnknownError)
+        } else {
+            let user = get_user_by_id(&(*self).client, id).await.unwrap();
+            Ok(User {
+                id: user.get("id"),
+                username: user.get("username"),
+                email: user.get("email"),
+                phone: user.get("phone"),
+                enabled: user.get("enabled"),
+            })
+        }
+    }
+
+    async fn get_user_by_id(&self, id: Uuid) -> Result<User, DbError> {
+        let result = query::get_user_by_id(&(*self).client, id).await;
+        println!("get_user_by_id: {}", result.is_ok());
+        return if result.is_err() {
+            Err(DbError::UnknownError)
+        } else {
+            let user = result.unwrap();
+            Ok(User {
+                id: user.get("id"),
+                username: user.get("username"),
+                email: user.get("email"),
+                phone: user.get("phone"),
+                enabled: user.get("enabled"),
+            })
+        }
     }
 }

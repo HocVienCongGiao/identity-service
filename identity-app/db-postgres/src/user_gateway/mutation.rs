@@ -2,6 +2,7 @@ use tokio_postgres::types::ToSql;
 use tokio_postgres::{Client, Error};
 
 use domain::entity::user::User;
+use uuid::Uuid;
 
 pub async fn save_identity_user(client: &Client, user: &User) -> Result<u64, Error> {
     let stmt = (*client)
@@ -55,5 +56,16 @@ pub async fn save_identity_user_enabled(client: &Client, user: &User) -> Result<
 
     // let stmt = block_on(stmt_future).unwrap();
     let params: &[&(dyn ToSql + Sync)] = &[&user.id];
+    client.execute(&stmt, params).await
+}
+
+pub async fn deactivate_identity_user(client: &Client, id: Uuid) -> Result<u64, Error> {
+    let stmt = (*client)
+        .prepare("UPDATE identity__user_enabled SET enabled = false where id = $1")
+        .await
+        .unwrap();
+    println!("id: {}", id);
+
+    let params: &[&(dyn ToSql + Sync)] = &[&id];
     client.execute(&stmt, params).await
 }
