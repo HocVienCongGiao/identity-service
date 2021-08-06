@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use regex::Regex;
 use uuid::Uuid;
 
 use crate::boundaries;
@@ -6,7 +7,6 @@ use crate::boundaries::{
     DbError, UserDbGateway, UserDbResponse, UserMutationError, UserMutationRequest,
     UserMutationResponse,
 };
-use regex::Regex;
 
 pub struct UserSimpleMutationInteractor<A: UserDbGateway> {
     db_gateway: A,
@@ -14,8 +14,8 @@ pub struct UserSimpleMutationInteractor<A: UserDbGateway> {
 
 #[async_trait]
 impl<A> boundaries::UserSimpleMutationInputBoundary for UserSimpleMutationInteractor<A>
-where
-    A: UserDbGateway + Sync + Send,
+    where
+        A: UserDbGateway + Sync + Send,
 {
     async fn create_user(
         &self,
@@ -68,11 +68,30 @@ where
             Err(UserMutationError::UnknownError)
         }
     }
+
+    async fn deactivate_user(&self, id: Uuid) -> Result<UserMutationResponse, UserMutationError> {
+        let result = (*self)
+            .db_gateway.deactivate_user(id).await
+            .map(|user| user.to_user_mutation_response())
+            .map_err(|err| err.to_user_mutation_error());
+        ;
+
+        if result.is_err() {
+            Err(UserMutationError::UnknownError)
+        } else { result }
+    }
+
+    async fn get_user_by_id(&self, id: Uuid) -> Result<UserMutationResponse, UserMutationError> {
+        (*self)
+            .db_gateway.get_user_by_id(id).await
+            .map(|user| user.to_user_mutation_response())
+            .map_err(|err| err.to_user_mutation_error())
+    }
 }
 
 impl<A> UserSimpleMutationInteractor<A>
-where
-    A: UserDbGateway + Sync + Send,
+    where
+        A: UserDbGateway + Sync + Send,
 {
     pub fn new(db_gateway: A) -> Self {
         UserSimpleMutationInteractor { db_gateway }
@@ -115,7 +134,7 @@ impl crate::interactors::user_mutation::UserMutationRequest {
         let email_regex = Regex::new(
             r"^([a-z0-9_+]([a-z0-9_+.]*[a-z0-9_+])?)@([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6})",
         )
-        .unwrap();
+            .unwrap();
 
         if self.email.is_none() {
             println!("Email is none");

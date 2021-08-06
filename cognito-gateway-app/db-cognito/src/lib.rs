@@ -10,7 +10,7 @@ use hvcg_iam_openapi_identity::models::User;
 use lambda_http::{Body, Context, IntoResponse, Request, RequestExt, Response};
 use rusoto_core::credential::EnvironmentProvider;
 use rusoto_core::{HttpClient, Region};
-use rusoto_dynamodb::{AttributeValue, DynamoDb, DynamoDbClient, ListTablesInput, PutItemInput};
+use rusoto_dynamodb::{AttributeValue, DynamoDb, DynamoDbClient, ListTablesInput, PutItemInput, UpdateItemInput, AttributeValueUpdate};
 use uuid::Uuid;
 
 pub async fn insert_user_to_dynamodb(user: Option<&User>, user_table_name: String) -> bool {
@@ -23,8 +23,7 @@ pub async fn insert_user_to_dynamodb(user: Option<&User>, user_table_name: Strin
     let user_dynamodb = user.unwrap();
 
     let mut user_attributes = HashMap::new();
-    let random_uuid = Uuid::new_v4();
-    println!("random uuid {}", random_uuid);
+    println!("user_id: {}", user_dynamodb.id.unwrap());
 
     user_attributes.insert(
         String::from("HashKey"),
@@ -66,6 +65,14 @@ pub async fn insert_user_to_dynamodb(user: Option<&User>, user_table_name: Strin
         },
     );
 
+    user_attributes.insert(
+        String::from("enabled"),
+        AttributeValue {
+            s: Some("true".parse().unwrap()),
+            ..Default::default()
+        },
+    );
+
     let result = client
         .put_item(PutItemInput {
             table_name: user_table_name,
@@ -84,6 +91,56 @@ pub async fn insert_user_to_dynamodb(user: Option<&User>, user_table_name: Strin
     result.is_ok()
 }
 
+pub async fn deactivate_user_to_dynamodb(user: Option<&User>, user_table_name: String) -> bool {
+    let client = DynamoDbClient::new_with(
+        HttpClient::new().unwrap(),
+        EnvironmentProvider::default(),
+        Region::ApSoutheast1,
+    );
+
+    let user_dynamodb = user.unwrap();
+
+    let mut user_key = HashMap::new();
+    println!("user_id {}", user_dynamodb.id.unwrap());
+
+    user_key.insert(
+        String::from("HashKey"),
+        AttributeValue {
+            s: Some(hash(user_dynamodb.id).to_string()),
+            ..Default::default()
+        },
+    );
+
+    let mut attribute_updates = HashMap::new();
+    attribute_updates.insert(
+        String::from("enabled"),
+        AttributeValueUpdate {
+            action: Option::from("PUT".to_string()),
+            value: Option::from(AttributeValue {
+                s: Some("false".to_string()),
+                ..Default::default()
+            })
+        },
+    );
+
+    let result = client
+        .update_item(UpdateItemInput {
+            table_name: user_table_name,
+            key : user_key,
+            attribute_updates: Option::from(attribute_updates),
+            ..UpdateItemInput::default()
+        })
+        .sync();
+
+    if result.is_err() {
+        println!("put_item() result {:#?}", result.as_ref().err());
+        return false;
+    }
+
+    println!("put_item() result {:#?}", result.as_ref().unwrap());
+
+    result.is_ok()
+}
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
@@ -96,23 +153,78 @@ mod tests {
         AttributeValue, DynamoDb, DynamoDbClient, ListTablesInput, PutItemInput,
     };
     use uuid::Uuid;
+    use std::ops::Add;
+    use std::path::PathBuf;
+    use std::sync::Once;
+    use crate::{hash, insert_user_to_dynamodb, deactivate_user_to_dynamodb};
+    static INIT: Once = Once::new();
 
-    use crate::{hash, insert_user_to_dynamodb};
+
+    fn initialise() {
+        INIT.call_once(|| {
+            let my_path = PathBuf::new().join(".env.test");
+            dotenv::from_path(my_path.as_path()).ok();
+            println!(
+                "testing env {}",
+                std::env::var("HELLO").unwrap_or_else(|_| "".to_string())
+            );
+        });
+    }
 
     #[tokio::test]
     async fn crud_users() {
+        initialise();
+        println!("is it working?");
+        env::set_var(
+            "AWS_ACCESS_KEY_ID",
+            std::env::var("AWS_ACCESS_KEY_ID").unwrap(),
+        );
+        env::set_var(
+            "AWS_SECRET_ACCESS_KEY",
+            std::env::var("AWS_SECRET_ACCESS_KEY").unwrap(),
+        );
+
         let table_name = "dev-sg_UserTable".to_string();
 
         let user_dynamodb = &User {
             id: Option::from(Uuid::new_v4()),
-            username: "123".to_string(),
-            email: Option::from(Uuid::new_v4().to_string()),
-            phone: Option::from(Uuid::new_v4().to_string()),
+            username: "nhut_donot_delete".to_string(),
+            email: Option::from("donotdelete@gmail.com".to_string()),
+            phone: Option::from("+84123456789".to_string()),
         };
 
         let result = insert_user_to_dynamodb(Option::from(user_dynamodb), table_name).await;
 
         println!("insert to dynamo db result {}", result);
+    }
+
+    #[tokio::test]
+    async fn deactivate_user() {
+        initialise();
+        println!("is it working?");
+        env::set_var(
+            "AWS_ACCESS_KEY_ID",
+            std::env::var("AWS_ACCESS_KEY_ID").unwrap(),
+        );
+        env::set_var(
+            "AWS_SECRET_ACCESS_KEY",
+            std::env::var("AWS_SECRET_ACCESS_KEY").unwrap(),
+        );
+
+        let table_name = "dev-sg_UserTable".to_string();
+
+        let uuid = Uuid::parse_str("6296fd76-07f6-40c0-9c71-db0412cd0562").unwrap();
+        let user_dynamodb = &User {
+            id: Option::from(uuid),
+            username: "".to_string(),
+            email: None,
+            phone: None
+        };
+
+        let result = deactivate_user_to_dynamodb(Option::from(user_dynamodb), table_name).await;
+
+        println!("deactivate user result {}", result);
+
     }
 }
 

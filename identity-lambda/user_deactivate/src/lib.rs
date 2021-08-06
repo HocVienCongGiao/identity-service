@@ -1,12 +1,12 @@
 use domain::boundaries::UserMutationError;
 use hvcg_iam_openapi_identity::models::User;
 use jsonwebtoken::TokenData;
-use lambda_http::{Body, Context, IntoResponse, Request, RequestExt, Response};
-use lambda_http::http::{HeaderValue, method, StatusCode};
 use lambda_http::http::header::{
     ACCESS_CONTROL_ALLOW_HEADERS, ACCESS_CONTROL_ALLOW_METHODS, ACCESS_CONTROL_ALLOW_ORIGIN,
     CONTENT_TYPE,
 };
+use lambda_http::http::{method, HeaderValue, StatusCode};
+use lambda_http::{Body, Context, IntoResponse, Request, RequestExt, Response};
 use serde::{Deserialize, Serialize};
 
 type Error = Box<dyn std::error::Error + Sync + Send + 'static>;
@@ -21,7 +21,10 @@ struct TokenPayload {
     groups: Vec<String>,
 }
 
-pub async fn create_user(request: Request, context: Context) -> Result<impl IntoResponse, Error> {
+pub async fn deactivate_user(
+    request: Request,
+    context: Context,
+) -> Result<impl IntoResponse, Error> {
     println!("Request {:?}", request);
     println!("Request Method {:?}", request.method());
 
@@ -35,25 +38,13 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
         return Ok(empty_response(request));
     }
 
-    let status_code: u16;
-
     let serialized_user = serde_json::to_string(&lambda_user_request).unwrap();
     println!("serialized_user: {}", serialized_user);
 
     let user_response: Option<controller::openapi::identity_user::User>;
-    let result = controller::create_user(&lambda_user_request.unwrap()).await;
+    let result = controller::deactivate_user(lambda_user_request.unwrap().id.unwrap()).await;
 
-    match result {
-        Ok(_) => status_code = 200,
-        Err(UserMutationError::UniqueConstraintViolationError(..)) => status_code = 503,
-        Err(UserMutationError::InvalidUser) => status_code = 405,
-        Err(UserMutationError::InvalidEmail) => status_code = 405,
-        Err(UserMutationError::InvalidPhone) => status_code = 405,
-        Err(UserMutationError::ExistedUser) => status_code = 400,
-        Err(UserMutationError::UnknownError) | Err(UserMutationError::IdCollisionError) => {
-            status_code = 500
-        }
-    }
+    let status_code: u16 = if result.is_ok() { 200 } else { 500 };
 
     user_response = result.map(Some).unwrap_or_else(|e| {
         println!("{:?}", e);
@@ -67,17 +58,20 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
     } else {
         "prod-sg_UserTable"
     }
-        .to_string();
+    .to_string();
 
-    let insert_dynamodb_result = db_cognito::insert_user_to_dynamodb(
+    let deactivate_user_dynamodb_result = db_cognito::deactivate_user_to_dynamodb(
         Option::from(&user_response),
         user_table_name.parse().unwrap(),
     )
-        .await;
-    println!("Insert dynamodb result: {}", insert_dynamodb_result);
+    .await;
+    println!(
+        "Deactivate user dynamodb result: {}",
+        deactivate_user_dynamodb_result
+    );
 
-    if !insert_dynamodb_result {
-        println!("Error while insert to dynamodb")
+    if !deactivate_user_dynamodb_result {
+        println!("Error while updating to dynamodb")
     }
 
     let response: Response<Body> = Response::builder()
@@ -111,8 +105,8 @@ fn empty_response(_req: Request) -> Response<Body> {
                 email: None,
                 phone: None,
             })
-                .expect("unable to serialize user_json::Value")
-                .into(),
+            .expect("unable to serialize user_json::Value")
+            .into(),
         )
         .expect("unable to build http::Response")
 }
