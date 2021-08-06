@@ -69,9 +69,10 @@ impl domain::boundaries::UserDbGateway for UserRepository {
         let deactivate_user = mutation::deactivate_identity_user(&(*self).client, id).await;
         println!("deactivate_user_result: {}", deactivate_user.is_ok());
 
-         if deactivate_user.is_err() {
+        if deactivate_user.is_err() {
             return Err(DbError::UnknownError);
         }
+
         let user = get_user_by_id(&(*self).client, id).await.unwrap();
         Ok(User {
             id: user.get("id"),
