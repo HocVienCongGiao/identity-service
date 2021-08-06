@@ -69,18 +69,17 @@ impl domain::boundaries::UserDbGateway for UserRepository {
         let deactivate_user = mutation::deactivate_identity_user(&(*self).client, id).await;
         println!("deactivate_user_result: {}", deactivate_user.is_ok());
 
-        return if deactivate_user.is_err() {
-            Err(DbError::UnknownError);
-        } else {
-            let user = get_user_by_id(&(*self).client, id).await.unwrap();
-            Ok(User {
-                id: user.get("id"),
-                username: user.get("username"),
-                email: user.get("email"),
-                phone: user.get("phone"),
-                enabled: user.get("enabled"),
-            })
-        };
+         if deactivate_user.is_err() {
+            return Err(DbError::UnknownError);
+        }
+        let user = get_user_by_id(&(*self).client, id).await.unwrap();
+        Ok(User {
+            id: user.get("id"),
+            username: user.get("username"),
+            email: user.get("email"),
+            phone: user.get("phone"),
+            enabled: user.get("enabled"),
+        })
     }
 
     async fn get_user_by_id(&self, id: Uuid) -> Result<User, DbError> {
