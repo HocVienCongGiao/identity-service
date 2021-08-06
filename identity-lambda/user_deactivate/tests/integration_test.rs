@@ -85,7 +85,7 @@ mod tests {
         let user = controller::create_user(&user_test).await;
         let user_id = user.unwrap().id;
         let deactivate_user_request = User {
-            id: Option::from(user_id),
+            id: user_id,
             username: "".to_string(),
             email: None,
             phone: None,
