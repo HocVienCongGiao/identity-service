@@ -351,7 +351,7 @@ mod tests {
             .admin_create_user(admin_create_user_request)
             .sync();
 
-        println!("Result: {:?}", result_cognito.unwrap())
+        println!("Result: {:?}", result_cognito)
     }
 
     #[tokio::test]
