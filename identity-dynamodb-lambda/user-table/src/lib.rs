@@ -133,7 +133,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
             "message": format!("Cognito insert result, {:?}!", result_cognito.is_ok())
         }))
     } else if event_name.eq("MODIFY") {
-        if enabled.unwrap() == "false".to_string() {
+        if enabled.unwrap() == *"false" {
             let admin_disable_user_request = AdminDisableUserRequest {
                 user_pool_id,
                 username: username_dynamodb.unwrap(),
@@ -151,11 +151,11 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
                     )
             }))
         } else {
-            Ok(json!({ "message": format!("This user did not disable.") }))
+            Ok(json!({ "message": "This user did not disable." }))
         }
     } else {
         Ok(json!({
-            "message": format!("Delete function will be implemented later!")
+            "message": "Delete function will be implemented later!"
         }))
     }
 }

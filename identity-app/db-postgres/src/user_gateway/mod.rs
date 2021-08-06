@@ -70,7 +70,7 @@ impl domain::boundaries::UserDbGateway for UserRepository {
         println!("deactivate_user_result: {}", deactivate_user.is_ok());
 
         return if deactivate_user.is_err() {
-            Err(DbError::UnknownError)
+            Err(DbError::UnknownError);
         } else {
             let user = get_user_by_id(&(*self).client, id).await.unwrap();
             Ok(User {
@@ -88,7 +88,7 @@ impl domain::boundaries::UserDbGateway for UserRepository {
 
         println!("get_user_by_id: {}", result.is_ok());
         if result.is_err() {
-            return Err(DbError::UnknownError)
+            return Err(DbError::UnknownError);
         }
 
         let user = result.unwrap();
@@ -98,6 +98,6 @@ impl domain::boundaries::UserDbGateway for UserRepository {
             email: user.get("email"),
             phone: user.get("phone"),
             enabled: user.get("enabled"),
-        })
+        });
     }
 }
