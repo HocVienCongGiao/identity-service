@@ -3406,7 +3406,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "user_deactivate"
+name = "user_deactivation"
 version = "0.1.0"
 dependencies = [
  "controller",

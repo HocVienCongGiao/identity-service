@@ -1,5 +1,5 @@
 [package]
-name = "user_deactivate"
+name = "user_deactivation"
 version = "0.1.0"
 authors = ["nhuthm080280 <nhuthm080280@gmail.com>"]
 edition = "2018"
