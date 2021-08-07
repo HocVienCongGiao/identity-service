@@ -5,6 +5,7 @@ use user_deactivation::deactivate_user;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
+    println!("Start deactivate user");
     lambda_runtime::run(handler(deactivate_user)).await?;
     Ok(())
 }
