@@ -26,10 +26,10 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
         .to_string();
     println!("hash_key: {}", hash_key);
 
-    let function_name = context.invoked_function_arn;
-    println!("function_name: {}", function_name);
+    let invoked_function_arn = context.invoked_function_arn;
+    println!("invoked_function_arn: {}", invoked_function_arn);
 
-    let user_table_name = if function_name.contains("prod") {
+    let user_table_name = if invoked_function_arn.contains("prod") {
         "prod-sg_UserTable"
     } else {
         "dev-sg_UserTable"

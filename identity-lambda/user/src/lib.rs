@@ -60,9 +60,9 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
         None
     });
 
-    let function_name = context.invoked_function_arn;
-    println!("invoked_function_arn: {:?}", context.invoked_function_arn);
-    let user_table_name = if function_name.contains("dev") {
+    let invoked_function_arn = context.invoked_function_arn;
+    println!("invoked_function_arn: {:?}", invoked_function_arn);
+    let user_table_name = if invoked_function_arn.contains("dev") {
         "dev-sg_UserTable"
     } else {
         "prod-sg_UserTable"
