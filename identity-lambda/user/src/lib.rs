@@ -61,7 +61,7 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
     });
 
     let function_name = context.env_config.function_name;
-    println!("function_name: {}", function_name);
+    println!("context: {:?}", context);
     let user_table_name = if function_name.contains("dev") {
         "dev-sg_UserTable"
     } else {
