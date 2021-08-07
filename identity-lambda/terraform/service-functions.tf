@@ -64,7 +64,7 @@ module "users_deactivate" {
   query_api_parent_id = module.identity-service.query_api_gateway_resource_id
   mutation_api_parent_id = module.identity-service.mutation_api_gateway_resource_id
 
-  function_name = "users_deactivate"
+  function_name = "users/deactivate"
   file_name     = "user_deactivate"
 
   depends_on = [
