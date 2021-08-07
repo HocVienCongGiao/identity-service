@@ -39,7 +39,7 @@ mod tests {
     use std::collections::HashMap;
     use std::hash::{Hash, Hasher};
     use tokio_postgres::types::ToSql;
-    use user_deactivate::deactivate_user;
+    use user_deactivation::deactivate_user;
 
     static INIT: Once = Once::new();
 
