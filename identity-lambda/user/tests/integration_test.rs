@@ -53,7 +53,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn deactivate_user_success() {
+    async fn create_user_success() {
         initialise();
         println!("is it working?");
         env::set_var(
@@ -92,7 +92,7 @@ mod tests {
             .unwrap();
 
         let mut context: Context = Context::default();
-        context.env_config.function_name = "dev-sg_identity-service_users".to_string();
+        context.invoked_function_arn = "dev-sg_identity-service_users".to_string();
 
         let response = user::create_user(request, context)
             .await

@@ -26,7 +26,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
         .to_string();
     println!("hash_key: {}", hash_key);
 
-    let function_name = context.env_config.function_name;
+    let function_name = context.invoked_function_arn;
     println!("function_name: {}", function_name);
 
     let user_table_name = if function_name.contains("prod") {
@@ -395,7 +395,7 @@ mod tests {
         let event = Value::Object(records);
 
         let mut context: Context = Context::default();
-        context.env_config.function_name = "dev-sg_identity-service_users".to_string();
+        context.invoked_function_arn = "dev-sg_identity-service_users".to_string();
         let result = func(event, context).await;
         print!("Disabled user result: {:?}", result.unwrap());
     }

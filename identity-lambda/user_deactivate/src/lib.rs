@@ -51,7 +51,7 @@ pub async fn deactivate_user(
         None
     });
 
-    let function_name = context.env_config.function_name;
+    let function_name = context.invoked_function_arn;
     println!("function_name: {}", function_name);
     let user_table_name = if function_name.contains("dev") {
         "dev-sg_UserTable"
