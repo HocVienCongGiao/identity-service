@@ -66,7 +66,7 @@ module "users_deactivation" {
 
   function_name = "deactivation"
   file_name     = "user_deactivation"
-
+  path_part     = "deactivation"
   depends_on = [
     module.users
   ]
