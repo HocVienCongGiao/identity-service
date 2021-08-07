@@ -65,10 +65,10 @@ jobs:
           cargo clean
           cargo build --release --target x86_64-unknown-linux-musl
           cp ./target/x86_64-unknown-linux-musl/release/user ./bootstrap && zip user.zip bootstrap
-          cp ./target/x86_64-unknown-linux-musl/release/user_deactivate ./bootstrap && zip user_deactivate.zip bootstrap
+          cp ./target/x86_64-unknown-linux-musl/release/user_deactivation ./bootstrap && zip user_deactivation.zip bootstrap
           rm bootstrap
           aws s3 cp ./user.zip s3://891616054205-ap-southeast-1-aws-lambda/dev-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/user.zip
-          aws s3 cp ./user_deactivate.zip s3://891616054205-ap-southeast-1-aws-lambda/dev-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/user_deactivate.zip
+          aws s3 cp ./user_deactivation.zip s3://891616054205-ap-southeast-1-aws-lambda/dev-sg-hocvienconggiao/${{ github.event.repository.name }}/latest/user_deactivation.zip
           cd /home/runner/work/identity-service/identity-service/identity-dynamodb-lambda
           cargo clean
           cargo build --release --target x86_64-unknown-linux-musl
