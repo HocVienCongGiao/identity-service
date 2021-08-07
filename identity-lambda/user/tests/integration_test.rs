@@ -151,20 +151,21 @@ mod tests {
 
         let user_table_name = "dev-sg_UserTable".to_string();
 
-        let result = client
-            .delete_item(DeleteItemInput {
-                condition_expression: None,
-                conditional_operator: None,
-                expected: None,
-                expression_attribute_names: None,
-                expression_attribute_values: None,
-                key: query_condition,
-                return_consumed_capacity: None,
-                return_item_collection_metrics: None,
-                return_values: None,
-                table_name: user_table_name,
-            })
-            .sync();
+        // TODO do not delete user in dynano db to avoid the processor retry
+        // let result = client
+        //     .delete_item(DeleteItemInput {
+        //         condition_expression: None,
+        //         conditional_operator: None,
+        //         expected: None,
+        //         expression_attribute_names: None,
+        //         expression_attribute_values: None,
+        //         key: query_condition,
+        //         return_consumed_capacity: None,
+        //         return_item_collection_metrics: None,
+        //         return_values: None,
+        //         table_name: user_table_name,
+        //     })
+        //     .sync();
         println!("trigger build");
     }
 

@@ -71,6 +71,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
 
     let item = user.unwrap().item;
     if item.is_none() {
+        println!("User not found");
         return Ok(json!({ "message": "User not found." }))
     }
 
@@ -208,7 +209,7 @@ mod tests {
 
         hash_key_object_details.insert(
             "S".to_string(),
-            Value::String("11905088586532604268".to_string()),
+            Value::String("119050885865326042681".to_string()),
         );
         hash_key_object.insert(
             "HashKey".to_string(),
@@ -247,7 +248,7 @@ mod tests {
         println!("event_name: {}", event_name);
         let result = func(event, Default::default()).await;
         println!("Result: {:?}", result.is_err());
-
+        return
         assert!(!result.is_err());
 
         let aws_client = Client::shared();

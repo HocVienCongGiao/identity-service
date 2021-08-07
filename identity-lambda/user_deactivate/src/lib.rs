@@ -53,10 +53,10 @@ pub async fn deactivate_user(
 
     let invoked_function_arn = context.invoked_function_arn;
     println!("invoked_function_arn: {}", invoked_function_arn);
-    let user_table_name = if invoked_function_arn.contains("dev") {
-        "dev-sg_UserTable"
-    } else {
+    let user_table_name = if invoked_function_arn.contains("prod") {
         "prod-sg_UserTable"
+    } else {
+        "dev-sg_UserTable"
     }
     .to_string();
 
