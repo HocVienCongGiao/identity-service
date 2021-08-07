@@ -69,28 +69,24 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
 
     println!("dynamodb user: {:?}", user);
 
-    let username_dynamodb = user
-        .as_ref()
-        .unwrap()
-        .item
+    let item = user.unwrap().item;
+    if item.is_none() {
+        return Ok(json!({ "message": "User not found." }))
+    }
+
+    let username_dynamodb = item
         .as_ref()
         .unwrap()
         .get("username")
         .and_then(|value| value.s.clone());
 
-    let email_dynamodb = user
-        .as_ref()
-        .unwrap()
-        .item
+    let email_dynamodb = item
         .as_ref()
         .unwrap()
         .get("email")
         .and_then(|value| value.s.clone());
 
-    let enabled = user
-        .as_ref()
-        .unwrap()
-        .item
+    let enabled = item
         .as_ref()
         .unwrap()
         .get("enabled")
