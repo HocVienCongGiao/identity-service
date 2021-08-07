@@ -58,13 +58,13 @@ module "user" {
   db_name              = var.db_name
 }
 
-module "users_deactivation" {
+module "user_deactivation" {
   source = "git::ssh://git@github.com/HocVienCongGiao/terraform-infra.git//skeleton/services/service-function"
   service_name = var.service_name
-  query_api_parent_id = module.identity-service.query_api_gateway_resource_id
-  mutation_api_parent_id = module.identity-service.mutation_api_gateway_resource_id
+  query_api_parent_id = module.users.query_api_gateway_resource_id
+  mutation_api_parent_id = module.users.mutation_api_gateway_resource_id
 
-  function_name = "deactivation"
+  function_name = "user_deactivation"
   file_name     = "user_deactivation"
   path_part     = "deactivation"
   depends_on = [
