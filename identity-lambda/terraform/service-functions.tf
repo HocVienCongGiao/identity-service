@@ -64,11 +64,11 @@ module "users_deactivation" {
   query_api_parent_id = module.identity-service.query_api_gateway_resource_id
   mutation_api_parent_id = module.identity-service.mutation_api_gateway_resource_id
 
-  function_name = "users"
+  function_name = "deactivation"
   file_name     = "user_deactivation"
-  path_part     = "deactivation"
+
   depends_on = [
-    module.identity-service
+    module.users
   ]
 
   environment = var.environment
