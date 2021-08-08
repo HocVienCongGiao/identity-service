@@ -6,7 +6,6 @@ use std::hash::{Hash, Hasher};
 mod tests {
     use std::collections::HashMap;
 
-    use crate::func;
     use lambda_runtime::{Context, Error};
     use rusoto_cognito_idp::{
         AdminCreateUserRequest, AdminDeleteUserRequest, AdminSetUserPasswordRequest, AttributeType,
