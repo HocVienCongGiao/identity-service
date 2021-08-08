@@ -41,7 +41,7 @@ mod tests {
     use std::thread::sleep;
     use std::time::Duration;
     use tokio_postgres::types::ToSql;
-    use user_deactivation::func;
+    use user_deactivation::{func, User_Deactivation_Request};
 
     static INIT: Once = Once::new();
 
@@ -76,12 +76,30 @@ mod tests {
         );
 
         // Given
+        let user_test = User {
+            id: None,
+            username: "test001".to_string(),
+            email: Option::from("test001@gmail.com".to_string()),
+            phone: Option::from("+84 123456789".to_string()),
+        };
+
+        let user = controller::create_user(&user_test).await;
+        // Let's sleep for 2 seconds:
+        sleep(Duration::from_millis(2));
+
+        let user_id = user.unwrap().id;
+        let request = User_Deactivation_Request {
+            id: user_id.unwrap(),
+        };
+
+        let serialized_request = serde_json::to_string(&request).unwrap();
+
         let deactivate_request = http::Request::builder()
             .uri("https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/users/deactivation")
             .method("POST")
             .header("Content-Type", "application/json")
             .header("authorization", "Bearer 123445")
-            .body(Body::Text("{\n\"id\": \"a020aa98-4b40-4546-91cd-71503dfc14f0\"\n}".parse().unwrap()))
+            .body(Body::from(serialized_request))
             .unwrap();
 
         let mut context: Context = Context::default();
@@ -94,7 +112,25 @@ mod tests {
         let deserialized_user: User = serde_json::from_slice(response.body()).unwrap();
         // Then
         assert_eq!(response.status(), 200);
+
+        // Clean up data
+        let connect = connect().await;
+
+        let stmt = (connect)
+            .prepare(
+                "truncate identity__user_username,\
+             identity__user_phone, \
+             identity__user_email, \
+             identity__user_enabled, \
+             identity__user",
+            )
+            .await
+            .unwrap();
+
+        let id: &[&(dyn ToSql + Sync)] = &[&deserialized_user.id];
+        connect.query_one(&stmt, &[]).await;
     }
+
     fn hash<T>(obj: T) -> u64
     where
         T: Hash,

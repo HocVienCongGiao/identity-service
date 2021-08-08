@@ -23,8 +23,8 @@ struct TokenPayload {
 }
 
 #[derive(Deserialize, Serialize)]
-struct User_Deactivation_Request {
-    id: Uuid,
+pub struct User_Deactivation_Request {
+    pub id: Uuid,
 }
 pub async fn func(request: Request, context: Context) -> Result<impl IntoResponse, Error> {
     println!("Request {:?}", request);
