@@ -21,7 +21,7 @@ struct TokenPayload {
     groups: Vec<String>,
 }
 
-pub async fn create_user(request: Request, context: Context) -> Result<impl IntoResponse, Error> {
+pub async fn func(request: Request, context: Context) -> Result<impl IntoResponse, Error> {
     println!("Request {:?}", request);
     println!("Request Method {:?}", request.method());
 
@@ -60,12 +60,12 @@ pub async fn create_user(request: Request, context: Context) -> Result<impl Into
         None
     });
 
-    let function_name = context.env_config.function_name;
-    println!("function_name: {}", function_name);
-    let user_table_name = if function_name.contains("dev") {
-        "dev-sg_UserTable"
-    } else {
+    let invoked_function_arn = context.invoked_function_arn;
+    println!("invoked_function_arn: {:?}", invoked_function_arn);
+    let user_table_name = if invoked_function_arn.contains("prod") {
         "prod-sg_UserTable"
+    } else {
+        "dev-sg_UserTable"
     }
     .to_string();
 

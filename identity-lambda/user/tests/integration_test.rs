@@ -53,7 +53,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn deactivate_user_success() {
+    async fn create_user_success() {
         initialise();
         println!("is it working?");
         env::set_var(
@@ -92,9 +92,9 @@ mod tests {
             .unwrap();
 
         let mut context: Context = Context::default();
-        context.env_config.function_name = "dev-sg_identity-service_users".to_string();
+        context.invoked_function_arn = "dev-sg_identity-service_users".to_string();
 
-        let response = user::create_user(request, context)
+        let response = user::func(request, context)
             .await
             .expect("expected Ok(_) value")
             .into_response();
@@ -151,20 +151,21 @@ mod tests {
 
         let user_table_name = "dev-sg_UserTable".to_string();
 
-        let result = client
-            .delete_item(DeleteItemInput {
-                condition_expression: None,
-                conditional_operator: None,
-                expected: None,
-                expression_attribute_names: None,
-                expression_attribute_values: None,
-                key: query_condition,
-                return_consumed_capacity: None,
-                return_item_collection_metrics: None,
-                return_values: None,
-                table_name: user_table_name,
-            })
-            .sync();
+        // TODO do not delete user in dynano db to avoid the processor retry
+        // let result = client
+        //     .delete_item(DeleteItemInput {
+        //         condition_expression: None,
+        //         conditional_operator: None,
+        //         expected: None,
+        //         expression_attribute_names: None,
+        //         expression_attribute_values: None,
+        //         key: query_condition,
+        //         return_consumed_capacity: None,
+        //         return_item_collection_metrics: None,
+        //         return_values: None,
+        //         table_name: user_table_name,
+        //     })
+        //     .sync();
         println!("trigger build");
     }
 

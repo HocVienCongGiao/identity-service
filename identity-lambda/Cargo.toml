@@ -1,2 +1,2 @@
 [workspace]
-members = ["user", "user_deactivate"]
+members = ["user", "user_deactivation"]

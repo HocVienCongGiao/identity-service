@@ -8,6 +8,7 @@ use lambda_http::http::header::{
 use lambda_http::http::{method, HeaderValue, StatusCode};
 use lambda_http::{Body, Context, IntoResponse, Request, RequestExt, Response};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 type Error = Box<dyn std::error::Error + Sync + Send + 'static>;
 
@@ -21,10 +22,11 @@ struct TokenPayload {
     groups: Vec<String>,
 }
 
-pub async fn deactivate_user(
-    request: Request,
-    context: Context,
-) -> Result<impl IntoResponse, Error> {
+#[derive(Deserialize, Serialize)]
+struct User_Deactivation_Request {
+    id: Uuid,
+}
+pub async fn func(request: Request, context: Context) -> Result<impl IntoResponse, Error> {
     println!("Request {:?}", request);
     println!("Request Method {:?}", request.method());
 
@@ -33,16 +35,17 @@ pub async fn deactivate_user(
         return Ok(empty_response(request));
     }
 
-    let lambda_user_request: Option<User> = request.payload().unwrap_or(None);
-    if lambda_user_request.is_none() {
+    let lambda_user_request: User_Deactivation_Request =
+        serde_json::from_slice(request.body()).unwrap();
+    println!("lambda_user_request_id: {:?}", lambda_user_request.id);
+
+    if lambda_user_request.id.is_nil() {
+        println!("lambda_user_request is none");
         return Ok(empty_response(request));
     }
 
-    let serialized_user = serde_json::to_string(&lambda_user_request).unwrap();
-    println!("serialized_user: {}", serialized_user);
-
     let user_response: Option<controller::openapi::identity_user::User>;
-    let result = controller::deactivate_user(lambda_user_request.unwrap().id.unwrap()).await;
+    let result = controller::deactivate_user(lambda_user_request.id).await;
 
     let status_code: u16 = if result.is_ok() { 200 } else { 500 };
 
@@ -51,12 +54,12 @@ pub async fn deactivate_user(
         None
     });
 
-    let function_name = context.env_config.function_name;
-    println!("function_name: {}", function_name);
-    let user_table_name = if function_name.contains("dev") {
-        "dev-sg_UserTable"
-    } else {
+    let invoked_function_arn = context.invoked_function_arn;
+    println!("invoked_function_arn: {}", invoked_function_arn);
+    let user_table_name = if invoked_function_arn.contains("prod") {
         "prod-sg_UserTable"
+    } else {
+        "dev-sg_UserTable"
     }
     .to_string();
 

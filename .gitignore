@@ -32,5 +32,5 @@ node_modules
 target
 .idea
 /identity-lambda/user/.env.test
-/identity-lambda/user_deactivate/.env.test
 /cognito-gateway-app/db-cognito/.env.test
+/identity-lambda/user_deactivation/.env.test
