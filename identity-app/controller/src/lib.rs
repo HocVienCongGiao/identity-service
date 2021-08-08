@@ -32,6 +32,15 @@ pub async fn deactivate_user(id: Uuid) -> Result<openapi::identity_user::User, U
     response.map(|res| res.to_openapi())
 }
 
+pub async fn activate_user(id: Uuid) -> Result<openapi::identity_user::User, UserMutationError> {
+    let client = db_postgres::connect().await;
+    let user_repository = UserRepository { client };
+
+    let user_interactor =
+        domain::interactors::user_mutation::UserSimpleMutationInteractor::new(user_repository);
+    let response = user_interactor.activate_user(id).await;
+    response.map(|res| res.to_openapi())
+}
 #[cfg(test)]
 mod tests {
     use hvcg_iam_openapi_identity::models::User;

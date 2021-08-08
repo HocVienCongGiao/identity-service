@@ -31,17 +31,34 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
     }
 
     let lambda_user_request: Option<User> = request.payload().unwrap_or(None);
-    if lambda_user_request.is_none() {
-        return Ok(empty_response(request));
-    }
-
     let status_code: u16;
 
-    let serialized_user = serde_json::to_string(&lambda_user_request).unwrap();
-    println!("serialized_user: {}", serialized_user);
-
+    // let serialized_user = serde_json::to_string(&lambda_user_request).unwrap();
+    // println!("serialized_user: {}", serialized_user);
+    let mut user = &lambda_user_request.unwrap();
     let user_response: Option<controller::openapi::identity_user::User>;
-    let result = controller::create_user(&lambda_user_request.unwrap()).await;
+    let result: Result<User, UserMutationError>;
+
+    let invoked_function_arn = context.invoked_function_arn;
+    println!("invoked_function_arn: {:?}", invoked_function_arn);
+    let user_table_name = if invoked_function_arn.contains("prod") {
+        "prod-sg_UserTable"
+    } else {
+        "dev-sg_UserTable"
+    }
+        .to_string();
+    // Active user
+    if request.uri().query().unwrap().contains("activation") {
+        println!("Start activate user");
+        result = controller::activate_user(user.id.unwrap()).await;
+    } else {
+        if user.username.is_empty() {
+            println!("lambda_user_request is None");
+            return Ok(empty_response(request));
+        }
+        println!("Start create user");
+        result = controller::create_user(user).await;
+    }
 
     match result {
         Ok(_) => status_code = 200,
@@ -54,30 +71,32 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
             status_code = 500
         }
     }
-
     user_response = result.map(Some).unwrap_or_else(|e| {
         println!("{:?}", e);
         None
     });
+    if request.uri().query().unwrap().contains("activation") {
+        let insert_dynamodb_result = db_cognito::activate_user_to_dynamodb(
+            Option::from(&user_response),
+            user_table_name.parse().unwrap(),
+        )
+            .await;
+        println!("Activate dynamodb result: {}", insert_dynamodb_result);
 
-    let invoked_function_arn = context.invoked_function_arn;
-    println!("invoked_function_arn: {:?}", invoked_function_arn);
-    let user_table_name = if invoked_function_arn.contains("prod") {
-        "prod-sg_UserTable"
+        if !insert_dynamodb_result {
+            println!("Error while active to dynamodb")
+        }
     } else {
-        "dev-sg_UserTable"
-    }
-    .to_string();
+        let insert_dynamodb_result = db_cognito::insert_user_to_dynamodb(
+            Option::from(&user_response),
+            user_table_name.parse().unwrap(),
+        )
+            .await;
+        println!("Insert dynamodb result: {}", insert_dynamodb_result);
 
-    let insert_dynamodb_result = db_cognito::insert_user_to_dynamodb(
-        Option::from(&user_response),
-        user_table_name.parse().unwrap(),
-    )
-    .await;
-    println!("Insert dynamodb result: {}", insert_dynamodb_result);
-
-    if !insert_dynamodb_result {
-        println!("Error while insert to dynamodb")
+        if !insert_dynamodb_result {
+            println!("Error while insert to dynamodb")
+        }
     }
 
     let response: Response<Body> = Response::builder()
