@@ -94,7 +94,7 @@ mod tests {
         let mut context: Context = Context::default();
         context.invoked_function_arn = "dev-sg_identity-service_users".to_string();
 
-        let response = user::create_user(request, context)
+        let response = user::func(request, context)
             .await
             .expect("expected Ok(_) value")
             .into_response();

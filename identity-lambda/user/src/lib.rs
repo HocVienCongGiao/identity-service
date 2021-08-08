@@ -21,7 +21,7 @@ struct TokenPayload {
     groups: Vec<String>,
 }
 
-pub async fn create_user(request: Request, context: Context) -> Result<impl IntoResponse, Error> {
+pub async fn func(request: Request, context: Context) -> Result<impl IntoResponse, Error> {
     println!("Request {:?}", request);
     println!("Request Method {:?}", request.method());
 

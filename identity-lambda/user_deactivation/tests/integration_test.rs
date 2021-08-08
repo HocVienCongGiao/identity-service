@@ -39,7 +39,7 @@ mod tests {
     use std::collections::HashMap;
     use std::hash::{Hash, Hasher};
     use tokio_postgres::types::ToSql;
-    use user_deactivation::deactivate_user;
+    use user_deactivation::func;
 
     static INIT: Once = Once::new();
 
@@ -74,7 +74,6 @@ mod tests {
         );
 
         // Given
-        // prepare data
         let user_test = User {
             id: None,
             username: "test001".to_string(),
@@ -94,16 +93,16 @@ mod tests {
         let serialized_user = serde_json::to_string(&deactivate_user_request).unwrap();
 
         let deactivate_request = http::Request::builder()
-            .uri("https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/user")
+            .uri("https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/users/deactivation")
             .method("POST")
             .header("Content-Type", "application/json")
             .header("authorization", "Bearer 123445")
-            .body(Body::from(serialized_user))
+            .body(Body::Text("{\n\"id\": \"a020aa98-4b40-4546-91cd-71503dfc14f0\"\n}".parse().unwrap()))
             .unwrap();
         let mut context: Context = Context::default();
-        context.env_config.function_name = "dev-sg_identity-service_users".to_string();
+        context.invoked_function_arn = "dev-sg_identity-service_users".to_string();
 
-        let response = deactivate_user(deactivate_request, context)
+        let response = func(deactivate_request, context)
             .await
             .expect("expected Ok(_) value")
             .into_response();

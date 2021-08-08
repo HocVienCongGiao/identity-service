@@ -72,7 +72,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
     let item = user.unwrap().item;
     if item.is_none() {
         println!("User not found");
-        return Ok(json!({ "message": "User not found." }))
+        return Ok(json!({ "message": "User not found." }));
     }
 
     let username_dynamodb = item
@@ -190,7 +190,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn get_user_success() {
+    async fn create_user_success() {
         initialise();
         env::set_var(
             "AWS_ACCESS_KEY_ID",
@@ -209,7 +209,7 @@ mod tests {
 
         hash_key_object_details.insert(
             "S".to_string(),
-            Value::String("119050885865326042681".to_string()),
+            Value::String("5285243916027018465".to_string()),
         );
         hash_key_object.insert(
             "HashKey".to_string(),
@@ -246,9 +246,11 @@ mod tests {
             .unwrap()
             .to_string();
         println!("event_name: {}", event_name);
+        let mut context = Context::default();
+        context.invoked_function_arn = "dev".to_string();
         let result = func(event, Default::default()).await;
-        println!("Result: {:?}", result.is_err());
-        return
+        println!("Result is ok?: {:?}", result.is_ok());
+
         assert!(!result.is_err());
 
         let aws_client = Client::shared();
@@ -256,7 +258,7 @@ mod tests {
         let rusoto_cognito_idp_client =
             CognitoIdentityProviderClient::new_with_client(aws_client, Region::ApSoutheast1);
 
-        let test_username = "nhutcargo001".to_string();
+        let test_username = "user_donot_delete_create".to_string();
         let admin_delete_user_request = AdminDeleteUserRequest {
             user_pool_id,
             username: test_username,
@@ -266,89 +268,6 @@ mod tests {
             .admin_delete_user(admin_delete_user_request)
             .sync();
         println!("delete result: {:?}", delete_result);
-
-        // Get item by hash key
-        let client = DynamoDbClient::new_with(
-            HttpClient::new().unwrap(),
-            EnvironmentProvider::default(),
-            Region::ApSoutheast1,
-        );
-
-        // Filter condition
-        let mut query_condition: HashMap<String, AttributeValue> = HashMap::new();
-        query_condition.insert(
-            String::from("HashKey"),
-            AttributeValue {
-                s: Option::from(hash_key.replace("\"", "")),
-                ..Default::default()
-            },
-        );
-        let user_table_name = "dev-sg_UserTable".to_string();
-        let user = client
-            .get_item(GetItemInput {
-                attributes_to_get: None,
-                consistent_read: None,
-                expression_attribute_names: None,
-                key: query_condition,
-                projection_expression: None,
-                return_consumed_capacity: None,
-                table_name: user_table_name,
-            })
-            .sync();
-        println!("user : {:?}", user);
-        let username = user
-            .as_ref()
-            .unwrap()
-            .item
-            .as_ref()
-            .unwrap()
-            .get("username")
-            .and_then(|value| value.s.clone());
-        println!("{}", username.as_ref().unwrap());
-        let email = user
-            .as_ref()
-            .unwrap()
-            .item
-            .as_ref()
-            .unwrap()
-            .get("email")
-            .and_then(|value| value.s.clone());
-        println!("{}", email.as_ref().unwrap());
-
-        let phone = user
-            .unwrap()
-            .item
-            .unwrap()
-            .get("phone")
-            .and_then(|value| value.s.clone());
-        println!("{}", phone.as_ref().unwrap());
-        // Insert user to cognito
-        let aws_client = Client::shared();
-        let user_pool_id = "ap-southeast-1_9QWSYGzXk".to_string();
-        let rusoto_cognito_idp_client =
-            CognitoIdentityProviderClient::new_with_client(aws_client, Region::ApSoutheast1);
-
-        let mut user_attributes: Vec<AttributeType> = vec![AttributeType {
-            name: "email".to_string(),
-            value: email,
-        }];
-
-        let admin_create_user_request = AdminCreateUserRequest {
-            desired_delivery_mediums: None,
-            force_alias_creation: None,
-            message_action: None,
-            temporary_password: Option::from("Hvcg@123456789".to_string()),
-            user_attributes: Option::from(user_attributes),
-            user_pool_id,
-            username: username.unwrap(),
-            validation_data: None,
-        };
-
-        let result_cognito = rusoto_cognito_idp_client
-            .admin_create_user(admin_create_user_request)
-            .sync();
-
-        println!("Result: {:?}", result_cognito)
     }
 
     #[tokio::test]
