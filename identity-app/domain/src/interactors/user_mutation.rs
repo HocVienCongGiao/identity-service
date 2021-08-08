@@ -4,8 +4,7 @@ use uuid::Uuid;
 
 use crate::boundaries;
 use crate::boundaries::{
-    DbError, UserDbGateway, UserDbResponse, UserMutationError, UserMutationRequest,
-    UserMutationResponse,
+    DbError, UserDbGateway, UserMutationError, UserMutationRequest, UserMutationResponse,
 };
 
 pub struct UserSimpleMutationInteractor<A: UserDbGateway> {
@@ -115,14 +114,6 @@ impl DbError {
 }
 
 impl crate::entity::user::User {
-    fn to_user_db_request(&self) -> UserMutationRequest {
-        UserMutationRequest {
-            username: self.username.clone(),
-            email: self.email.clone(),
-            phone: self.phone.clone(),
-        }
-    }
-
     fn to_user_mutation_response(&self) -> UserMutationResponse {
         UserMutationResponse {
             id: self.id,

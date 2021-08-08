@@ -1,20 +1,12 @@
-mod main;
-
-use std::collections::hash_map::DefaultHasher;
-use std::collections::HashMap;
-use std::hash::{Hash, Hasher};
-use std::time::SystemTime;
-
-use chrono::prelude::*;
 use hvcg_iam_openapi_identity::models::User;
-use lambda_http::{Body, Context, IntoResponse, Request, RequestExt, Response};
 use rusoto_core::credential::EnvironmentProvider;
 use rusoto_core::{HttpClient, Region};
 use rusoto_dynamodb::{
-    AttributeValue, AttributeValueUpdate, DynamoDb, DynamoDbClient, ListTablesInput, PutItemInput,
-    UpdateItemInput,
+    AttributeValue, AttributeValueUpdate, DynamoDb, DynamoDbClient, PutItemInput, UpdateItemInput,
 };
-use uuid::Uuid;
+use std::collections::hash_map::DefaultHasher;
+use std::collections::HashMap;
+use std::hash::{Hash, Hasher};
 
 pub async fn insert_user_to_dynamodb(user: Option<&User>, user_table_name: String) -> bool {
     let client = DynamoDbClient::new_with(
