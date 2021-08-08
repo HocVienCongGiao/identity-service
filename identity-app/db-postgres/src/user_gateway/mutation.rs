@@ -69,3 +69,14 @@ pub async fn deactivate_identity_user(client: &Client, id: Uuid) -> Result<u64, 
     let params: &[&(dyn ToSql + Sync)] = &[&id];
     client.execute(&stmt, params).await
 }
+
+pub async fn activate_identity_user(client: &Client, id: Uuid) -> Result<u64, Error> {
+    let stmt = (*client)
+        .prepare("UPDATE identity__user_enabled SET enabled = true where id = $1")
+        .await
+        .unwrap();
+    println!("id: {}", id);
+
+    let params: &[&(dyn ToSql + Sync)] = &[&id];
+    client.execute(&stmt, params).await
+}

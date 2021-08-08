@@ -16,6 +16,21 @@ impl<A> boundaries::UserSimpleMutationInputBoundary for UserSimpleMutationIntera
 where
     A: UserDbGateway + Sync + Send,
 {
+    async fn activate_user(&self, id: Uuid) -> Result<UserMutationResponse, UserMutationError> {
+        let result = (*self)
+            .db_gateway
+            .activate_user(id)
+            .await
+            .map(|user| user.to_user_mutation_response())
+            .map_err(|err| err.to_user_mutation_error());
+
+        if result.is_err() {
+            Err(UserMutationError::UnknownError)
+        } else {
+            result
+        }
+    }
+
     async fn create_user(
         &self,
         request: UserMutationRequest,

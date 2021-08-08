@@ -8,6 +8,57 @@ use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 
+pub async fn activate_user_to_dynamodb(user: Option<&User>, user_table_name: String) -> bool {
+    let client = DynamoDbClient::new_with(
+        HttpClient::new().unwrap(),
+        EnvironmentProvider::default(),
+        Region::ApSoutheast1,
+    );
+
+    let user_dynamodb = user.unwrap();
+
+    let mut user_key = HashMap::new();
+    println!("user_id {}", user_dynamodb.id.unwrap());
+
+    user_key.insert(
+        String::from("HashKey"),
+        AttributeValue {
+            s: Some(hash(user_dynamodb.id).to_string()),
+            ..Default::default()
+        },
+    );
+
+    let mut attribute_updates = HashMap::new();
+    attribute_updates.insert(
+        String::from("enabled"),
+        AttributeValueUpdate {
+            action: Option::from("PUT".to_string()),
+            value: Option::from(AttributeValue {
+                s: Some("true".to_string()),
+                ..Default::default()
+            }),
+        },
+    );
+
+    let result = client
+        .update_item(UpdateItemInput {
+            table_name: user_table_name,
+            key: user_key,
+            attribute_updates: Option::from(attribute_updates),
+            ..UpdateItemInput::default()
+        })
+        .sync();
+
+    if result.is_err() {
+        println!("put_item() result {:#?}", result.as_ref().err());
+        return false;
+    }
+
+    println!("put_item() result {:#?}", result.as_ref().unwrap());
+
+    result.is_ok()
+}
+
 pub async fn insert_user_to_dynamodb(user: Option<&User>, user_table_name: String) -> bool {
     let client = DynamoDbClient::new_with(
         HttpClient::new().unwrap(),
@@ -136,6 +187,7 @@ pub async fn deactivate_user_to_dynamodb(user: Option<&User>, user_table_name: S
 
     result.is_ok()
 }
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;

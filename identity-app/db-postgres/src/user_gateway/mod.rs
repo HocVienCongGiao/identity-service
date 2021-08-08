@@ -15,6 +15,24 @@ pub struct UserRepository {
 
 #[async_trait]
 impl domain::boundaries::UserDbGateway for UserRepository {
+    async fn activate_user(&self, id: Uuid) -> Result<User, DbError> {
+        let activate_user = mutation::activate_identity_user(&(*self).client, id).await;
+        println!("activate_user_result: {}", activate_user.is_ok());
+
+        if activate_user.is_err() {
+            return Err(DbError::UnknownError);
+        }
+
+        let user = get_user_by_id(&(*self).client, id).await.unwrap();
+        Ok(User {
+            id: user.get("id"),
+            username: user.get("username"),
+            email: user.get("email"),
+            phone: user.get("phone"),
+            enabled: user.get("enabled"),
+        })
+    }
+
     async fn exists_by_username(&self, username: String) -> bool {
         let result = query::find_one_by_username(&(*self).client, username.clone()).await;
         println!("second block_on for row");

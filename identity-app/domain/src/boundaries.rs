@@ -19,6 +19,7 @@ pub trait UserSimpleMutationInputBoundary {
         request: UserMutationRequest,
     ) -> Result<UserMutationResponse, UserMutationError>;
     async fn deactivate_user(&self, id: Uuid) -> Result<UserMutationResponse, UserMutationError>;
+    async fn activate_user(&self, id: Uuid) -> Result<UserMutationResponse, UserMutationError>;
     async fn get_user_by_id(&self, id: Uuid) -> Result<UserMutationResponse, UserMutationError>;
 }
 
@@ -66,6 +67,7 @@ pub trait Test1DbGateway {
 
 #[async_trait]
 pub trait UserDbGateway {
+    async fn activate_user(&self, id: Uuid) -> Result<User, DbError>;
     async fn exists_by_username(&self, username: String) -> bool;
     async fn insert(&self, user: &User) -> Result<(), DbError>;
     async fn deactivate_user(&self, id: Uuid) -> Result<User, DbError>;
