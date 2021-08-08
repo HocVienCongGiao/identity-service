@@ -1,5 +1,8 @@
 use lambda_runtime::{Context, Error};
-use rusoto_cognito_idp::{AdminCreateUserRequest, AdminDisableUserRequest, AttributeType, CognitoIdentityProvider, CognitoIdentityProviderClient, AdminEnableUserRequest};
+use rusoto_cognito_idp::{
+    AdminCreateUserRequest, AdminDisableUserRequest, AdminEnableUserRequest, AttributeType,
+    CognitoIdentityProvider, CognitoIdentityProviderClient,
+};
 use rusoto_core::credential::EnvironmentProvider;
 use rusoto_core::{Client, HttpClient, Region};
 use rusoto_dynamodb::{AttributeValue, DynamoDb, DynamoDbClient, GetItemInput};
@@ -152,11 +155,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
                 .sync();
 
             Ok(json!({
-                "message":
-                    format!(
-                        "Cognito enable user result, {:?}!",
-                        result_cognito.unwrap()
-                    )
+                "message": format!("Cognito enable user result, {:?}!", result_cognito.unwrap())
             }))
         }
     } else {
