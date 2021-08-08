@@ -48,7 +48,7 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
     }
     .to_string();
     // Active user
-    if request.uri().query().unwrap().contains("activation") {
+    if request.uri().to_string().contains("activation") {
         println!("Start activate user");
         result = controller::activate_user(user.id.unwrap()).await;
     } else {
@@ -75,7 +75,7 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
         println!("{:?}", e);
         None
     });
-    if request.uri().query().unwrap().contains("activation") {
+    if request.uri().to_string().contains("activation") {
         let insert_dynamodb_result = db_cognito::activate_user_to_dynamodb(
             Option::from(&user_response),
             user_table_name.parse().unwrap(),

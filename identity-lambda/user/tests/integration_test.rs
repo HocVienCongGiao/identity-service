@@ -52,8 +52,26 @@ mod tests {
         });
     }
 
+    async fn truncate_data() {
+        let connect = connect().await;
+
+        let stmt = (connect)
+            .prepare(
+                "truncate identity__user_username,\
+             identity__user_phone, \
+             identity__user_email, \
+             identity__user_enabled, \
+             identity__user",
+            )
+            .await
+            .unwrap();
+
+        connect.query_one(&stmt, &[]).await;
+    }
+
     #[tokio::test]
     async fn create_user_success() {
+        truncate_data().await;
         initialise();
         println!("is it working?");
         env::set_var(
@@ -90,6 +108,7 @@ mod tests {
             .header("authorization", "Bearer 123445")
             .body(Body::from(serialized_user))
             .unwrap();
+        println!("request : {}", request.uri().to_string());
 
         let mut context: Context = Context::default();
         context.invoked_function_arn = "dev-sg_identity-service_users".to_string();
