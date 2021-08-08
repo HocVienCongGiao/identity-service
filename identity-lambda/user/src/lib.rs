@@ -46,7 +46,7 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
     } else {
         "dev-sg_UserTable"
     }
-        .to_string();
+    .to_string();
     // Active user
     if request.uri().query().unwrap().contains("activation") {
         println!("Start activate user");
@@ -80,7 +80,7 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
             Option::from(&user_response),
             user_table_name.parse().unwrap(),
         )
-            .await;
+        .await;
         println!("Activate dynamodb result: {}", insert_dynamodb_result);
 
         if !insert_dynamodb_result {
@@ -91,7 +91,7 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
             Option::from(&user_response),
             user_table_name.parse().unwrap(),
         )
-            .await;
+        .await;
         println!("Insert dynamodb result: {}", insert_dynamodb_result);
 
         if !insert_dynamodb_result {
