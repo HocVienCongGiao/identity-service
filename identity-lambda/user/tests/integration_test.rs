@@ -39,6 +39,8 @@ mod tests {
     use std::collections::HashMap;
     use std::hash::{Hash, Hasher};
     use tokio_postgres::types::ToSql;
+    use user::func;
+
     static INIT: Once = Once::new();
 
     fn initialise() {
@@ -186,6 +188,99 @@ mod tests {
         //     })
         //     .sync();
         println!("trigger build!!!");
+    }
+
+    #[tokio::test]
+    async fn deactivate_activate_user_success() {
+        initialise();
+        println!("is it working?");
+        env::set_var(
+            "AWS_ACCESS_KEY_ID",
+            std::env::var("AWS_ACCESS_KEY_ID").unwrap(),
+        );
+        env::set_var(
+            "AWS_SECRET_ACCESS_KEY",
+            std::env::var("AWS_SECRET_ACCESS_KEY").unwrap(),
+        );
+
+        let client = DynamoDbClient::new_with(
+            HttpClient::new().unwrap(),
+            EnvironmentProvider::default(),
+            Region::ApSoutheast1,
+        );
+
+        // Given
+        let user_test = User {
+            id: None,
+            username: "test001".to_string(),
+            email: Option::from("test001@gmail.com".to_string()),
+            phone: Option::from("+84 123456789".to_string()),
+        };
+
+        let user = controller::create_user(&user_test).await;
+
+        let user_id = user.unwrap().id;
+        let request = User {
+            id: Option::from(user_id.unwrap()),
+            username: "".to_string(),
+            email: None,
+            phone: None,
+        };
+
+        let mut serialized_request = serde_json::to_string(&request).unwrap();
+
+        let deactivate_request = http::Request::builder()
+            .uri("https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/users/deactivation")
+            .method("POST")
+            .header("Content-Type", "application/json")
+            .header("authorization", "Bearer 123445")
+            .body(Body::from(serialized_request.clone()))
+            .unwrap();
+
+        let mut deactivate_context: Context = Context::default();
+        deactivate_context.invoked_function_arn = "dev-sg_identity-service_users".to_string();
+
+        let deactivate_user_response = func(deactivate_request, deactivate_context)
+            .await
+            .expect("expected Ok(_) value")
+            .into_response();
+        let deserialized_user: User =
+            serde_json::from_slice(deactivate_user_response.body()).unwrap();
+        // Then
+        assert_eq!(deactivate_user_response.status(), 200);
+
+        // Activate user
+        let activate_request = http::Request::builder()
+            .uri("https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/users/activation")
+            .method("POST")
+            .header("Content-Type", "application/json")
+            .header("authorization", "Bearer 123445")
+            .body(Body::from(serialized_request.clone()))
+            .unwrap();
+        let mut activate_context: Context = Context::default();
+        activate_context.invoked_function_arn = "dev-sg_identity-service_users".to_string();
+        let activate_user_response = func(activate_request, activate_context)
+            .await
+            .expect("expected Ok(_) value")
+            .into_response();
+        assert_eq!(activate_user_response.status(), 200);
+
+        // Clean up data
+        let connect = connect().await;
+
+        let stmt = (connect)
+            .prepare(
+                "truncate identity__user_username,\
+             identity__user_phone, \
+             identity__user_email, \
+             identity__user_enabled, \
+             identity__user",
+            )
+            .await
+            .unwrap();
+
+        let id: &[&(dyn ToSql + Sync)] = &[&deserialized_user.id];
+        connect.query_one(&stmt, &[]).await;
     }
 
     fn hash<T>(obj: T) -> u64

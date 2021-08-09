@@ -33,31 +33,33 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
     let lambda_user_request: Option<User> = request.payload().unwrap_or(None);
     let status_code: u16;
 
-    // let serialized_user = serde_json::to_string(&lambda_user_request).unwrap();
-    // println!("serialized_user: {}", serialized_user);
     let mut user = &lambda_user_request.unwrap();
     let user_response: Option<controller::openapi::identity_user::User>;
     let result: Result<User, UserMutationError>;
 
     let invoked_function_arn = context.invoked_function_arn;
     println!("invoked_function_arn: {:?}", invoked_function_arn);
-    let user_table_name = if invoked_function_arn.contains("prod") {
-        "prod-sg_UserTable"
-    } else {
-        "dev-sg_UserTable"
-    }
-    .to_string();
-    // Active user
-    if request.uri().to_string().contains("activation") {
-        println!("Start activate user");
-        result = controller::activate_user(user.id.unwrap()).await;
-    } else {
-        if user.username.is_empty() {
-            println!("lambda_user_request is None");
-            return Ok(empty_response(request));
+    let user_table_name = get_user_table_name(invoked_function_arn);
+    let function_name = get_function_name(request.uri().to_string());
+
+    match function_name {
+        FunctionName::Activation => {
+            println!("Start activate user");
+            result = controller::activate_user(user.id.unwrap()).await;
         }
-        println!("Start create user");
-        result = controller::create_user(user).await;
+        FunctionName::Deactivation => {
+            println!("Start deactivate user");
+            result = controller::deactivate_user(user.id.unwrap()).await;
+        }
+        FunctionName::CreateUser => {
+            if user.username.is_empty() {
+                println!("lambda_user_request is None");
+                return Ok(empty_response(request));
+            }
+            println!("Start create user");
+            result = controller::create_user(user).await;
+        }
+        FunctionName::Unknown => result = Result::Err(UserMutationError::UnknownError),
     }
 
     match result {
@@ -75,27 +77,46 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
         println!("{:?}", e);
         None
     });
-    if request.uri().to_string().contains("activation") {
-        let insert_dynamodb_result = db_cognito::activate_user_to_dynamodb(
-            Option::from(&user_response),
-            user_table_name.parse().unwrap(),
-        )
-        .await;
-        println!("Activate dynamodb result: {}", insert_dynamodb_result);
 
-        if !insert_dynamodb_result {
-            println!("Error while active to dynamodb")
+    match function_name {
+        FunctionName::Activation => {
+            let dynamodb_result = db_cognito::activate_user_to_dynamodb(
+                Option::from(&user_response),
+                user_table_name.parse().unwrap(),
+            )
+            .await;
+            println!("Activate dynamodb result: {}", dynamodb_result);
+
+            if !dynamodb_result {
+                println!("Error while active to dynamodb")
+            }
         }
-    } else {
-        let insert_dynamodb_result = db_cognito::insert_user_to_dynamodb(
-            Option::from(&user_response),
-            user_table_name.parse().unwrap(),
-        )
-        .await;
-        println!("Insert dynamodb result: {}", insert_dynamodb_result);
+        FunctionName::Deactivation => {
+            let dynamodb_result = db_cognito::deactivate_user_to_dynamodb(
+                Option::from(&user_response),
+                user_table_name.parse().unwrap(),
+            )
+            .await;
+            println!("Deactivate dynamodb result: {}", dynamodb_result);
 
-        if !insert_dynamodb_result {
-            println!("Error while insert to dynamodb")
+            if !dynamodb_result {
+                println!("Error while deactive to dynamodb")
+            }
+        }
+        FunctionName::CreateUser => {
+            let insert_dynamodb_result = db_cognito::insert_user_to_dynamodb(
+                Option::from(&user_response),
+                user_table_name.parse().unwrap(),
+            )
+            .await;
+            println!("Insert dynamodb result: {}", insert_dynamodb_result);
+
+            if !insert_dynamodb_result {
+                println!("Error while insert to dynamodb")
+            }
+        }
+        FunctionName::Unknown => {
+            println!("Unknown function")
         }
     }
 
@@ -134,4 +155,31 @@ fn empty_response(_req: Request) -> Response<Body> {
             .into(),
         )
         .expect("unable to build http::Response")
+}
+
+fn get_user_table_name(function_name: String) -> String {
+    if function_name.contains("prod") {
+        "prod-sg_UserTable"
+    } else {
+        "dev-sg_UserTable"
+    }
+    .to_string()
+}
+
+fn get_function_name(uri: String) -> FunctionName {
+    if uri.contains("deactivation") {
+        FunctionName::Deactivation
+    } else if uri.contains("activation") {
+        FunctionName::Activation
+    } else {
+        FunctionName::CreateUser
+    }
+}
+
+#[derive(Debug)]
+pub enum FunctionName {
+    Activation,
+    Deactivation,
+    CreateUser,
+    Unknown,
 }

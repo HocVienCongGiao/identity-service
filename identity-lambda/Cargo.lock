@@ -3406,32 +3406,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "user_deactivation"
-version = "0.1.0"
-dependencies = [
- "controller",
- "db-cognito",
- "db-postgres",
- "domain",
- "dotenv",
- "hvcg_example_openapi_entity",
- "hvcg_iam_openapi_identity",
- "jsonwebtoken",
- "lambda_http",
- "regex",
- "rusoto_cognito_idp",
- "rusoto_core 0.42.0",
- "rusoto_credential 0.43.0",
- "rusoto_dynamodb 0.42.0",
- "serde",
- "serde_dynamodb",
- "serde_json",
- "tokio 1.8.1",
- "tokio-postgres",
- "uuid",
-]
-
-[[package]]
 name = "uuid"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
