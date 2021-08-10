@@ -77,3 +77,23 @@ module "users_activation" {
   db_password          = var.db_password
   db_name              = var.db_name
 }
+
+module "users_update_password" {
+  source = "git::ssh://git@github.com/HocVienCongGiao/terraform-infra.git//skeleton/services/service-function"
+  service_name = var.service_name
+  query_api_parent_id = module.users.query_api_gateway_resource_id
+  mutation_api_parent_id = module.users.mutation_api_gateway_resource_id
+
+  function_name = "users_update_password"
+  file_name     = "user"
+  path_part     = "{id}/password"
+  depends_on = [
+    module.users
+  ]
+
+  environment = var.environment
+  db_host              = var.db_host
+  db_user              = var.db_user
+  db_password          = var.db_password
+  db_name              = var.db_name
+}
