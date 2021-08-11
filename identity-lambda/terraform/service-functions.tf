@@ -97,3 +97,4 @@ module "users_update_password" {
   db_password          = var.db_password
   db_name              = var.db_name
 }
+
