@@ -39,7 +39,7 @@ mod tests {
     use std::collections::HashMap;
     use std::hash::{Hash, Hasher};
     use tokio_postgres::types::ToSql;
-    use user::func;
+    use user::{func, UserUpdate};
 
     static INIT: Once = Once::new();
 
@@ -283,6 +283,58 @@ mod tests {
         connect.query_one(&stmt, &[]).await;
     }
 
+
+    #[tokio::test]
+    async fn update_password_user_success() {
+        truncate_data().await;
+        initialise();
+        println!("is it working?");
+        env::set_var(
+            "AWS_ACCESS_KEY_ID",
+            std::env::var("AWS_ACCESS_KEY_ID").unwrap(),
+        );
+        env::set_var(
+            "AWS_SECRET_ACCESS_KEY",
+            std::env::var("AWS_SECRET_ACCESS_KEY").unwrap(),
+        );
+
+        // Given
+        let user_test = User {
+            id: None,
+            username: "nhut_donot_delete".to_string(),
+            email: Option::from("test001@gmail.com".to_string()),
+            phone: Option::from("+84 123456789".to_string()),
+        };
+
+        let user = controller::create_user(&user_test).await;
+        let user_request = UserUpdate {
+            id: user.unwrap().id,
+            plain_password : "Test@12345678".to_string()
+        };
+
+        let serialized_user = serde_json::to_string(&user_request).unwrap();
+
+        let request = http::Request::builder()
+            .uri("https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/users/update-password")
+            .method("PUT")
+            .header("Content-Type", "application/json")
+            .header("authorization", "Bearer 123445")
+            .body(Body::from(serialized_user))
+            .unwrap();
+        println!("request: {:?}", request);
+
+        let mut context: Context = Context::default();
+        context.invoked_function_arn = "dev-sg_identity-service_users".to_string();
+
+        let response = user::func(request, context)
+            .await
+            .expect("expected Ok(_) value")
+            .into_response();
+
+        // Then
+        assert_eq!(response.status(), 200);
+        truncate_data().await;
+    }
     fn hash<T>(obj: T) -> u64
     where
         T: Hash,

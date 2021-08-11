@@ -1,12 +1,17 @@
 use hvcg_iam_openapi_identity::models::User;
+use rusoto_cognito_idp::{
+    AdminCreateUserRequest, AdminSetUserPasswordRequest, AdminUpdateAuthEventFeedbackRequest,
+    AttributeType, CognitoIdentityProvider, CognitoIdentityProviderClient,
+};
 use rusoto_core::credential::EnvironmentProvider;
-use rusoto_core::{HttpClient, Region};
+use rusoto_core::{Client, HttpClient, Region};
 use rusoto_dynamodb::{
     AttributeValue, AttributeValueUpdate, DynamoDb, DynamoDbClient, PutItemInput, UpdateItemInput,
 };
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
+use uuid::Uuid;
 
 pub async fn activate_user_to_dynamodb(user: Option<&User>, user_table_name: String) -> bool {
     let client = DynamoDbClient::new_with(
@@ -188,12 +193,32 @@ pub async fn deactivate_user_to_dynamodb(user: Option<&User>, user_table_name: S
     result.is_ok()
 }
 
+pub async fn update_user_password(user: &User, plain_password: String) -> bool {
+    let aws_client = Client::shared();
+    let user_pool_id = "ap-southeast-1_9QWSYGzXk".to_string();
+    let rusoto_cognito_idp_client =
+        CognitoIdentityProviderClient::new_with_client(aws_client, Region::ApSoutheast1);
+
+    let admin_set_user_password_request = AdminSetUserPasswordRequest {
+        password: plain_password,
+        permanent: None,
+        user_pool_id,
+        username: user.username.clone(),
+    };
+
+    let result_cognito = rusoto_cognito_idp_client
+        .admin_set_user_password(admin_set_user_password_request)
+        .sync();
+    let is_ok_result = result_cognito.is_ok();
+    println!("Update password result: {}", is_ok_result);
+    is_ok_result
+}
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
     use std::env;
 
-    use crate::{deactivate_user_to_dynamodb, hash, insert_user_to_dynamodb};
+    use crate::{deactivate_user_to_dynamodb, hash, insert_user_to_dynamodb, update_user_password};
     use hvcg_iam_openapi_identity::models::User;
     use rusoto_core::credential::EnvironmentProvider;
     use rusoto_core::{HttpClient, Region};
@@ -270,6 +295,29 @@ mod tests {
         let result = deactivate_user_to_dynamodb(Option::from(user_dynamodb), table_name).await;
 
         println!("deactivate user result {}", result);
+    }
+
+    #[tokio::test]
+    async fn update_password() {
+        initialise();
+        println!("is it working?");
+        env::set_var(
+            "AWS_ACCESS_KEY_ID",
+            std::env::var("AWS_ACCESS_KEY_ID").unwrap(),
+        );
+        env::set_var(
+            "AWS_SECRET_ACCESS_KEY",
+            std::env::var("AWS_SECRET_ACCESS_KEY").unwrap(),
+        );
+        let user = &User {
+            id: None,
+            username: "nhut_donot_delete".to_string(),
+            email: None,
+            phone: None,
+        };
+
+        let result = update_user_password(user, "Hvcg@123456".to_string()).await;
+        println!("Update password result: {}", result)
     }
 }
 
