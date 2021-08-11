@@ -283,7 +283,6 @@ mod tests {
         connect.query_one(&stmt, &[]).await;
     }
 
-
     #[tokio::test]
     async fn update_password_user_success() {
         truncate_data().await;
@@ -309,7 +308,7 @@ mod tests {
         let user = controller::create_user(&user_test).await;
         let user_request = UserUpdate {
             id: user.unwrap().id,
-            plain_password : "Test@12345678".to_string()
+            plain_password: "Test@12345678".to_string(),
         };
 
         let serialized_user = serde_json::to_string(&user_request).unwrap();
