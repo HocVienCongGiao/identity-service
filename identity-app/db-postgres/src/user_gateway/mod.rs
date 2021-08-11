@@ -1,7 +1,7 @@
 use async_trait::async_trait;
-use domain::boundaries::{DbError, UserDbResponse};
+use domain::boundaries::{DbError};
 use domain::entity::user::User;
-use tokio_postgres::{Client, Row};
+use tokio_postgres::{Client};
 use uuid::Uuid;
 
 use crate::user_gateway::query::get_user_by_id;
