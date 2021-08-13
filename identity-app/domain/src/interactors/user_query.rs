@@ -66,11 +66,11 @@ where
 impl UserDbResponse {
     fn to_user_query_response(&self) -> UserQueryResponse {
         UserQueryResponse {
-            id: self.id.clone(),
+            id: self.id,
             username: self.username.to_string(),
             email: self.email.to_string(),
             phone: self.phone.to_string(),
-            enabled: self.enabled.clone(),
+            enabled: self.enabled,
         }
     }
 }

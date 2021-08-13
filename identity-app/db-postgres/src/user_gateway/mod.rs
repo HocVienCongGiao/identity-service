@@ -101,7 +101,7 @@ impl domain::boundaries::UserDbGateway for UserRepository {
     }
 
     async fn get_user_by_id(&self, id: Uuid) -> Option<UserDbResponse> {
-        let result = query::get_user_by_id(&(*self).client, id.clone()).await;
+        let result = query::get_user_by_id(&(*self).client, id).await;
 
         println!("second block_on for row");
         if result.is_err() {
@@ -129,15 +129,11 @@ impl domain::boundaries::UserDbGateway for UserRepository {
         let result = query::get_users(&(*self).client, filter.clone(), pagination).await;
 
         let collection: Vec<UserDbResponse>;
-        if result.is_err() {
-            collection = vec![];
-        } else {
-            collection = result
-                .unwrap()
-                .into_iter()
-                .map(|row| convert_to_user_db_response(row))
-                .collect();
-        }
+        collection = result
+            .unwrap()
+            .into_iter()
+            .map(convert_to_user_db_response)
+            .collect();
 
         let has_more: Option<bool>;
         if let Some(count_param) = count {
@@ -169,56 +165,47 @@ fn combine_into_filter_string(
     let query_username = username
         .clone()
         .map(|value| format!("%{}%", value))
-        .unwrap_or("%".to_string());
+        .unwrap_or_else(|| "%".to_string());
     let query_phone = phone
         .clone()
         .map(|value| format!("%{}%", value))
-        .unwrap_or("%".to_string());
+        .unwrap_or_else(|| "%".to_string());
     let query_email = email
         .clone()
         .map(|value| format!("%{}%", value))
-        .unwrap_or("%".to_string());
+        .unwrap_or_else(|| "%".to_string());
     let query_enabled = enabled
         .map(|value| format!("%{}%", value))
-        .unwrap_or("%".to_string());
+        .unwrap_or_else(|| "%".to_string());
 
-    if !username.clone().unwrap_or("".to_string()).is_empty()
-        && !phone.clone().unwrap_or("".to_string()).is_empty()
-        && !email.clone().unwrap_or("".to_string()).is_empty()
-    {
+    if is_search_username_phone_email(username.clone(), phone.clone(), email.clone()) {
         format!(
             "username LIKE '{}' AND \
             phone LIKE '{}' \
             AND email LIKE '{}'",
             query_username, query_phone, query_email
         )
-    } else if !username.clone().unwrap_or("".to_string()).is_empty()
-        && !phone.clone().unwrap_or("".to_string()).is_empty()
-    {
+    } else if is_search_username_phone(username.clone(), phone.clone()) {
         format!(
             "username LIKE '{}' AND \
             phone LIKE '{}'",
             query_username, query_phone
         )
-    } else if !username.clone().unwrap_or("".to_string()).is_empty()
-        && !email.clone().unwrap_or("".to_string()).is_empty()
-    {
+    } else if is_search_username_email(username, email.clone()) {
         format!(
             "username LIKE '{}' AND \
             email LIKE '{}'",
             query_username, query_email
         )
-    } else if !phone.clone().unwrap_or("".to_string()).is_empty()
-        && !email.clone().unwrap_or("".to_string()).is_empty()
-    {
+    } else if is_search_phone_email(phone.clone(), email.clone()) {
         format!(
             "phone LIKE '{}' AND \
             email LIKE '{}'",
             query_phone, query_email
         )
-    } else if !phone.clone().unwrap_or("".to_string()).is_empty() {
+    } else if !phone.unwrap_or_else(|| "".to_string()).is_empty() {
         format!("phone LIKE '{}'", query_phone)
-    } else if !email.clone().unwrap_or("".to_string()).is_empty() {
+    } else if !email.unwrap_or_else(|| "".to_string()).is_empty() {
         format!("email LIKE '{}'", query_phone)
     } else {
         format!("username LIKE '{}'", query_username)
@@ -228,7 +215,7 @@ fn combine_into_filter_string(
 fn combine_into_pagination_string(offset: Option<u16>, count: Option<u16>) -> String {
     let count = count
         .map(|value| value.to_string())
-        .unwrap_or("ALL".to_string());
+        .unwrap_or_else(|| "ALL".to_string());
     let offset = offset.unwrap_or(0);
 
     format!("LIMIT {} OFFSET {}", count, offset)
@@ -248,4 +235,29 @@ fn convert_to_user_db_response(row: Row) -> UserDbResponse {
         phone,
         enabled,
     }
+}
+
+fn is_search_username_phone_email(
+    username: Option<String>,
+    phone: Option<String>,
+    email: Option<String>,
+) -> bool {
+    !username.unwrap_or_else(|| "".to_string()).is_empty()
+        && !phone.unwrap_or_else(|| "".to_string()).is_empty()
+        && !email.unwrap_or_else(|| "".to_string()).is_empty()
+}
+
+fn is_search_username_phone(username: Option<String>, phone: Option<String>) -> bool {
+    !username.unwrap_or_else(|| "".to_string()).is_empty()
+        && !phone.unwrap_or_else(|| "".to_string()).is_empty()
+}
+
+fn is_search_username_email(username: Option<String>, email: Option<String>) -> bool {
+    !username.unwrap_or_else(|| "".to_string()).is_empty()
+        && !email.unwrap_or_else(|| "".to_string()).is_empty()
+}
+
+fn is_search_phone_email(phone: Option<String>, email: Option<String>) -> bool {
+    !phone.unwrap_or_else(|| "".to_string()).is_empty()
+        && !email.unwrap_or_else(|| "".to_string()).is_empty()
 }
