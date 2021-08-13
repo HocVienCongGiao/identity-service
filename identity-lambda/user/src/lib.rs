@@ -1,5 +1,5 @@
 use domain::boundaries::UserMutationError;
-use hvcg_iam_openapi_identity::models::User;
+use hvcg_iam_openapi_identity::models::{User, UserCollection};
 use jsonwebtoken::TokenData;
 use lambda_http::http::header::{
     ACCESS_CONTROL_ALLOW_HEADERS, ACCESS_CONTROL_ALLOW_METHODS, ACCESS_CONTROL_ALLOW_ORIGIN,
@@ -31,12 +31,37 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
     println!("invoked_function_arn: {:?}", invoked_function_arn);
     let user_table_name = get_user_table_name(invoked_function_arn);
     let function_name = get_post_function_name(request.uri().to_string());
-
+    let mut is_get_users = false;
+    let user_collection: Option<UserCollection>;
     match *request.method() {
         method::Method::GET => {
             println!("Handle get method.");
-            user_response = None;
-            status_code = 404;
+            if let Some(id) = get_id_from_request(&request) {
+                println!("Get user by id: {}", id.clone());
+                user_collection = None;
+                user_response = controller::get_user_by_id(id).await;
+                status_code = 200;
+                println!("Get user by id successfully: {}", id);
+            } else {
+                let query = get_query_from_request(&request);
+                let username: Option<String> = query.username;
+                let phone: Option<String> = query.phone;
+                let email: Option<String> = query.email;
+                let enabled: Option<bool> = query.enabled;
+                let offset: Option<u16> = query.offset;
+                let count: Option<u16> = query.count;
+                println!(
+                    "Search user with query with username {:?}, phone {:?},\
+                email {:?}, enabled {:?}, offset {:?}, count {:?}",
+                    username, phone, email, enabled, offset, count
+                );
+                user_collection = Some(
+                    controller::get_users(username, phone, email, enabled, offset, count).await,
+                );
+                is_get_users = true;
+                user_response = None;
+                status_code = 200;
+            }
         }
         method::Method::POST => match function_name {
             PostFunctionName::Activation => {
@@ -49,6 +74,7 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
                     println!("{:?}", e);
                     None
                 });
+                user_collection = None;
                 let dynamodb_result = db_cognito::activate_user_to_dynamodb(
                     Option::from(&user_response),
                     user_table_name.parse().unwrap(),
@@ -70,6 +96,7 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
                     println!("{:?}", e);
                     None
                 });
+                user_collection = None;
                 let dynamodb_result = db_cognito::deactivate_user_to_dynamodb(
                     Option::from(&user_response),
                     user_table_name.parse().unwrap(),
@@ -95,6 +122,7 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
                     println!("{:?}", e);
                     None
                 });
+                user_collection = None;
                 let insert_dynamodb_result = db_cognito::insert_user_to_dynamodb(
                     Option::from(&user_response),
                     user_table_name.parse().unwrap(),
@@ -107,6 +135,7 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
                 }
             }
             _ => {
+                user_collection = None;
                 user_response = None;
                 status_code = 404
             }
@@ -124,22 +153,23 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
                         db_cognito::update_user_password(&user, lambda_user_request.plain_password)
                             .await;
                     println!("update_password_result: {}", update_password_result);
-                    let result = controller::get_user_by_id(lambda_user_request.id.unwrap()).await;
-                    status_code = set_status_code(&result);
-                    user_response = result.map(Some).unwrap_or_else(|e| {
-                        println!("{:?}", e);
-                        None
-                    });
+                    user_response =
+                        controller::get_user_by_id(lambda_user_request.id.unwrap()).await;
+                    status_code = 200;
+                    user_collection = None;
                 } else {
+                    user_collection = None;
                     user_response = None;
                     status_code = 404
                 }
             } else {
+                user_collection = None;
                 user_response = None;
                 status_code = 404
             }
         }
         _ => {
+            user_collection = None;
             user_response = None;
             status_code = 404
         }
@@ -151,11 +181,17 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
         .header(ACCESS_CONTROL_ALLOW_HEADERS, "*")
         .header(ACCESS_CONTROL_ALLOW_METHODS, "*")
         .status(status_code)
-        .body(
-            serde_json::to_string(&user_response)
-                .expect("unable to serialize serde_json::Value")
-                .into(),
-        )
+        .body(if user_response.is_none() && user_collection.is_none() {
+            Body::Empty
+        } else {
+            if is_get_users {
+                serde_json::to_string(&user_collection)
+            } else {
+                serde_json::to_string(&user_response)
+            }
+            .expect("unable to serialize serde_json::Value")
+            .into()
+        })
         .expect("unable to build http::Response");
     println!("user response {:?}", serde_json::to_string(&user_response));
 
@@ -222,6 +258,29 @@ pub fn get_id_from_request(req: &Request) -> Option<uuid::Uuid> {
     } else {
         println!("id not found");
         None
+    }
+}
+
+pub struct UserQuery {
+    username: Option<String>,
+    phone: Option<String>,
+    email: Option<String>,
+    enabled: Option<bool>,
+    offset: Option<u16>,
+    count: Option<u16>,
+}
+
+pub fn get_query_from_request(req: &Request) -> UserQuery {
+    let query = req.query_string_parameters();
+    UserQuery {
+        username: query.get("username").map(|str| str.to_string()),
+        phone: query.get("phone").map(|str| str.to_string()),
+        email: query.get("email").map(|str| str.to_string()),
+        enabled: query
+            .get("enabled")
+            .map(|str| str.to_string().parse().unwrap()),
+        offset: query.get("offset").map(|str| str.parse().unwrap()),
+        count: query.get("count").map(|str| str.parse().unwrap()),
     }
 }
 

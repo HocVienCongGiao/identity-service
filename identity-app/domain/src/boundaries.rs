@@ -20,12 +20,25 @@ pub trait UserSimpleMutationInputBoundary {
     ) -> Result<UserMutationResponse, UserMutationError>;
     async fn deactivate_user(&self, id: Uuid) -> Result<UserMutationResponse, UserMutationError>;
     async fn activate_user(&self, id: Uuid) -> Result<UserMutationResponse, UserMutationError>;
-    async fn get_user_by_id(&self, id: Uuid) -> Result<UserMutationResponse, UserMutationError>;
 }
 
+#[async_trait]
+pub trait UserQueryInputBoundary {
+    async fn get_user_by_id(&self, id: Uuid) -> Option<UserQueryResponse>;
+    async fn get_users(
+        &self,
+        username: Option<String>,
+        phone: Option<String>,
+        email: Option<String>,
+        enabled: Option<bool>,
+        offset: Option<u16>,
+        count: Option<u16>,
+    ) -> UserCollectionQueryResponse;
+}
 pub struct Test1SimpleMutationRequest {
     pub name: String,
 }
+
 pub struct Test1SimpleQueryRequest {
     pub name: String,
 }
@@ -37,6 +50,7 @@ pub struct UserMutationRequest {
 }
 
 pub struct Test1SimpleMutationResponse {}
+
 pub struct Test1SimpleQueryResponse {
     pub status: u16,
 }
@@ -50,6 +64,14 @@ pub struct UserDbResponse {
 }
 
 pub struct UserMutationResponse {
+    pub id: Uuid,
+    pub username: String,
+    pub email: String,
+    pub phone: String,
+    pub enabled: bool,
+}
+
+pub struct UserQueryResponse {
     pub id: Uuid,
     pub username: String,
     pub email: String,
@@ -71,7 +93,16 @@ pub trait UserDbGateway {
     async fn exists_by_username(&self, username: String) -> bool;
     async fn insert(&self, user: &User) -> Result<(), DbError>;
     async fn deactivate_user(&self, id: Uuid) -> Result<User, DbError>;
-    async fn get_user_by_id(&self, id: Uuid) -> Result<User, DbError>;
+    async fn get_user_by_id(&self, id: Uuid) -> Option<UserDbResponse>;
+    async fn get_users(
+        &self,
+        username: Option<String>,
+        phone: Option<String>,
+        email: Option<String>,
+        enabled: Option<bool>,
+        offset: Option<u16>,
+        count: Option<u16>,
+    ) -> UserCollectionDbResponse;
 }
 
 #[derive(Debug)]
@@ -91,6 +122,15 @@ pub enum DbError {
     UnknownError,
 }
 
+pub struct UserCollectionQueryResponse {
+    pub collection: Vec<UserQueryResponse>,
+    pub has_more: Option<bool>,
+}
+
+pub struct UserCollectionDbResponse {
+    pub collection: Vec<UserDbResponse>,
+    pub has_more: Option<bool>,
+}
 // CommonUser
 // CommonUserFactory
 // JpaUser

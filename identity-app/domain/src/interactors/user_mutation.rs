@@ -3,9 +3,7 @@ use regex::Regex;
 use uuid::Uuid;
 
 use crate::boundaries;
-use crate::boundaries::{
-    DbError, UserDbGateway, UserMutationError, UserMutationRequest, UserMutationResponse,
-};
+use crate::boundaries::{DbError, UserDbGateway, UserMutationError, UserMutationRequest, UserMutationResponse, UserCollectionQueryResponse};
 
 pub struct UserSimpleMutationInteractor<A: UserDbGateway> {
     db_gateway: A,
@@ -16,21 +14,6 @@ impl<A> boundaries::UserSimpleMutationInputBoundary for UserSimpleMutationIntera
 where
     A: UserDbGateway + Sync + Send,
 {
-    async fn activate_user(&self, id: Uuid) -> Result<UserMutationResponse, UserMutationError> {
-        let result = (*self)
-            .db_gateway
-            .activate_user(id)
-            .await
-            .map(|user| user.to_user_mutation_response())
-            .map_err(|err| err.to_user_mutation_error());
-
-        if result.is_err() {
-            Err(UserMutationError::UnknownError)
-        } else {
-            result
-        }
-    }
-
     async fn create_user(
         &self,
         request: UserMutationRequest,
@@ -98,13 +81,19 @@ where
         }
     }
 
-    async fn get_user_by_id(&self, id: Uuid) -> Result<UserMutationResponse, UserMutationError> {
-        (*self)
+    async fn activate_user(&self, id: Uuid) -> Result<UserMutationResponse, UserMutationError> {
+        let result = (*self)
             .db_gateway
-            .get_user_by_id(id)
+            .activate_user(id)
             .await
             .map(|user| user.to_user_mutation_response())
-            .map_err(|err| err.to_user_mutation_error())
+            .map_err(|err| err.to_user_mutation_error());
+
+        if result.is_err() {
+            Err(UserMutationError::UnknownError)
+        } else {
+            result
+        }
     }
 }
 
