@@ -21,7 +21,7 @@ mod tests {
     use hvcg_iam_openapi_identity::models::User;
     use jsonwebtoken::TokenData;
     use lambda_http::http::HeaderValue;
-    use lambda_http::{http, Context};
+    use lambda_http::{http, Context, RequestExt};
     use lambda_http::{Body, IntoResponse};
     use regex::Regex;
     use std::env;
@@ -192,6 +192,7 @@ mod tests {
 
     #[tokio::test]
     async fn deactivate_activate_user_success() {
+        truncate_data().await;
         initialise();
         println!("is it working?");
         env::set_var(
@@ -334,6 +335,116 @@ mod tests {
         assert_eq!(response.status(), 200);
         truncate_data().await;
     }
+
+    #[tokio::test]
+    async fn get_user_by_id_success() {
+        truncate_data().await;
+        initialise();
+        println!("is it working?");
+        env::set_var(
+            "AWS_ACCESS_KEY_ID",
+            std::env::var("AWS_ACCESS_KEY_ID").unwrap(),
+        );
+        env::set_var(
+            "AWS_SECRET_ACCESS_KEY",
+            std::env::var("AWS_SECRET_ACCESS_KEY").unwrap(),
+        );
+
+        // Given
+        let user_test = User {
+            id: None,
+            username: "test001".to_string(),
+            email: Option::from("test001@gmail.com".to_string()),
+            phone: Option::from("+84 123456789".to_string()),
+        };
+
+        let user = controller::create_user(&user_test).await;
+        let user_id = user.unwrap().id.unwrap();
+        let uri = format!(
+            "https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/users/{}",
+            user_id
+        );
+        let mut path_param = HashMap::new();
+        path_param.insert("id".to_string(), vec![user_id.to_string()]);
+        let request = http::Request::builder()
+            .uri(uri)
+            .method("GET")
+            .header("Content-Type", "application/json")
+            .header("authorization", "Bearer 123445")
+            .body(Body::default())
+            .unwrap()
+            .with_path_parameters(path_param);
+        println!("request: {:?}", request);
+
+        let mut context: Context = Context::default();
+        context.invoked_function_arn = "dev-sg_identity-service_users".to_string();
+
+        let response = user::func(request, context)
+            .await
+            .expect("expected Ok(_) value")
+            .into_response();
+
+        // Then
+        println!("response: {:?}", response);
+        assert_eq!(response.status(), 200);
+        // truncate_data().await;
+    }
+
+    #[tokio::test]
+    async fn get_users() {
+        truncate_data().await;
+        initialise();
+        println!("is it working?");
+        env::set_var(
+            "AWS_ACCESS_KEY_ID",
+            std::env::var("AWS_ACCESS_KEY_ID").unwrap(),
+        );
+        env::set_var(
+            "AWS_SECRET_ACCESS_KEY",
+            std::env::var("AWS_SECRET_ACCESS_KEY").unwrap(),
+        );
+
+        // Given
+        let first_user_test = User {
+            id: None,
+            username: "test001".to_string(),
+            email: Option::from("test001@gmail.com".to_string()),
+            phone: Option::from("+84 123456788".to_string()),
+        };
+
+        let second_user_test = User {
+            id: None,
+            username: "test002".to_string(),
+            email: Option::from("test002@gmail.com".to_string()),
+            phone: Option::from("+84 123456789".to_string()),
+        };
+
+        let first_user_test = controller::create_user(&first_user_test).await;
+        println!("first_user_test : {:?}", first_user_test);
+        let second_user_test = controller::create_user(&second_user_test).await;
+        println!("second_user_test : {:?}", second_user_test);
+        let mut query_param = HashMap::new();
+        query_param.insert("count".to_string(), vec!["5".to_string()]);
+        query_param.insert("offset".to_string(), vec!["1".to_string()]);
+        query_param.insert("username".to_string(), vec!["test".to_string()]);
+        let request = http::Request::builder()
+            .uri("https://dev-sg.portal.hocvienconggiao.com/query-api/identity-service/users?offset=1&count=5")
+            .method("GET")
+            .header("Content-Type", "application/json")
+            .body(Body::Empty)
+            .unwrap()
+            .with_query_string_parameters(query_param);
+
+        // When
+        let response = user::func(request, Context::default())
+            .await
+            .expect("expected Ok(_) value")
+            .into_response();
+        // Then
+        println!("response: {:?}", response);
+        assert_eq!(response.status(), 200);
+    }
+
     fn hash<T>(obj: T) -> u64
     where
         T: Hash,

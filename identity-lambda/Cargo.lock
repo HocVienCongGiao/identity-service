@@ -1002,9 +1002,9 @@ dependencies = [
 
 [[package]]
 name = "hvcg_iam_openapi_identity"
-version = "0.0.4"
+version = "0.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fcdb4c1597b8ec9465dbb6657850065b6a93fe9e4e5b5c286e101b72abaca83b"
+checksum = "816c937775bbb67af79632d495de479916682113386bace1a84b63b117c49bab"
 dependencies = [
  "async-trait",
  "chrono",
