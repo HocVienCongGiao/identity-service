@@ -2,10 +2,7 @@ use hvcg_iam_openapi_identity::models::{User, UserCollection};
 
 use crate::openapi::identity_user::{ToModel, ToOpenApi};
 use db_postgres::user_gateway::UserRepository;
-use domain::boundaries::{
-    UserDbResponse, UserMutationError, UserMutationRequest, UserQueryInputBoundary,
-    UserSimpleMutationInputBoundary,
-};
+use domain::boundaries::{UserDbResponse, UserMutationError, UserMutationRequest, UserQueryInputBoundary, UserSimpleMutationInputBoundary, UserCollectionQueryResponse};
 use uuid::Uuid;
 
 pub mod openapi;
@@ -20,7 +17,7 @@ pub async fn create_user(user: &User) -> Result<openapi::identity_user::User, Us
 
     let response = user_interactor.create_user(user_request).await;
 
-    response.map(|res| res.to_openapi())
+    response.map(|res| res.user_openapi())
 }
 
 pub async fn deactivate_user(id: Uuid) -> Result<openapi::identity_user::User, UserMutationError> {
@@ -30,7 +27,7 @@ pub async fn deactivate_user(id: Uuid) -> Result<openapi::identity_user::User, U
     let user_interactor =
         domain::interactors::user_mutation::UserSimpleMutationInteractor::new(user_repository);
     let response = user_interactor.deactivate_user(id).await;
-    response.map(|res| res.to_openapi())
+    response.map(|res| res.user_openapi())
 }
 
 pub async fn activate_user(id: Uuid) -> Result<openapi::identity_user::User, UserMutationError> {
@@ -40,7 +37,7 @@ pub async fn activate_user(id: Uuid) -> Result<openapi::identity_user::User, Use
     let user_interactor =
         domain::interactors::user_mutation::UserSimpleMutationInteractor::new(user_repository);
     let response = user_interactor.activate_user(id).await;
-    response.map(|res| res.to_openapi())
+    response.map(|res| res.user_openapi())
 }
 
 pub async fn get_user_by_id(id: Uuid) -> Option<openapi::identity_user::User> {
@@ -50,10 +47,7 @@ pub async fn get_user_by_id(id: Uuid) -> Option<openapi::identity_user::User> {
     let user_interactor =
         domain::interactors::user_query::UserQueryInteractor::new(user_repository);
     let response = user_interactor.get_user_by_id(id).await;
-    if response.is_none() {
-        return None;
-    }
-    Some(response.unwrap().to_openapi())
+    Some(response.unwrap().user_openapi())
 }
 
 pub async fn get_users(
@@ -69,10 +63,10 @@ pub async fn get_users(
 
     let user_interactor =
         domain::interactors::user_query::UserQueryInteractor::new(user_repository);
-    let response = user_interactor
+    let response: UserCollectionQueryResponse = user_interactor
         .get_users(username, phone, email, enabled, offset, count)
         .await;
-    response.to_openapi()
+    response.user_openapi()
 }
 
 #[cfg(test)]

@@ -8,12 +8,23 @@ pub fn create_saint() {
 }
 
 impl ToOpenApi<User> for UserMutationResponse {
-    fn to_openapi(self) -> User {
+    fn user_openapi(self) -> User {
         User {
             id: Option::from(self.id),
             username: self.username.to_string(),
-            email: Option::from(self.email.to_string()),
-            phone: Option::from(self.phone.to_string()),
+            email: Option::from(self.email),
+            phone: Option::from(self.phone),
+        }
+    }
+}
+
+impl ToOpenApi<User> for UserQueryResponse {
+    fn user_openapi(self) -> User {
+        User {
+            id: Option::from(self.id),
+            username: self.username.to_string(),
+            email: Option::from(self.email),
+            phone: Option::from(self.phone),
         }
     }
 }
@@ -29,7 +40,7 @@ impl ToModel<UserMutationRequest> for &User {
 }
 
 pub trait ToOpenApi<T> {
-    fn to_openapi(self) -> T;
+    fn user_openapi(self) -> T;
 }
 
 pub trait ToModel<T> {
@@ -37,11 +48,11 @@ pub trait ToModel<T> {
 }
 
 impl ToOpenApi<UserCollection> for UserCollectionQueryResponse {
-    fn to_openapi(self) -> UserCollection {
+    fn user_openapi(self) -> UserCollection {
         let collection = (self
             .collection
             .into_iter()
-            .map(|user_query_response| user_query_response.to_openapi())
+            .map(|user_query_response| user_query_response.user_openapi())
             .collect::<Vec<User>>())
         .to_vec();
         UserCollection {
@@ -51,13 +62,3 @@ impl ToOpenApi<UserCollection> for UserCollectionQueryResponse {
     }
 }
 
-impl ToOpenApi<User> for UserQueryResponse {
-    fn to_openapi(self) -> User {
-        User {
-            id: Option::from(self.id),
-            username: self.username,
-            email: Option::from(self.email),
-            phone: Option::from(self.phone),
-        }
-    }
-}
