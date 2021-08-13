@@ -18,10 +18,7 @@ where
     A: UserDbGateway + Sync + Send,
 {
     async fn get_user_by_id(&self, id: Uuid) -> Option<UserQueryResponse> {
-        println!(
-            "user query input boundary {}",
-            id.to_hyphenated()
-        );
+        println!("user query input boundary {}", id.to_hyphenated());
 
         return if let Some(db_response) = ((*self).db_gateway.get_user_by_id(id)).await {
             println!("user found");

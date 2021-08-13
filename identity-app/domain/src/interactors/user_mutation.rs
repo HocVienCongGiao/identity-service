@@ -3,7 +3,10 @@ use regex::Regex;
 use uuid::Uuid;
 
 use crate::boundaries;
-use crate::boundaries::{DbError, UserDbGateway, UserMutationError, UserMutationRequest, UserMutationResponse, UserCollectionQueryResponse};
+use crate::boundaries::{
+    DbError, UserCollectionQueryResponse, UserDbGateway, UserMutationError, UserMutationRequest,
+    UserMutationResponse,
+};
 
 pub struct UserSimpleMutationInteractor<A: UserDbGateway> {
     db_gateway: A,

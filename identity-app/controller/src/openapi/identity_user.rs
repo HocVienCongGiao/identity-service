@@ -1,5 +1,5 @@
-use domain::boundaries::{UserMutationRequest, UserCollectionQueryResponse, UserQueryResponse};
 pub use domain::boundaries::UserMutationResponse;
+use domain::boundaries::{UserCollectionQueryResponse, UserMutationRequest, UserQueryResponse};
 pub use hvcg_iam_openapi_identity::models::User;
 use hvcg_iam_openapi_identity::models::UserCollection;
 
@@ -43,7 +43,7 @@ impl ToOpenApi<UserCollection> for UserCollectionQueryResponse {
             .into_iter()
             .map(|user_query_response| user_query_response.to_openapi())
             .collect::<Vec<User>>())
-            .to_vec();
+        .to_vec();
         UserCollection {
             users: Some(collection),
             has_more: self.has_more,
@@ -57,7 +57,7 @@ impl ToOpenApi<User> for UserQueryResponse {
             id: Option::from(self.id),
             username: self.username,
             email: Option::from(self.email),
-            phone: Option::from(self.phone)
+            phone: Option::from(self.phone),
         }
     }
 }

@@ -1,9 +1,9 @@
+use crate::user_gateway::query::get_user_by_id;
 use async_trait::async_trait;
 use domain::boundaries::{DbError, UserCollectionDbResponse, UserDbResponse, UserQueryResponse};
 use domain::entity::user::User;
 use tokio_postgres::{Client, Row};
 use uuid::Uuid;
-use crate::user_gateway::query::get_user_by_id;
 
 mod mutation;
 mod query;
