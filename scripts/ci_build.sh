@@ -22,3 +22,10 @@ cargo check --all
 cargo build
 cargo test
 echo "identity-lambda checked"
+cd ../identity-dynamodb-lambda &&
+cargo fmt --all -- --check &&
+cargo clippy --all-targets -- -D clippy::all &&
+cargo check --all
+cargo build
+cargo test
+echo "identity-dynamodb-lambda checked"

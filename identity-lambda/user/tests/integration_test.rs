@@ -73,7 +73,6 @@ mod tests {
 
     #[tokio::test]
     async fn create_user_success() {
-        truncate_data().await;
         initialise();
         println!("is it working?");
         env::set_var(
@@ -187,12 +186,11 @@ mod tests {
         //         table_name: user_table_name,
         //     })
         //     .sync();
-        println!("trigger build!!!!!");
+        println!("trigger build!");
     }
 
     #[tokio::test]
     async fn deactivate_activate_user_success() {
-        truncate_data().await;
         initialise();
         println!("is it working?");
         env::set_var(
@@ -215,7 +213,7 @@ mod tests {
             id: None,
             username: "test001".to_string(),
             email: Option::from("test001@gmail.com".to_string()),
-            phone: Option::from("+84 123456789".to_string()),
+            phone: Option::from("+84 123456001".to_string()),
         };
 
         let user = controller::create_user(&user_test).await;
@@ -265,28 +263,10 @@ mod tests {
             .expect("expected Ok(_) value")
             .into_response();
         assert_eq!(activate_user_response.status(), 200);
-
-        // Clean up data
-        let connect = connect().await;
-
-        let stmt = (connect)
-            .prepare(
-                "truncate identity__user_username,\
-             identity__user_phone, \
-             identity__user_email, \
-             identity__user_enabled, \
-             identity__user",
-            )
-            .await
-            .unwrap();
-
-        let id: &[&(dyn ToSql + Sync)] = &[&deserialized_user.id];
-        connect.query_one(&stmt, &[]).await;
     }
 
     #[tokio::test]
     async fn update_password_user_success() {
-        truncate_data().await;
         initialise();
         println!("is it working?");
         env::set_var(
@@ -302,8 +282,8 @@ mod tests {
         let user_test = User {
             id: None,
             username: "nhut_donot_delete".to_string(),
-            email: Option::from("test001@gmail.com".to_string()),
-            phone: Option::from("+84 123456789".to_string()),
+            email: Option::from("nhut_donot_delete@gmail.com".to_string()),
+            phone: Option::from("+84 123456002".to_string()),
         };
 
         let user = controller::create_user(&user_test).await;
@@ -333,12 +313,10 @@ mod tests {
 
         // Then
         assert_eq!(response.status(), 200);
-        truncate_data().await;
     }
 
     #[tokio::test]
     async fn get_user_by_id_success() {
-        truncate_data().await;
         initialise();
         println!("is it working?");
         env::set_var(
@@ -353,9 +331,9 @@ mod tests {
         // Given
         let user_test = User {
             id: None,
-            username: "test001".to_string(),
-            email: Option::from("test001@gmail.com".to_string()),
-            phone: Option::from("+84 123456789".to_string()),
+            username: "test003".to_string(),
+            email: Option::from("test003@gmail.com".to_string()),
+            phone: Option::from("+84 123456003".to_string()),
         };
 
         let user = controller::create_user(&user_test).await;
@@ -392,7 +370,6 @@ mod tests {
 
     #[tokio::test]
     async fn get_users() {
-        truncate_data().await;
         initialise();
         println!("is it working?");
         env::set_var(
@@ -407,16 +384,16 @@ mod tests {
         // Given
         let first_user_test = User {
             id: None,
-            username: "test001".to_string(),
-            email: Option::from("test001@gmail.com".to_string()),
-            phone: Option::from("+84 123456788".to_string()),
+            username: "test004".to_string(),
+            email: Option::from("test004@gmail.com".to_string()),
+            phone: Option::from("+84 123456004".to_string()),
         };
 
         let second_user_test = User {
             id: None,
-            username: "test002".to_string(),
-            email: Option::from("test002@gmail.com".to_string()),
-            phone: Option::from("+84 123456789".to_string()),
+            username: "test005".to_string(),
+            email: Option::from("test005@gmail.com".to_string()),
+            phone: Option::from("+84 123456005".to_string()),
         };
 
         let first_user_test = controller::create_user(&first_user_test).await;

@@ -2,7 +2,10 @@ use hvcg_iam_openapi_identity::models::{User, UserCollection};
 
 use crate::openapi::identity_user::{ToModel, ToOpenApi};
 use db_postgres::user_gateway::UserRepository;
-use domain::boundaries::{UserDbResponse, UserMutationError, UserMutationRequest, UserQueryInputBoundary, UserSimpleMutationInputBoundary, UserCollectionQueryResponse};
+use domain::boundaries::{
+    UserCollectionQueryResponse, UserDbResponse, UserMutationError, UserMutationRequest,
+    UserQueryInputBoundary, UserSimpleMutationInputBoundary,
+};
 use uuid::Uuid;
 
 pub mod openapi;
@@ -47,7 +50,11 @@ pub async fn get_user_by_id(id: Uuid) -> Option<openapi::identity_user::User> {
     let user_interactor =
         domain::interactors::user_query::UserQueryInteractor::new(user_repository);
     let response = user_interactor.get_user_by_id(id).await;
-    Some(response.unwrap().user_openapi())
+    if response.is_some() {
+        Some(response.unwrap().user_openapi())
+    } else {
+        None
+    }
 }
 
 pub async fn get_users(

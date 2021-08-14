@@ -61,4 +61,3 @@ impl ToOpenApi<UserCollection> for UserCollectionQueryResponse {
         }
     }
 }
-
