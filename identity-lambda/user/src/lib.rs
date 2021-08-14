@@ -156,7 +156,7 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
                     Option::from(&user_response),
                     user_table_name.parse().unwrap(),
                 )
-                    .await;
+                .await;
                 println!("update user dynamodb result: {}", dynamodb_result);
                 user_collection = None;
             } else if request.uri().to_string().contains("update-password") {

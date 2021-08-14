@@ -206,4 +206,49 @@ mod tests {
         let result = func(event, context).await;
         print!("Update user result: {:?}", result.unwrap());
     }
+
+    #[tokio::test]
+    async fn user_not_found() {
+        initialise();
+        env::set_var(
+            "AWS_ACCESS_KEY_ID",
+            std::env::var("AWS_ACCESS_KEY_ID").unwrap(),
+        );
+        env::set_var(
+            "AWS_SECRET_ACCESS_KEY",
+            std::env::var("AWS_SECRET_ACCESS_KEY").unwrap(),
+        );
+
+        let mut records: Map<String, Value> = Default::default();
+        let mut aws_object: Map<String, Value> = Default::default();
+        let mut hash_key_object: Map<String, Value> = Default::default();
+        let mut hash_key_object_details: Map<String, Value> = Default::default();
+        let mut key_object: Map<String, Value> = Default::default();
+
+        hash_key_object_details.insert(
+            "S".to_string(),
+            Value::String("123456789".to_string()),
+        );
+        hash_key_object.insert(
+            "HashKey".to_string(),
+            Value::Object(hash_key_object_details),
+        );
+
+        key_object.insert("Keys".to_string(), Value::Object(hash_key_object));
+
+        aws_object.insert("dynamodb".to_string(), Value::Object(key_object));
+        aws_object.insert("eventName".to_string(), Value::String("MODIFY".to_string()));
+
+        records.insert(
+            "Records".parse().unwrap(),
+            Value::Array(vec![Value::Object(aws_object)]),
+        );
+
+        let event = Value::Object(records);
+
+        let mut context: Context = Context::default();
+        context.invoked_function_arn = "dev-sg_identity-service_users".to_string();
+        let result = func(event, context).await;
+        print!("Update user result: {:?}", result.unwrap());
+    }
 }

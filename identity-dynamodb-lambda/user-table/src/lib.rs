@@ -62,7 +62,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
             consistent_read: None,
             expression_attribute_names: None,
             key: query_condition,
-            projection_expression: Option::from("id, username, email, phone, enabled".to_string()),
+            projection_expression: None,
             return_consumed_capacity: None,
             table_name: user_table_name,
         })
@@ -187,7 +187,7 @@ enum EventName {
     Insert,
     Modify,
     Delete,
-    Unknown
+    Unknown,
 }
 
 fn get_event_name(event_name: String) -> EventName {

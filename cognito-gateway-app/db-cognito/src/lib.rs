@@ -232,7 +232,7 @@ pub async fn update_user_to_dynamodb(user: Option<&User>, user_table_name: Strin
         AttributeValueUpdate {
             action: Option::from("PUT".to_string()),
             value: Option::from(AttributeValue {
-                s: Option::from(user_dynamodb.phone.clone()),
+                s: user_dynamodb.phone.clone(),
                 ..Default::default()
             }),
         },
@@ -243,7 +243,7 @@ pub async fn update_user_to_dynamodb(user: Option<&User>, user_table_name: Strin
         AttributeValueUpdate {
             action: Option::from("PUT".to_string()),
             value: Option::from(AttributeValue {
-                s: Option::from(user_dynamodb.email.clone()),
+                s: user_dynamodb.email.clone(),
                 ..Default::default()
             }),
         },
