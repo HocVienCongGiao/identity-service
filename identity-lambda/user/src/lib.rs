@@ -148,11 +148,16 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
                 let lambda_user_request: User = value.unwrap();
                 let result = controller::update_user(id.unwrap(), &lambda_user_request).await;
                 status_code = set_status_code(&result);
-                // TODO Update dynamodb
                 user_response = result.map(Some).unwrap_or_else(|e| {
                     println!("error: {:?}", e);
                     None
                 });
+                let dynamodb_result = db_cognito::update_user_to_dynamodb(
+                    Option::from(&user_response),
+                    user_table_name.parse().unwrap(),
+                )
+                    .await;
+                println!("update user dynamodb result: {}", dynamodb_result);
                 user_collection = None;
             } else if request.uri().to_string().contains("update-password") {
                 println!("Update user password");
