@@ -225,10 +225,7 @@ mod tests {
         let mut hash_key_object_details: Map<String, Value> = Default::default();
         let mut key_object: Map<String, Value> = Default::default();
 
-        hash_key_object_details.insert(
-            "S".to_string(),
-            Value::String("123456789".to_string()),
-        );
+        hash_key_object_details.insert("S".to_string(), Value::String("123456789".to_string()));
         hash_key_object.insert(
             "HashKey".to_string(),
             Value::Object(hash_key_object_details),
