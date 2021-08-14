@@ -106,7 +106,7 @@ where
     ) -> Result<UserMutationResponse, UserMutationError> {
         println!("user mutation input boundary {}", request.username);
 
-        let current_user = (*self).db_gateway.get_user_by_id(user_id.clone()).await;
+        let current_user = (*self).db_gateway.get_user_by_id(user_id).await;
         if current_user.is_none() {
             println!("user with id {} does not exist.", user_id);
             return Err(UserMutationError::ExistedUser);
