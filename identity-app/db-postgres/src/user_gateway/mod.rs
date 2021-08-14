@@ -39,6 +39,24 @@ impl domain::boundaries::UserDbGateway for UserRepository {
         })
     }
 
+    async fn deactivate_user(&self, id: Uuid) -> Result<User, DbError> {
+        let deactivate_user = mutation::deactivate_identity_user(&(*self).client, id).await;
+        println!("deactivate_user_result: {}", deactivate_user.is_ok());
+
+        if deactivate_user.is_err() {
+            return Err(DbError::UnknownError);
+        }
+
+        let user = get_user_by_id(&(*self).client, id).await.unwrap();
+        Ok(User {
+            id: user.get("id"),
+            username: user.get("username"),
+            email: user.get("email"),
+            phone: user.get("phone"),
+            enabled: user.get("enabled"),
+        })
+    }
+
     async fn exists_by_username(&self, username: String) -> bool {
         let result = query::find_one_by_username(&(*self).client, username.clone()).await;
         println!("second block_on for row");
@@ -87,24 +105,6 @@ impl domain::boundaries::UserDbGateway for UserRepository {
         }
 
         Ok(())
-    }
-
-    async fn deactivate_user(&self, id: Uuid) -> Result<User, DbError> {
-        let deactivate_user = mutation::deactivate_identity_user(&(*self).client, id).await;
-        println!("deactivate_user_result: {}", deactivate_user.is_ok());
-
-        if deactivate_user.is_err() {
-            return Err(DbError::UnknownError);
-        }
-
-        let user = get_user_by_id(&(*self).client, id).await.unwrap();
-        Ok(User {
-            id: user.get("id"),
-            username: user.get("username"),
-            email: user.get("email"),
-            phone: user.get("phone"),
-            enabled: user.get("enabled"),
-        })
     }
 
     async fn get_user_by_id(&self, id: Uuid) -> Option<UserDbResponse> {
@@ -160,6 +160,47 @@ impl domain::boundaries::UserDbGateway for UserRepository {
             collection,
             has_more,
         }
+    }
+
+    async fn update(&self, user: &User) -> Result<(), DbError> {
+        println!("Start update user to db");
+        if !user.username.is_empty() {
+            let update_identity_username =
+                mutation::update_identity_user_username(&(*self).client, user).await;
+            println!(
+                "update_identity_user_username result: {:?}",
+                update_identity_username
+            );
+            if update_identity_username.is_err() {
+                return Err(DbError::UnknownError);
+            }
+        }
+
+        if user.phone.is_some() {
+            let update_identity_phone =
+                mutation::update_identity_user_phone(&(*self).client, user).await;
+            println!(
+                "update_identity_user_phone result: {:?}",
+                update_identity_phone
+            );
+            if update_identity_phone.is_err() {
+                return Err(DbError::UnknownError);
+            }
+        }
+
+        if user.email.is_some() {
+            let update_identity_email =
+                mutation::update_identity_user_email(&(*self).client, user).await;
+            println!(
+                "update_identity_user_email result: {:?}",
+                update_identity_email
+            );
+            if update_identity_email.is_err() {
+                return Err(DbError::UnknownError);
+            }
+        }
+
+        Ok(())
     }
 }
 

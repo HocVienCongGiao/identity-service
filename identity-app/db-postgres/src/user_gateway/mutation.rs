@@ -80,3 +80,36 @@ pub async fn activate_identity_user(client: &Client, id: Uuid) -> Result<u64, Er
     let params: &[&(dyn ToSql + Sync)] = &[&id];
     client.execute(&stmt, params).await
 }
+
+pub async fn update_identity_user_username(client: &Client, user: &User) -> Result<u64, Error> {
+    let stmt = (*client)
+        .prepare("UPDATE identity__user_username SET username = $1 where id = $2")
+        .await
+        .unwrap();
+    println!("update_identity_user_username id: {}", user.id);
+
+    let params: &[&(dyn ToSql + Sync)] = &[&user.username, &user.id];
+    client.execute(&stmt, params).await
+}
+
+pub async fn update_identity_user_phone(client: &Client, user: &User) -> Result<u64, Error> {
+    let stmt = (*client)
+        .prepare("UPDATE identity__user_phone SET phone = $1 where id = $2")
+        .await
+        .unwrap();
+    println!("update_identity_user_username id: {}", user.id);
+
+    let params: &[&(dyn ToSql + Sync)] = &[&user.phone, &user.id];
+    client.execute(&stmt, params).await
+}
+
+pub async fn update_identity_user_email(client: &Client, user: &User) -> Result<u64, Error> {
+    let stmt = (*client)
+        .prepare("UPDATE identity__user_email SET email = $1 where id = $2")
+        .await
+        .unwrap();
+    println!("update_identity_user_username id: {}", user.id);
+
+    let params: &[&(dyn ToSql + Sync)] = &[&user.email, &user.id];
+    client.execute(&stmt, params).await
+}

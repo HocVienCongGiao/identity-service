@@ -17,6 +17,21 @@ impl<A> boundaries::UserSimpleMutationInputBoundary for UserSimpleMutationIntera
 where
     A: UserDbGateway + Sync + Send,
 {
+    async fn activate_user(&self, id: Uuid) -> Result<UserMutationResponse, UserMutationError> {
+        let result = (*self)
+            .db_gateway
+            .activate_user(id)
+            .await
+            .map(|user| user.to_user_mutation_response())
+            .map_err(|err| err.to_user_mutation_error());
+
+        if result.is_err() {
+            Err(UserMutationError::UnknownError)
+        } else {
+            result
+        }
+    }
+
     async fn create_user(
         &self,
         request: UserMutationRequest,
@@ -84,19 +99,37 @@ where
         }
     }
 
-    async fn activate_user(&self, id: Uuid) -> Result<UserMutationResponse, UserMutationError> {
+    async fn update_user(
+        &self,
+        user_id: Uuid,
+        request: UserMutationRequest,
+    ) -> Result<UserMutationResponse, UserMutationError> {
+        println!("user mutation input boundary {}", request.username);
+
+        let current_user = (*self).db_gateway.get_user_by_id(user_id.clone()).await;
+        if current_user.is_none() {
+            println!("user with id {} does not exist.", user_id);
+            return Err(UserMutationError::ExistedUser);
+        }
+        println!(
+            "update current user id: {:?}",
+            current_user.as_ref().unwrap().id
+        );
+        println!("update user, all is good");
+        let user = crate::entity::user::User {
+            id: user_id,
+            username: request.username,
+            email: request.email,
+            phone: request.phone,
+            enabled: current_user.as_ref().unwrap().enabled,
+        };
         let result = (*self)
             .db_gateway
-            .activate_user(id)
+            .update(&user)
             .await
-            .map(|user| user.to_user_mutation_response())
+            .map(|_| user.to_user_mutation_response())
             .map_err(|err| err.to_user_mutation_error());
-
-        if result.is_err() {
-            Err(UserMutationError::UnknownError)
-        } else {
-            result
-        }
+        return result;
     }
 }
 

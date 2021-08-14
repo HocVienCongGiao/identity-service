@@ -14,12 +14,17 @@ pub trait Test1SimpleMutationInputBoundary {
 
 #[async_trait]
 pub trait UserSimpleMutationInputBoundary {
+    async fn activate_user(&self, id: Uuid) -> Result<UserMutationResponse, UserMutationError>;
     async fn create_user(
         &self,
         request: UserMutationRequest,
     ) -> Result<UserMutationResponse, UserMutationError>;
     async fn deactivate_user(&self, id: Uuid) -> Result<UserMutationResponse, UserMutationError>;
-    async fn activate_user(&self, id: Uuid) -> Result<UserMutationResponse, UserMutationError>;
+    async fn update_user(
+        &self,
+        id: Uuid,
+        request: UserMutationRequest,
+    ) -> Result<UserMutationResponse, UserMutationError>;
 }
 
 #[async_trait]
@@ -90,9 +95,9 @@ pub trait Test1DbGateway {
 #[async_trait]
 pub trait UserDbGateway {
     async fn activate_user(&self, id: Uuid) -> Result<User, DbError>;
+    async fn deactivate_user(&self, id: Uuid) -> Result<User, DbError>;
     async fn exists_by_username(&self, username: String) -> bool;
     async fn insert(&self, user: &User) -> Result<(), DbError>;
-    async fn deactivate_user(&self, id: Uuid) -> Result<User, DbError>;
     async fn get_user_by_id(&self, id: Uuid) -> Option<UserDbResponse>;
     async fn get_users(
         &self,
@@ -103,6 +108,7 @@ pub trait UserDbGateway {
         offset: Option<u16>,
         count: Option<u16>,
     ) -> UserCollectionDbResponse;
+    async fn update(&self, user: &User) -> Result<(), DbError>;
 }
 
 #[derive(Debug)]

@@ -141,7 +141,20 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
             }
         },
         method::Method::PUT => {
-            if request.uri().to_string().contains("update-password") {
+            let id = get_id_from_request(&request);
+            let value = request.payload().unwrap_or(None);
+            if id.is_some() && value.is_some() {
+                println!("Start update user info");
+                let lambda_user_request: User = value.unwrap();
+                let result = controller::update_user(id.unwrap(), &lambda_user_request).await;
+                status_code = set_status_code(&result);
+                // TODO Update dynamodb
+                user_response = result.map(Some).unwrap_or_else(|e| {
+                    println!("error: {:?}", e);
+                    None
+                });
+                user_collection = None;
+            } else if request.uri().to_string().contains("update-password") {
                 println!("Update user password");
                 let user_update_request = request.payload().unwrap_or(None);
                 if user_update_request.is_some() {

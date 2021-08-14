@@ -23,6 +23,21 @@ pub async fn create_user(user: &User) -> Result<openapi::identity_user::User, Us
     response.map(|res| res.user_openapi())
 }
 
+pub async fn update_user(
+    id: Uuid,
+    user: &User,
+) -> Result<openapi::identity_user::User, UserMutationError> {
+    let client = db_postgres::connect().await;
+    let user_repository = UserRepository { client };
+    let user_request = user.to_model();
+    let user_interactor =
+        domain::interactors::user_mutation::UserSimpleMutationInteractor::new(user_repository);
+
+    let response = user_interactor.update_user(id, user_request).await;
+
+    response.map(|res| res.user_openapi())
+}
+
 pub async fn deactivate_user(id: Uuid) -> Result<openapi::identity_user::User, UserMutationError> {
     let client = db_postgres::connect().await;
     let user_repository = UserRepository { client };
