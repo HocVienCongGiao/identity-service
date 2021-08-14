@@ -72,6 +72,10 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn cleanup_data() {
+        truncate_data().await;
+    }
+    #[tokio::test]
     async fn create_user_success() {
         initialise();
         println!("is it working?");
@@ -138,23 +142,6 @@ mod tests {
             Option::from("+84 939686970".to_string())
         );
         println!("Create user successfully!");
-
-        // delete user in postgres
-        let connect = connect().await;
-
-        let stmt = (connect)
-            .prepare(
-                "truncate identity__user_username,\
-             identity__user_phone, \
-             identity__user_email, \
-             identity__user_enabled, \
-             identity__user",
-            )
-            .await
-            .unwrap();
-
-        let id: &[&(dyn ToSql + Sync)] = &[&deserialized_user.id];
-        connect.query_one(&stmt, &[]).await;
 
         // delete user in dynamodb
         let hash_key = hash(deserialized_user.id);

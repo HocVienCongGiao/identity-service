@@ -193,7 +193,10 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
             .into()
         })
         .expect("unable to build http::Response");
-    println!("user response {:?}", serde_json::to_string(&user_response));
+    println!(
+        "final user response{:?}",
+        serde_json::to_string(&user_response)
+    );
 
     Ok(response)
 }

@@ -22,13 +22,20 @@ impl domain::boundaries::UserDbGateway for UserRepository {
             return Err(DbError::UnknownError);
         }
 
-        let user = get_user_by_id(&(*self).client, id).await.unwrap();
+        let user = query::get_user_by_id(&(*self).client, id).await;
+        println!("activate_user_result_db: {:?}", user);
+        let row = user.unwrap();
+
+        if row.is_empty() {
+            return Err(DbError::UnknownError);
+        }
+
         Ok(User {
-            id: user.get("id"),
-            username: user.get("username"),
-            email: user.get("email"),
-            phone: user.get("phone"),
-            enabled: user.get("enabled"),
+            id: row.get("id"),
+            username: row.get("username"),
+            email: row.get("email"),
+            phone: row.get("phone"),
+            enabled: row.get("enabled"),
         })
     }
 
