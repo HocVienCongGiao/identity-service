@@ -136,14 +136,14 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
         let user_name = username_dynamodb.unwrap();
         let update_user_attributes: Vec<AttributeType> = vec![email_user_attribute];
 
-        let admin_enabled_user_request = AdminUpdateUserAttributesRequest {
+        let admin_user_attribute_update_request = AdminUpdateUserAttributesRequest {
             user_attributes: update_user_attributes,
             user_pool_id: cognito_user_pool_id.clone(),
             username: user_name.clone(),
         };
 
         let result_cognito = rusoto_cognito_idp_client
-            .admin_update_user_attributes(admin_enabled_user_request)
+            .admin_update_user_attributes(admin_user_attribute_update_request)
             .sync();
 
         if enabled.unwrap() == *"false" {
@@ -158,6 +158,20 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
 
             println!(
                 "Cognito disable user result, {:?}!",
+                result_cognito.unwrap()
+            );
+        } else {
+            let admin_enabled_user_request = AdminEnableUserRequest {
+                user_pool_id: cognito_user_pool_id,
+                username: user_name,
+            };
+
+            let result_cognito = rusoto_cognito_idp_client
+                .admin_enable_user(admin_enabled_user_request)
+                .sync();
+
+            println!(
+                "Cognito enabled user result, {:?}!",
                 result_cognito.unwrap()
             );
         }
