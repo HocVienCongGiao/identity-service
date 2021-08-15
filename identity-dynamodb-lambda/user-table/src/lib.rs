@@ -76,6 +76,12 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
         return Ok(json!({ "message": "User not found." }));
     }
 
+    if item.as_ref().unwrap().get("username").is_none()
+        || item.as_ref().unwrap().get("email").is_none()
+        || item.as_ref().unwrap().get("enabled ").is_none()
+    {
+        return Ok(json!({ "message": "Username or email or enabled not found." }));
+    }
     let username_dynamodb = item
         .as_ref()
         .unwrap()
@@ -145,6 +151,15 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
         let result_cognito = rusoto_cognito_idp_client
             .admin_update_user_attributes(admin_user_attribute_update_request)
             .sync();
+        if result_cognito.is_err() {
+            return Ok(json!({
+                "message":
+                    format!(
+                        "Error when update user result, {:?}!",
+                        result_cognito.unwrap()
+                    )
+            }));
+        }
 
         if enabled.unwrap() == *"false" {
             let admin_disable_user_request = AdminDisableUserRequest {
@@ -156,10 +171,15 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
                 .admin_disable_user(admin_disable_user_request)
                 .sync();
 
-            println!(
-                "Cognito disable user result, {:?}!",
-                result_cognito.unwrap()
-            );
+            if result_cognito.is_err() {
+                return Ok(json!({
+                    "message":
+                        format!(
+                            "Error when deactivate user result, {:?}!",
+                            result_cognito.unwrap()
+                        )
+                }));
+            }
         } else {
             let admin_enabled_user_request = AdminEnableUserRequest {
                 user_pool_id: cognito_user_pool_id,
@@ -170,14 +190,19 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
                 .admin_enable_user(admin_enabled_user_request)
                 .sync();
 
-            println!(
-                "Cognito enabled user result, {:?}!",
-                result_cognito.unwrap()
-            );
+            if result_cognito.is_err() {
+                return Ok(json!({
+                    "message":
+                        format!(
+                            "Error when activate user result, {:?}!",
+                            result_cognito.unwrap()
+                        )
+                }));
+            }
         }
 
         Ok(json!({
-            "message": format!("Cognito update user result, {:?}!", result_cognito.unwrap())
+            "message": "Cognito update user result success".to_string()
         }))
     } else {
         println!("Start delete user");
