@@ -4,8 +4,8 @@ mod tests {
     use std::env;
 
     use db_cognito::{
-        deactivate_user_to_dynamodb, insert_user_to_dynamodb, update_user_password,
-        update_user_to_dynamodb,
+        activate_user_to_dynamodb, deactivate_user_to_dynamodb, insert_user_to_dynamodb,
+        update_user_password, update_user_to_dynamodb,
     };
     use hvcg_iam_openapi_identity::models::User;
     use rusoto_core::credential::EnvironmentProvider;
@@ -29,6 +29,34 @@ mod tests {
                 std::env::var("HELLO").unwrap_or_else(|_| "".to_string())
             );
         });
+    }
+
+    #[tokio::test]
+    async fn activate_user() {
+        initialise();
+        println!("is it working?");
+        env::set_var(
+            "AWS_ACCESS_KEY_ID",
+            std::env::var("AWS_ACCESS_KEY_ID").unwrap(),
+        );
+        env::set_var(
+            "AWS_SECRET_ACCESS_KEY",
+            std::env::var("AWS_SECRET_ACCESS_KEY").unwrap(),
+        );
+
+        let table_name = "dev-sg_UserTable".to_string();
+
+        let uuid = Uuid::parse_str("22ea2825-621f-4260-bc13-f2c8432066ae").unwrap();
+        let user_dynamodb = &User {
+            id: Option::from(uuid),
+            username: "".to_string(),
+            email: None,
+            phone: None,
+        };
+
+        let result = activate_user_to_dynamodb(Option::from(user_dynamodb), table_name).await;
+
+        println!("activate user result {}", result);
     }
 
     #[tokio::test]
