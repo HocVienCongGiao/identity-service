@@ -76,7 +76,7 @@ mod tests {
         truncate_data().await;
     }
     #[tokio::test]
-    async fn create_user_success() {
+    async fn crud_user_success() {
         initialise();
         println!("is it working?");
         env::set_var(
@@ -99,8 +99,8 @@ mod tests {
 
         let user_request = User {
             id: None,
-            username: "test_user".to_string() + &*test_suffix,
-            email: Option::from("nhutcargo@gmail.com".to_string()),
+            username: "create_test_user".to_string(),
+            email: Option::from("create_test_user@gmail.com".to_string()),
             phone: Option::from("+84 939686970".to_string()),
         };
 
@@ -194,6 +194,60 @@ mod tests {
             deserialized_activate_user
         );
         assert_eq!(activate_user_response.status(), 200);
+
+        // Update user
+        let update_user_request = User {
+            id: None,
+            username: "test_update_user_updated".to_string(),
+            email: Option::from("test_update_user_updated@gmail.com".to_string()),
+            phone: Option::from("+84 939969699".to_string()),
+        };
+        let serialized_user = serde_json::to_string(&update_user_request).unwrap();
+        let uri = format!(
+            "https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/users/{}",
+            deserialized_user.id.unwrap().to_hyphenated()
+        );
+        let mut path_param = HashMap::new();
+        path_param.insert(
+            "id".to_string(),
+            vec![new_user_id.unwrap().to_hyphenated().to_string()],
+        );
+        let request = http::Request::builder()
+            .uri("https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/users")
+            .method("PUT")
+            .header("Content-Type", "application/json")
+            .header("authorization", "Bearer 123445")
+            .body(Body::from(serialized_user))
+            .unwrap()
+            .with_path_parameters(path_param);
+        println!("request : {}", request.uri().to_string());
+        let mut context: Context = Context::default();
+        context.invoked_function_arn = "dev-sg_identity-service_users".to_string();
+
+        let response = user::func(request, context)
+            .await
+            .expect("expected Ok(_) value")
+            .into_response();
+
+        // Then
+        assert_eq!(response.status(), 200);
+
+        let deserialized_user: User = serde_json::from_slice(response.body()).unwrap();
+
+        assert!(!deserialized_user.id.is_none(), true);
+        assert_eq!(
+            deserialized_user.username,
+            "test_update_user_updated".to_string()
+        );
+        assert_eq!(
+            deserialized_user.email,
+            Option::from("test_update_user_updated@gmail.com".to_string())
+        );
+        assert_eq!(
+            deserialized_user.phone,
+            Option::from("+84 939969699".to_string())
+        );
+        println!("Update user successfully!");
     }
 
     // #[tokio::test]
@@ -429,7 +483,7 @@ mod tests {
         assert_eq!(response.status(), 200);
     }
 
-    #[tokio::test]
+    // #[tokio::test]
     async fn update_user_success() {
         initialise();
         println!("is it working?");
