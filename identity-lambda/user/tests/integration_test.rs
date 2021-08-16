@@ -77,6 +77,7 @@ mod tests {
     }
     #[tokio::test]
     async fn crud_user_success() {
+        truncate_data().await;
         initialise();
         println!("is it working?");
         env::set_var(
@@ -129,13 +130,10 @@ mod tests {
         let deserialized_user: User = serde_json::from_slice(response.body()).unwrap();
 
         assert!(!deserialized_user.id.is_none(), true);
-        assert_eq!(
-            deserialized_user.username,
-            "test_user".to_string() + &*test_suffix
-        );
+        assert_eq!(deserialized_user.username, "create_test_user".to_string());
         assert_eq!(
             deserialized_user.email,
-            Option::from("nhutcargo@gmail.com".to_string())
+            Option::from("create_test_user@gmail.com".to_string())
         );
         assert_eq!(
             deserialized_user.phone,
@@ -210,7 +208,7 @@ mod tests {
         let mut path_param = HashMap::new();
         path_param.insert(
             "id".to_string(),
-            vec![new_user_id.unwrap().to_hyphenated().to_string()],
+            vec![deserialized_user.id.unwrap().to_hyphenated().to_string()],
         );
         let request = http::Request::builder()
             .uri("https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/users")
