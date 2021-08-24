@@ -18,7 +18,7 @@ mod tests {
     use std::path::PathBuf;
     use std::sync::Once;
 
-    use hvcg_iam_openapi_identity::models::User;
+    use hvcg_iam_openapi_identity::models::{Group, User};
     use jsonwebtoken::TokenData;
     use lambda_http::http::HeaderValue;
     use lambda_http::{http, Context, RequestExt};
@@ -339,7 +339,7 @@ mod tests {
             "AWS_SECRET_ACCESS_KEY",
             std::env::var("AWS_SECRET_ACCESS_KEY").unwrap(),
         );
-
+        truncate_data().await;
         // Given
         let user_test = User {
             id: None,
@@ -347,7 +347,7 @@ mod tests {
             email: Option::from("test003@gmail.com".to_string()),
             phone: Option::from("+84 123456003".to_string()),
             enabled: None,
-            group: None,
+            group: Option::from(vec![Group::ADMIN_GROUP, Group::PROFESSOR_GROUP]),
         };
 
         let user = controller::create_user(&user_test).await;
@@ -394,7 +394,7 @@ mod tests {
             "AWS_SECRET_ACCESS_KEY",
             std::env::var("AWS_SECRET_ACCESS_KEY").unwrap(),
         );
-
+        truncate_data().await;
         // Given
         let first_user_test = User {
             id: None,
@@ -402,7 +402,7 @@ mod tests {
             email: Option::from("test004@gmail.com".to_string()),
             phone: Option::from("+84 123456004".to_string()),
             enabled: None,
-            group: None,
+            group: Option::from(vec![Group::ADMIN_GROUP, Group::PROFESSOR_GROUP]),
         };
 
         let second_user_test = User {
@@ -411,7 +411,7 @@ mod tests {
             email: Option::from("test005@gmail.com".to_string()),
             phone: Option::from("+84 123456005".to_string()),
             enabled: None,
-            group: None,
+            group: Option::from(vec![Group::ADMIN_GROUP, Group::PROFESSOR_GROUP]),
         };
 
         let first_user_test = controller::create_user(&first_user_test).await;
