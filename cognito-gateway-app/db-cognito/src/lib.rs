@@ -1,6 +1,6 @@
 mod main;
 
-use hvcg_iam_openapi_identity::models::{User, Group};
+use hvcg_iam_openapi_identity::models::{Group, User};
 use rusoto_cognito_idp::{
     AdminCreateUserRequest, AdminSetUserPasswordRequest, AdminUpdateAuthEventFeedbackRequest,
     AttributeType, CognitoIdentityProvider, CognitoIdentityProviderClient,
@@ -334,5 +334,5 @@ fn get_group_name(mut group: &Group) -> String {
         Group::PROFESSOR_GROUP => "ProfessorGroup".to_string(),
         Group::STUDENT_GROUP => "StudentGroup".to_string(),
         Group::UNKNOWN => "Unknown".to_string(),
-    }
+    };
 }

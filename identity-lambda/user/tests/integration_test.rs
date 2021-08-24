@@ -254,7 +254,7 @@ mod tests {
         assert_eq!(response.status(), 200);
 
         let deserialized_user: User = serde_json::from_slice(response.body()).unwrap();
-        println!("updated deserialized_user: {:?}", deserialized_user.clone());
+        println!("updated deserialized_user: {:?}", deserialized_user);
         assert!(!deserialized_user.id.is_none(), true);
         assert_eq!(
             deserialized_user.username,
@@ -268,7 +268,10 @@ mod tests {
             deserialized_user.phone,
             Option::from("+84 939969699".to_string())
         );
-        assert_eq!(deserialized_user.group.unwrap(), update_group_request.clone());
+        assert_eq!(
+            deserialized_user.group.unwrap(),
+            update_group_request.clone()
+        );
         println!("Update user successfully!");
     }
 

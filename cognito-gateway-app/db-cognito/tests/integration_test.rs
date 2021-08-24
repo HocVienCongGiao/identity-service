@@ -7,7 +7,7 @@ mod tests {
         activate_user_to_dynamodb, deactivate_user_to_dynamodb, insert_user_to_dynamodb,
         update_user_password, update_user_to_dynamodb,
     };
-    use hvcg_iam_openapi_identity::models::{User, Group};
+    use hvcg_iam_openapi_identity::models::{Group, User};
     use rusoto_core::credential::EnvironmentProvider;
     use rusoto_core::{HttpClient, Region};
     use rusoto_dynamodb::{
@@ -53,7 +53,7 @@ mod tests {
             email: None,
             phone: None,
             enabled: None,
-            group: None
+            group: None,
         };
 
         let result = activate_user_to_dynamodb(Option::from(user_dynamodb), table_name).await;
@@ -82,10 +82,7 @@ mod tests {
             email: Option::from("test_user_group1@gmail.com".to_string()),
             phone: Option::from("+84123456789".to_string()),
             enabled: Option::from(true),
-            group: Option::from(vec![
-                Group::ADMIN_GROUP,
-                Group::STUDENT_GROUP,
-            ])
+            group: Option::from(vec![Group::ADMIN_GROUP, Group::STUDENT_GROUP]),
         };
 
         let result = insert_user_to_dynamodb(Option::from(user_dynamodb), table_name).await;
@@ -115,7 +112,7 @@ mod tests {
             email: None,
             phone: None,
             enabled: None,
-            group: None
+            group: None,
         };
 
         let result = deactivate_user_to_dynamodb(Option::from(user_dynamodb), table_name).await;
@@ -141,7 +138,7 @@ mod tests {
             email: None,
             phone: None,
             enabled: None,
-            group: None
+            group: None,
         };
 
         let result = update_user_password(user, "Hvcg@123456".to_string()).await;
@@ -170,10 +167,7 @@ mod tests {
             email: Option::from("test_user_group1_updated_updated@gmail.com".to_string()),
             phone: Option::from("+84 987654321".to_string()),
             enabled: None,
-            group: Option::from(vec![
-                Group::OPERATOR_GROUP,
-                Group::PROFESSOR_GROUP
-            ])
+            group: Option::from(vec![Group::OPERATOR_GROUP, Group::PROFESSOR_GROUP]),
         };
 
         let result = update_user_to_dynamodb(Option::from(user_dynamodb), table_name).await;
