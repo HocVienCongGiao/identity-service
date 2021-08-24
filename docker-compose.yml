@@ -1,0 +1,14 @@
+version: '3.5'
+services:
+  postgres:
+    container_name: postgres11
+    image: postgres:11-alpine
+    environment:
+      POSTGRES_USER: hocvien_dev
+      POSTGRES_DB: dev_hocvien
+      POSTGRES_PASSWORD: 123456
+    volumes:
+      - ./db.sql:/docker-entrypoint-initdb.d/db.sql
+      - ./postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"

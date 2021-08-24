@@ -52,6 +52,7 @@ pub struct UserMutationRequest {
     pub username: String,
     pub email: Option<String>,
     pub phone: Option<String>,
+    pub group: Option<Vec<String>>,
 }
 
 pub struct Test1SimpleMutationResponse {}
@@ -66,6 +67,12 @@ pub struct UserDbResponse {
     pub email: String,
     pub phone: String,
     pub enabled: bool,
+    pub group: Vec<String>,
+}
+
+pub struct GroupDbResponse {
+    pub id: Uuid,
+    pub group_name: String,
 }
 
 pub struct UserMutationResponse {
@@ -74,6 +81,7 @@ pub struct UserMutationResponse {
     pub email: String,
     pub phone: String,
     pub enabled: bool,
+    pub group: Vec<String>,
 }
 
 pub struct UserQueryResponse {
@@ -82,22 +90,18 @@ pub struct UserQueryResponse {
     pub email: String,
     pub phone: String,
     pub enabled: bool,
+    pub group: Vec<String>,
 }
 
 pub trait MutationOutputBoundary {}
-
-#[async_trait]
-pub trait Test1DbGateway {
-    async fn exists_by_name(&self, name: String) -> bool;
-    async fn insert(&self, name: String, country: String) -> bool;
-}
 
 #[async_trait]
 pub trait UserDbGateway {
     async fn activate_user(&self, id: Uuid) -> Result<User, DbError>;
     async fn deactivate_user(&self, id: Uuid) -> Result<User, DbError>;
     async fn exists_by_username(&self, username: String) -> bool;
-    async fn insert(&self, user: &User) -> Result<(), DbError>;
+    async fn get_group_by_group_name(&self, group_name: &str) -> Option<GroupDbResponse>;
+    async fn insert(&self, user: &User, group_ids: Vec<Uuid>) -> Result<(), DbError>;
     async fn get_user_by_id(&self, id: Uuid) -> Option<UserDbResponse>;
     async fn get_users(
         &self,
@@ -108,7 +112,7 @@ pub trait UserDbGateway {
         offset: Option<u16>,
         count: Option<u16>,
     ) -> UserCollectionDbResponse;
-    async fn update(&self, user: &User) -> Result<(), DbError>;
+    async fn update(&self, user: &User, group_ids: Vec<Uuid>) -> Result<(), DbError>;
 }
 
 #[derive(Debug)]
@@ -119,6 +123,7 @@ pub enum UserMutationError {
     InvalidEmail,
     InvalidPhone,
     ExistedUser,
+    NotExistedGroup,
     UnknownError,
 }
 
