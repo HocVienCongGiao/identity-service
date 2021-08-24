@@ -328,11 +328,11 @@ where
 }
 
 fn get_group_name(mut group: &Group) -> String {
-    return match group {
+    match group {
         Group::ADMIN_GROUP => "AdminGroup".to_string(),
         Group::OPERATOR_GROUP => "OperatorGroup".to_string(),
         Group::PROFESSOR_GROUP => "ProfessorGroup".to_string(),
         Group::STUDENT_GROUP => "StudentGroup".to_string(),
         Group::UNKNOWN => "Unknown".to_string(),
-    };
+    }
 }
