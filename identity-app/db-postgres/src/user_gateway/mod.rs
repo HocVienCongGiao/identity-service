@@ -1,6 +1,10 @@
-use crate::user_gateway::query::get_user_by_id;
+use crate::user_gateway::query::{
+    get_groups_by_group_id, get_user_by_id, get_user_group_by_user_id,
+};
 use async_trait::async_trait;
-use domain::boundaries::{DbError, UserCollectionDbResponse, UserDbResponse, UserQueryResponse};
+use domain::boundaries::{
+    DbError, GroupDbResponse, UserCollectionDbResponse, UserDbResponse, UserQueryResponse,
+};
 use domain::entity::user::User;
 use tokio_postgres::{Client, Row};
 use uuid::Uuid;
@@ -30,12 +34,40 @@ impl domain::boundaries::UserDbGateway for UserRepository {
             return Err(DbError::UnknownError);
         }
 
+        let user = get_user_by_id(&(*self).client, id).await.unwrap();
+        // get user group by user id
+        let mut user_groups = get_user_group_by_user_id(&(*self).client, id)
+            .await
+            .unwrap();
+        if user_groups.is_empty() {
+            println!("User group is empty");
+            return Err(DbError::UnknownError);
+        }
+        let mut group_ids = vec![];
+        for row in user_groups {
+            let group_id = row.get("group_id");
+            group_ids.push(group_id);
+        }
+        let mut groups = get_groups_by_group_id(&(*self).client, group_ids)
+            .await
+            .unwrap();
+        if groups.is_empty() {
+            println!("Groups is empty");
+            return Err(DbError::UnknownError);
+        }
+        let mut group_names: Vec<String> = vec![];
+        for group in groups {
+            let group_name = group.get("group_name");
+            group_names.push(group_name)
+        }
+
         Ok(User {
             id: row.get("id"),
             username: row.get("username"),
             email: row.get("email"),
             phone: row.get("phone"),
             enabled: row.get("enabled"),
+            group: Option::from(group_names),
         })
     }
 
@@ -48,12 +80,41 @@ impl domain::boundaries::UserDbGateway for UserRepository {
         }
 
         let user = get_user_by_id(&(*self).client, id).await.unwrap();
+        // get user group by user id
+        let mut user_groups = get_user_group_by_user_id(&(*self).client, id)
+            .await
+            .unwrap();
+        if user_groups.is_empty() {
+            println!("User group is empty");
+            return Err(DbError::UnknownError);
+        }
+        let mut group_ids = vec![];
+        for row in user_groups {
+            let group_id = row.get("group_id");
+            group_ids.push(group_id);
+        }
+        println!("group_ids: {:?}", group_ids);
+        let mut groups = get_groups_by_group_id(&(*self).client, group_ids)
+            .await
+            .unwrap();
+        println!("mut_groups_result: {:?}", groups);
+        if groups.is_empty() {
+            println!("Groups is empty");
+            return Err(DbError::UnknownError);
+        }
+        let mut group_names: Vec<String> = vec![];
+        for group in groups {
+            let group_name: String = group.get("group_name");
+            group_names.push(group_name)
+        }
+
         Ok(User {
             id: user.get("id"),
             username: user.get("username"),
             email: user.get("email"),
             phone: user.get("phone"),
             enabled: user.get("enabled"),
+            group: Option::from(group_names),
         })
     }
 
@@ -69,7 +130,22 @@ impl domain::boundaries::UserDbGateway for UserRepository {
         name_found == username
     }
 
-    async fn insert(&self, user: &User) -> Result<(), DbError> {
+    async fn get_group_by_group_name(&self, group_name: &str) -> Option<GroupDbResponse> {
+        let result = query::get_group_by_group_name(&(*self).client, &group_name).await;
+
+        println!("second block_on for row");
+        if result.is_err() {
+            return None;
+        }
+        println!("user query input boundary {}", group_name);
+
+        let row = result.unwrap();
+        println!("get_group_by_group_name : {:?}", row);
+
+        Some(convert_to_group_db_response(row))
+    }
+
+    async fn insert(&self, user: &User, group_ids: Vec<Uuid>) -> Result<(), DbError> {
         println!("Start insert user to db");
 
         let save_identity_user = mutation::save_identity_user(&(*self).client, user).await;
@@ -101,6 +177,12 @@ impl domain::boundaries::UserDbGateway for UserRepository {
         let save_identity_user_enabled =
             mutation::save_identity_user_enabled(&(*self).client, user).await;
         if save_identity_user_enabled.is_err() {
+            return Err(DbError::UnknownError);
+        }
+
+        let save_identity_user_group =
+            mutation::save_identity_user_group(&(*self).client, user, group_ids).await;
+        if !save_identity_user_group {
             return Err(DbError::UnknownError);
         }
 
@@ -162,7 +244,7 @@ impl domain::boundaries::UserDbGateway for UserRepository {
         }
     }
 
-    async fn update(&self, user: &User) -> Result<(), DbError> {
+    async fn update(&self, user: &User, group_ids: Vec<Uuid>) -> Result<(), DbError> {
         println!("Start update user to db");
         if !user.username.is_empty() {
             let update_identity_username =
@@ -196,6 +278,14 @@ impl domain::boundaries::UserDbGateway for UserRepository {
                 update_identity_email
             );
             if update_identity_email.is_err() {
+                return Err(DbError::UnknownError);
+            }
+        }
+
+        if user.group.is_some() {
+            let update_identity_group =
+                mutation::update_identity_user_group(&(*self).client, user, group_ids).await;
+            if !update_identity_group {
                 return Err(DbError::UnknownError);
             }
         }
@@ -282,7 +372,15 @@ fn convert_to_user_db_response(row: Row) -> UserDbResponse {
         email,
         phone,
         enabled,
+        group: vec![],
     }
+}
+
+fn convert_to_group_db_response(row: Row) -> GroupDbResponse {
+    let id: Uuid = row.get("id");
+    let group_name: String = row.get("group_name");
+
+    GroupDbResponse { id, group_name }
 }
 
 fn is_search_username_phone_email(

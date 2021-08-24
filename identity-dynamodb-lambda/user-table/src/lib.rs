@@ -1,8 +1,9 @@
 use lambda_runtime::{Context, Error};
 use rusoto_cognito_idp::{
-    AdminCreateUserRequest, AdminDisableUserRequest, AdminEnableUserRequest,
-    AdminUpdateUserAttributesRequest, AttributeType, CognitoIdentityProvider,
-    CognitoIdentityProviderClient,
+    AdminAddUserToGroupRequest, AdminCreateUserRequest, AdminDisableUserRequest,
+    AdminEnableUserRequest, AdminGetUserRequest, AdminListGroupsForUserRequest,
+    AdminRemoveUserFromGroupRequest, AdminUpdateUserAttributesRequest, AttributeType,
+    CognitoIdentityProvider, CognitoIdentityProviderClient,
 };
 use rusoto_core::credential::EnvironmentProvider;
 use rusoto_core::{Client, HttpClient, Region};
@@ -11,8 +12,8 @@ use serde_json::{json, Value};
 use std::collections::HashMap;
 use std::str::FromStr;
 use strum_macros::EnumString;
-
 pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
+    let mut temp_password: String = "Hvcg@123456789".to_string();
     println!("welcome to dynamodb processor!!!!");
     println!("Event payload is {:?}", event);
 
@@ -78,8 +79,9 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
 
     if item.as_ref().unwrap().get("username").is_none()
         || item.as_ref().unwrap().get("email").is_none()
-        || item.as_ref().unwrap().get("enabled ").is_none()
+        || item.as_ref().unwrap().get("group").is_none()
     {
+        println!("Username or email or group not found.");
         return Ok(json!({ "message": "Username or email or enabled not found." }));
     }
     let username_dynamodb = item
@@ -100,6 +102,11 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
         .get("enabled")
         .and_then(|value| value.s.clone());
 
+    let groups = item
+        .as_ref()
+        .unwrap()
+        .get("group")
+        .and_then(|value| value.ss.clone());
     // Insert user to cognito
     let aws_client = Client::shared();
     let rusoto_cognito_idp_client =
@@ -123,16 +130,46 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
             desired_delivery_mediums: None,
             force_alias_creation: None,
             message_action: None,
-            temporary_password: Option::from("Hvcg@123456789".to_string()),
+            temporary_password: Option::from(temp_password),
             user_attributes: Option::from(user_attributes),
-            user_pool_id: cognito_user_pool_id,
-            username: username_dynamodb.unwrap(),
+            user_pool_id: cognito_user_pool_id.clone(),
+            username: username_dynamodb.clone().unwrap(),
             validation_data: None,
         };
 
         let result_cognito = rusoto_cognito_idp_client
             .admin_create_user(admin_create_user_request)
             .sync();
+
+        let mut user_groups = groups.unwrap();
+
+        if user_groups.is_empty() {
+            println!("Groups not found.");
+            return Ok(json!({ "message": "Groups is empty".to_string()}));
+        }
+        for group_name in user_groups {
+            println!("group_name: {}", group_name.clone());
+            if group_name.is_empty() {
+                println!("group name is empty");
+                return Ok(json!({
+                    "message": "Group name is empty"
+                }));
+            }
+            let admin_add_user_to_group = AdminAddUserToGroupRequest {
+                group_name: group_name.clone(),
+                user_pool_id: cognito_user_pool_id.clone(),
+                username: username_dynamodb.clone().unwrap(),
+            };
+            let result = rusoto_cognito_idp_client
+                .admin_add_user_to_group(admin_add_user_to_group)
+                .sync();
+            if result.is_err() {
+                println!("error while add user to group: {:?}", result);
+                return Ok(json!({
+                    "message": format!("Error while add user to group {}", group_name)
+                }));
+            }
+        }
 
         Ok(json!({
             "message": format!("Cognito insert result, {:?}!", result_cognito.is_ok())
@@ -160,6 +197,21 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
                     )
             }));
         }
+
+        let mut user_groups = groups.unwrap();
+
+        if user_groups.is_empty() {
+            println!("Groups not found.");
+            return Ok(json!({
+                "message": "Groups is empty.".to_string()
+            }));
+        }
+        update_cognito_user_group(
+            user_name.clone(),
+            cognito_user_pool_id.clone(),
+            user_groups,
+            rusoto_cognito_idp_client.clone(),
+        );
 
         if enabled.unwrap() == *"false" {
             let admin_disable_user_request = AdminDisableUserRequest {
@@ -212,6 +264,60 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
     }
 }
 
+fn update_cognito_user_group(
+    user_name: String,
+    cognito_user_pool_id: String,
+    user_groups: Vec<String>,
+    rusoto_cognito_idp_client: CognitoIdentityProviderClient,
+) -> bool {
+    let mut result = true;
+    // get user
+    let admin_list_group_for_user = AdminListGroupsForUserRequest {
+        limit: None,
+        next_token: None,
+        user_pool_id: cognito_user_pool_id.clone(),
+        username: user_name.clone(),
+    };
+
+    let admin_list_group_for_user_result = rusoto_cognito_idp_client
+        .admin_list_groups_for_user(admin_list_group_for_user)
+        .sync();
+    let current_group = admin_list_group_for_user_result.unwrap().groups.unwrap();
+    for group in current_group {
+        let remove_group_result = rusoto_cognito_idp_client
+            .admin_remove_user_from_group(AdminRemoveUserFromGroupRequest {
+                group_name: group.group_name.as_ref().unwrap().clone(),
+                user_pool_id: cognito_user_pool_id.clone(),
+                username: user_name.clone(),
+            })
+            .sync();
+        if remove_group_result.is_err() {
+            println!("Error while removing group: {:?}", group);
+            result = false;
+        }
+    }
+
+    for group_name in user_groups {
+        println!("group_name: {}", group_name.clone());
+        if group_name.is_empty() {
+            println!("group name is empty");
+            result = false
+        }
+        let admin_add_user_to_group = AdminAddUserToGroupRequest {
+            group_name: group_name.clone(),
+            user_pool_id: cognito_user_pool_id.clone(),
+            username: user_name.clone(),
+        };
+        let result_add_user_group = rusoto_cognito_idp_client
+            .admin_add_user_to_group(admin_add_user_to_group)
+            .sync();
+        if result_add_user_group.is_err() {
+            println!("error while add user to group: {:?}", result);
+            result = false;
+        }
+    }
+    result
+}
 fn get_user_pool_id(invoked_function_arn: String) -> String {
     if invoked_function_arn.contains("prod") {
         "ap-southeast-1_03CBODhXO"

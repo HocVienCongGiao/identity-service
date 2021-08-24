@@ -113,3 +113,61 @@ pub async fn update_identity_user_email(client: &Client, user: &User) -> Result<
     let params: &[&(dyn ToSql + Sync)] = &[&user.email, &user.id];
     client.execute(&stmt, params).await
 }
+
+pub async fn save_identity_user_group(client: &Client, user: &User, group_ids: Vec<Uuid>) -> bool {
+    for group_id in group_ids {
+        let user_group_id = Uuid::new_v4();
+        println!("user_group_id: {}", user_group_id);
+        let stmt = (*client)
+            .prepare("INSERT into identity__user_group(id, user_id, group_id) VALUES ($1, $2, $3)")
+            .await
+            .unwrap();
+        let params: &[&(dyn ToSql + Sync)] = &[&user_group_id, &user.id, &group_id];
+        let result = client.execute(&stmt, params).await;
+        if result.is_err() {
+            return false;
+        }
+    }
+    true
+}
+
+pub async fn update_identity_user_group(
+    client: &Client,
+    user: &User,
+    group_ids: Vec<Uuid>,
+) -> bool {
+    // Remove existing group with this customer id
+    let delete_user_group_result = delete_user_group_by_user_id(client, &user.id).await;
+    if delete_user_group_result.is_err() {
+        print!(
+            "Error when delete user group: {:?}",
+            delete_user_group_result
+        );
+        return false;
+    }
+    for group_id in group_ids {
+        let user_group_id = Uuid::new_v4();
+        println!("user_group_id: {}", user_group_id);
+        let stmt = (*client)
+            .prepare("INSERT into identity__user_group(id, user_id, group_id) VALUES ($1, $2, $3)")
+            .await
+            .unwrap();
+        let params: &[&(dyn ToSql + Sync)] = &[&user_group_id, &user.id, &group_id];
+        let result = client.execute(&stmt, params).await;
+        if result.is_err() {
+            return false;
+        }
+    }
+    true
+}
+
+pub async fn delete_user_group_by_user_id(client: &Client, user_id: &Uuid) -> Result<u64, Error> {
+    let stmt = (*client)
+        .prepare("DELETE FROM identity__user_group WHERE user_id = $1")
+        .await
+        .unwrap();
+    println!("delete_user_group_by_user_id id: {}", &user_id);
+
+    let params: &[&(dyn ToSql + Sync)] = &[&user_id];
+    client.execute(&stmt, params).await
+}

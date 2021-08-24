@@ -1,6 +1,6 @@
 mod main;
 
-use hvcg_iam_openapi_identity::models::User;
+use hvcg_iam_openapi_identity::models::{User, Group};
 use rusoto_cognito_idp::{
     AdminCreateUserRequest, AdminSetUserPasswordRequest, AdminUpdateAuthEventFeedbackRequest,
     AttributeType, CognitoIdentityProvider, CognitoIdentityProviderClient,
@@ -122,6 +122,19 @@ pub async fn insert_user_to_dynamodb(user: Option<&User>, user_table_name: Strin
         String::from("enabled"),
         AttributeValue {
             s: Some("true".parse().unwrap()),
+            ..Default::default()
+        },
+    );
+
+    let mut user_group = user_dynamodb.group.clone().unwrap();
+    let mut groups: Vec<String> = vec![];
+    for group in &mut user_group {
+        groups.push(get_group_name(group))
+    }
+    user_attributes.insert(
+        String::from("group"),
+        AttributeValue {
+            ss: Some(groups),
             ..Default::default()
         },
     );
@@ -249,6 +262,23 @@ pub async fn update_user_to_dynamodb(user: Option<&User>, user_table_name: Strin
         },
     );
 
+    let mut user_group = user_dynamodb.group.clone().unwrap();
+    let mut groups: Vec<String> = vec![];
+    for group in &mut user_group {
+        groups.push(get_group_name(group))
+    }
+
+    attribute_updates.insert(
+        String::from("group"),
+        AttributeValueUpdate {
+            action: Option::from("PUT".to_string()),
+            value: Option::from(AttributeValue {
+                ss: Option::from(groups),
+                ..Default::default()
+            }),
+        },
+    );
+
     let result = client
         .update_item(UpdateItemInput {
             table_name: user_table_name,
@@ -295,4 +325,14 @@ where
     let mut hasher = DefaultHasher::new();
     obj.hash(&mut hasher);
     hasher.finish()
+}
+
+fn get_group_name(mut group: &Group) -> String {
+    return match group {
+        Group::ADMIN_GROUP => "AdminGroup".to_string(),
+        Group::OPERATOR_GROUP => "OperatorGroup".to_string(),
+        Group::PROFESSOR_GROUP => "ProfessorGroup".to_string(),
+        Group::STUDENT_GROUP => "StudentGroup".to_string(),
+        Group::UNKNOWN => "Unknown".to_string(),
+    }
 }

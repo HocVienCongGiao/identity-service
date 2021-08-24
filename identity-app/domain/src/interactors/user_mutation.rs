@@ -53,13 +53,19 @@ where
             return Err(UserMutationError::InvalidPhone);
         }
 
-        if (*self)
-            .db_gateway
-            .exists_by_username(request.username.clone())
-            .await
-        {
-            println!("user with this {} already exists", request.username);
-            return Err(UserMutationError::ExistedUser);
+        let mut request_group_name = request.group.clone().unwrap();
+
+        let mut group_ids = vec![];
+        for group_name in &mut request_group_name {
+            let group_result = (*self)
+                .db_gateway
+                .get_group_by_group_name(&group_name)
+                .await;
+            if group_result.is_none() {
+                println!("Group with name {} does not exist.", &group_name);
+                return Err(UserMutationError::NotExistedGroup);
+            }
+            group_ids.push(group_result.unwrap().id)
         }
 
         println!("new user, all is good");
@@ -69,13 +75,14 @@ where
             email: request.email,
             phone: request.phone,
             enabled: true,
+            group: request.group,
         };
 
         if !is_not_valid_username {
             println!("This user is valid");
             (*self)
                 .db_gateway
-                .insert(&user)
+                .insert(&user, group_ids)
                 .await
                 .map(|_| user.to_user_mutation_response())
                 .map_err(|err| err.to_user_mutation_error())
@@ -115,6 +122,18 @@ where
             "update current user id: {:?}",
             current_user.as_ref().unwrap().id
         );
+
+        let mut request_group_name = request.group.clone().unwrap();
+
+        let mut group_ids = vec![];
+        for group_name in &mut request_group_name {
+            let group_result = (*self)
+                .db_gateway
+                .get_group_by_group_name(&group_name)
+                .await;
+            group_ids.push(group_result.unwrap().id)
+        }
+
         println!("update user, all is good");
         let user = crate::entity::user::User {
             id: user_id,
@@ -122,10 +141,12 @@ where
             email: request.email,
             phone: request.phone,
             enabled: current_user.as_ref().unwrap().enabled,
+            group: request.group,
         };
+
         let result = (*self)
             .db_gateway
-            .update(&user)
+            .update(&user, group_ids)
             .await
             .map(|_| user.to_user_mutation_response())
             .map_err(|err| err.to_user_mutation_error());
@@ -161,6 +182,7 @@ impl crate::entity::user::User {
             email: self.email.clone().unwrap(),
             phone: self.phone.clone().unwrap(),
             enabled: self.enabled,
+            group: self.group.clone().unwrap(),
         }
     }
 }

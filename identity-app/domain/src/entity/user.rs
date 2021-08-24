@@ -6,4 +6,5 @@ pub struct User {
     pub email: Option<String>,
     pub phone: Option<String>,
     pub enabled: bool,
+    pub group: Option<Vec<String>>,
 }

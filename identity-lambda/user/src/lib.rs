@@ -226,6 +226,7 @@ fn set_status_code(result: &Result<User, UserMutationError>) -> u16 {
         Err(UserMutationError::InvalidUser) => 405,
         Err(UserMutationError::InvalidEmail) => 405,
         Err(UserMutationError::InvalidPhone) => 405,
+        Err(UserMutationError::NotExistedGroup) => 405,
         Err(UserMutationError::ExistedUser) => 400,
         Err(UserMutationError::UnknownError) | Err(UserMutationError::IdCollisionError) => 500,
     }
@@ -244,6 +245,8 @@ fn empty_response(_req: Request) -> Response<Body> {
                 username: "".to_string(),
                 email: None,
                 phone: None,
+                enabled: None,
+                group: None
             })
             .expect("unable to serialize user_json::Value")
             .into(),

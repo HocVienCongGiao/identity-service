@@ -71,6 +71,7 @@ impl UserDbResponse {
             email: self.email.to_string(),
             phone: self.phone.to_string(),
             enabled: self.enabled,
+            group: self.group.clone(),
         }
     }
 }

@@ -55,7 +55,7 @@ mod tests {
 
         hash_key_object_details.insert(
             "S".to_string(),
-            Value::String("5285243916027018465".to_string()),
+            Value::String("16409123419541265597".to_string()),
         );
         hash_key_object.insert(
             "HashKey".to_string(),
@@ -99,21 +99,21 @@ mod tests {
 
         assert!(!result.is_err());
 
-        let aws_client = Client::shared();
-        let user_pool_id = "ap-southeast-1_9QWSYGzXk".to_string();
-        let rusoto_cognito_idp_client =
-            CognitoIdentityProviderClient::new_with_client(aws_client, Region::ApSoutheast1);
-
-        let test_username = "user_donot_delete_create".to_string();
-        let admin_delete_user_request = AdminDeleteUserRequest {
-            user_pool_id,
-            username: test_username,
-        };
-
-        let delete_result = rusoto_cognito_idp_client
-            .admin_delete_user(admin_delete_user_request)
-            .sync();
-        println!("delete result: {:?}", delete_result);
+        // let aws_client = Client::shared();
+        // let user_pool_id = "ap-southeast-1_9QWSYGzXk".to_string();
+        // let rusoto_cognito_idp_client =
+        //     CognitoIdentityProviderClient::new_with_client(aws_client, Region::ApSoutheast1);
+        //
+        // let test_username = "test_add_user_group".to_string();
+        // let admin_delete_user_request = AdminDeleteUserRequest {
+        //     user_pool_id,
+        //     username: test_username,
+        // };
+        //
+        // let delete_result = rusoto_cognito_idp_client
+        //     .admin_delete_user(admin_delete_user_request)
+        //     .sync();
+        // println!("delete result: {:?}", delete_result);
     }
 
     #[tokio::test]
@@ -182,7 +182,7 @@ mod tests {
 
         hash_key_object_details.insert(
             "S".to_string(),
-            Value::String("12358323330878084114".to_string()),
+            Value::String("5776488286062203382".to_string()),
         );
         hash_key_object.insert(
             "HashKey".to_string(),

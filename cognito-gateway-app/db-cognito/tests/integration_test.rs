@@ -7,7 +7,7 @@ mod tests {
         activate_user_to_dynamodb, deactivate_user_to_dynamodb, insert_user_to_dynamodb,
         update_user_password, update_user_to_dynamodb,
     };
-    use hvcg_iam_openapi_identity::models::User;
+    use hvcg_iam_openapi_identity::models::{User, Group};
     use rusoto_core::credential::EnvironmentProvider;
     use rusoto_core::{HttpClient, Region};
     use rusoto_dynamodb::{
@@ -52,6 +52,8 @@ mod tests {
             username: "".to_string(),
             email: None,
             phone: None,
+            enabled: None,
+            group: None
         };
 
         let result = activate_user_to_dynamodb(Option::from(user_dynamodb), table_name).await;
@@ -76,9 +78,14 @@ mod tests {
 
         let user_dynamodb = &User {
             id: Option::from(Uuid::new_v4()),
-            username: "nhut_donot_delete".to_string(),
-            email: Option::from("donotdelete@gmail.com".to_string()),
+            username: "test_user_group".to_string(),
+            email: Option::from("test_user_group1@gmail.com".to_string()),
             phone: Option::from("+84123456789".to_string()),
+            enabled: Option::from(true),
+            group: Option::from(vec![
+                Group::ADMIN_GROUP,
+                Group::STUDENT_GROUP,
+            ])
         };
 
         let result = insert_user_to_dynamodb(Option::from(user_dynamodb), table_name).await;
@@ -107,6 +114,8 @@ mod tests {
             username: "".to_string(),
             email: None,
             phone: None,
+            enabled: None,
+            group: None
         };
 
         let result = deactivate_user_to_dynamodb(Option::from(user_dynamodb), table_name).await;
@@ -131,6 +140,8 @@ mod tests {
             username: "nhut_donot_delete".to_string(),
             email: None,
             phone: None,
+            enabled: None,
+            group: None
         };
 
         let result = update_user_password(user, "Hvcg@123456".to_string()).await;
@@ -152,12 +163,17 @@ mod tests {
 
         let table_name = "dev-sg_UserTable".to_string();
 
-        let uuid = Uuid::parse_str("f6ebd43d-ca3b-4695-85e7-97d1dfba2b2b").unwrap();
+        let uuid = Uuid::parse_str("45cd758d-a99b-4d26-b851-c75779674ebb").unwrap();
         let user_dynamodb = &User {
             id: Option::from(uuid),
-            username: "test_update_user".to_string(),
-            email: Option::from("test_update_user@gmail.com".to_string()),
+            username: "test_user_group1_updated".to_string(),
+            email: Option::from("test_user_group1_updated_updated@gmail.com".to_string()),
             phone: Option::from("+84 987654321".to_string()),
+            enabled: None,
+            group: Option::from(vec![
+                Group::OPERATOR_GROUP,
+                Group::PROFESSOR_GROUP
+            ])
         };
 
         let result = update_user_to_dynamodb(Option::from(user_dynamodb), table_name).await;
