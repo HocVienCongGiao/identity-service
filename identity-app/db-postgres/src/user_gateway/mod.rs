@@ -131,7 +131,7 @@ impl domain::boundaries::UserDbGateway for UserRepository {
     }
 
     async fn get_group_by_group_name(&self, group_name: &str) -> Option<GroupDbResponse> {
-        let result = query::get_group_by_group_name(&(*self).client, &group_name).await;
+        let result = query::get_group_by_group_name(&(*self).client, group_name).await;
 
         println!("second block_on for row");
         if result.is_err() {
