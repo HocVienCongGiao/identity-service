@@ -57,10 +57,7 @@ where
 
         let mut group_ids = vec![];
         for group_name in &mut request_group_name {
-            let group_result = (*self)
-                .db_gateway
-                .get_group_by_group_name(&group_name)
-                .await;
+            let group_result = (*self).db_gateway.get_group_by_group_name(group_name).await;
             if group_result.is_none() {
                 println!("Group with name {} does not exist.", &group_name);
                 return Err(UserMutationError::NotExistedGroup);
@@ -127,10 +124,7 @@ where
 
         let mut group_ids = vec![];
         for group_name in &mut request_group_name {
-            let group_result = (*self)
-                .db_gateway
-                .get_group_by_group_name(&group_name)
-                .await;
+            let group_result = (*self).db_gateway.get_group_by_group_name(group_name).await;
             group_ids.push(group_result.unwrap().id)
         }
 
