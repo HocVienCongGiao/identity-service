@@ -34,7 +34,6 @@ impl domain::boundaries::UserDbGateway for UserRepository {
             return Err(DbError::UnknownError);
         }
 
-        let user = get_user_by_id(&(*self).client, id).await.unwrap();
         // get user group by user id
         let mut user_groups = get_user_group_by_user_id(&(*self).client, id)
             .await
@@ -72,14 +71,19 @@ impl domain::boundaries::UserDbGateway for UserRepository {
     }
 
     async fn deactivate_user(&self, id: Uuid) -> Result<User, DbError> {
+        let user = get_user_by_id(&(*self).client, id).await.unwrap();
+        if user.is_empty() {
+            println!("User with id {} is empty", id);
+            return Err(DbError::UnknownError);
+        }
         let deactivate_user = mutation::deactivate_identity_user(&(*self).client, id).await;
         println!("deactivate_user_result: {}", deactivate_user.is_ok());
 
         if deactivate_user.is_err() {
+            println!("Error while deactivate user db");
             return Err(DbError::UnknownError);
         }
 
-        let user = get_user_by_id(&(*self).client, id).await.unwrap();
         // get user group by user id
         let mut user_groups = get_user_group_by_user_id(&(*self).client, id)
             .await
