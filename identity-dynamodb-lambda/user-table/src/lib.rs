@@ -67,7 +67,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
             return_consumed_capacity: None,
             table_name: user_table_name,
         })
-        .sync();
+        .await;
 
     println!("dynamodb user: {:?}", user);
 
@@ -127,6 +127,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
         println!("Start insert user to cognito");
         let user_attributes: Vec<AttributeType> = vec![email_user_attribute];
         let admin_create_user_request = AdminCreateUserRequest {
+            client_metadata: None,
             desired_delivery_mediums: None,
             force_alias_creation: None,
             message_action: None,
@@ -139,7 +140,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
 
         let result_cognito = rusoto_cognito_idp_client
             .admin_create_user(admin_create_user_request)
-            .sync();
+            .await;
 
         let mut user_groups = groups.unwrap();
 
@@ -162,7 +163,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
             };
             let result = rusoto_cognito_idp_client
                 .admin_add_user_to_group(admin_add_user_to_group)
-                .sync();
+                .await;
             if result.is_err() {
                 println!("error while add user to group: {:?}", result);
                 return Ok(json!({
@@ -180,6 +181,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
         let update_user_attributes: Vec<AttributeType> = vec![email_user_attribute];
 
         let admin_user_attribute_update_request = AdminUpdateUserAttributesRequest {
+            client_metadata: None,
             user_attributes: update_user_attributes,
             user_pool_id: cognito_user_pool_id.clone(),
             username: user_name.clone(),
@@ -187,7 +189,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
 
         let result_cognito = rusoto_cognito_idp_client
             .admin_update_user_attributes(admin_user_attribute_update_request)
-            .sync();
+            .await;
         if result_cognito.is_err() {
             return Ok(json!({
                 "message":
@@ -211,7 +213,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
             cognito_user_pool_id.clone(),
             user_groups,
             rusoto_cognito_idp_client.clone(),
-        );
+        ).await;
 
         if enabled.unwrap() == *"false" {
             let admin_disable_user_request = AdminDisableUserRequest {
@@ -221,7 +223,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
 
             let result_cognito = rusoto_cognito_idp_client
                 .admin_disable_user(admin_disable_user_request)
-                .sync();
+                .await;
 
             if result_cognito.is_err() {
                 return Ok(json!({
@@ -240,7 +242,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
 
             let result_cognito = rusoto_cognito_idp_client
                 .admin_enable_user(admin_enabled_user_request)
-                .sync();
+                .await;
 
             if result_cognito.is_err() {
                 return Ok(json!({
@@ -264,7 +266,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
     }
 }
 
-fn update_cognito_user_group(
+async fn update_cognito_user_group(
     user_name: String,
     cognito_user_pool_id: String,
     user_groups: Vec<String>,
@@ -281,7 +283,7 @@ fn update_cognito_user_group(
 
     let admin_list_group_for_user_result = rusoto_cognito_idp_client
         .admin_list_groups_for_user(admin_list_group_for_user)
-        .sync();
+        .await;
     let current_group = admin_list_group_for_user_result.unwrap().groups.unwrap();
     for group in current_group {
         let remove_group_result = rusoto_cognito_idp_client
@@ -290,7 +292,7 @@ fn update_cognito_user_group(
                 user_pool_id: cognito_user_pool_id.clone(),
                 username: user_name.clone(),
             })
-            .sync();
+            .await;
         if remove_group_result.is_err() {
             println!("Error while removing group: {:?}", group);
             result = false;
@@ -310,7 +312,7 @@ fn update_cognito_user_group(
         };
         let result_add_user_group = rusoto_cognito_idp_client
             .admin_add_user_to_group(admin_add_user_to_group)
-            .sync();
+            .await;
         if result_add_user_group.is_err() {
             println!("error while add user to group: {:?}", result);
             result = false;

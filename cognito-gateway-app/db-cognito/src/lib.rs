@@ -54,7 +54,7 @@ pub async fn activate_user_to_dynamodb(user: Option<&User>, user_table_name: Str
             attribute_updates: Option::from(attribute_updates),
             ..UpdateItemInput::default()
         })
-        .sync();
+        .await;
 
     if result.is_err() {
         println!("put_item() result {:#?}", result.as_ref().err());
@@ -145,7 +145,7 @@ pub async fn insert_user_to_dynamodb(user: Option<&User>, user_table_name: Strin
             item: user_attributes,
             ..PutItemInput::default()
         })
-        .sync();
+        .await;
 
     if result.is_err() {
         println!("put_item() result {:#?}", result.as_ref().err());
@@ -196,7 +196,7 @@ pub async fn deactivate_user_to_dynamodb(user: Option<&User>, user_table_name: S
             attribute_updates: Option::from(attribute_updates),
             ..UpdateItemInput::default()
         })
-        .sync();
+        .await;
 
     if result.is_err() {
         println!("put_item() result {:#?}", result.as_ref().err());
@@ -286,7 +286,7 @@ pub async fn update_user_to_dynamodb(user: Option<&User>, user_table_name: Strin
             attribute_updates: Option::from(attribute_updates),
             ..UpdateItemInput::default()
         })
-        .sync();
+        .await;
 
     if result.is_err() {
         println!("put_item() result {:#?}", result.as_ref().err());
@@ -312,7 +312,7 @@ pub async fn update_user_password(user: &User, plain_password: String) -> bool {
 
     let result_cognito = rusoto_cognito_idp_client
         .admin_set_user_password(admin_set_user_password_request)
-        .sync();
+        .await;
     let is_ok_result = result_cognito.is_ok();
     println!("Update password result: {}", is_ok_result);
     is_ok_result
