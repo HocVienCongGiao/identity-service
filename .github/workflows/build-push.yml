@@ -156,7 +156,7 @@ jobs:
         ls -l ./lambda/terraform/module/python/
         cd ./lambda/terraform/module/python/ && python -c 'from shared_db_app.migration import migrate; migrate()'
         echo "migrate successfully"
-        psql -h 0.0.0.0 -U hocvien_dev -d dev_hocvien -p 5432 -c 'SELECT * FROM public.identity__user' -w
+        psql -h 0.0.0.0 -U hocvien_dev -d dev_hocvien -p 5432 -c 'SELECT * FROM public.identity__group' -w
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
