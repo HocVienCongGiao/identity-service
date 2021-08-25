@@ -438,6 +438,7 @@ mod tests {
         // Then
         println!("response: {:?}", response);
         assert_eq!(response.status(), 200);
+        println!("Trigger build");
     }
 
     fn hash<T>(obj: T) -> u64
