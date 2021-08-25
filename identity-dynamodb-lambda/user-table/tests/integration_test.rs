@@ -246,6 +246,6 @@ mod tests {
         let mut context: Context = Context::default();
         context.invoked_function_arn = "dev-sg_identity-service_users".to_string();
         let result = func(event, context).await;
-        print!("Update user result: {:?}", result.unwrap());
+        print!("Updated user result: {:?}", result.unwrap());
     }
 }
