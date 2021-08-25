@@ -72,10 +72,6 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn cleanup_data() {
-        truncate_data().await;
-    }
-    #[tokio::test]
     async fn crud_user_success() {
         truncate_data().await;
         initialise();
@@ -152,7 +148,11 @@ mod tests {
                 hvcg_iam_openapi_identity::models::Group::STUDENT_GROUP
             ])
         );
-        println!("Create user successfully!");
+        println!(
+            "Create user successfully with id {:?}",
+            deserialized_user.id.unwrap()
+        );
+
         // Deactivate user
         let deactivate_request = User {
             id: Option::from(deserialized_user.id.unwrap()),
@@ -295,7 +295,7 @@ mod tests {
             email: Option::from("nhut_donot_delete@gmail.com".to_string()),
             phone: Option::from("+84 123456002".to_string()),
             enabled: None,
-            group: None,
+            group: Option::from(vec![Group::ADMIN_GROUP]),
         };
 
         let user = controller::create_user(&user_test).await;
