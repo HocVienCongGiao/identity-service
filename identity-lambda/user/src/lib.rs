@@ -36,10 +36,8 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
     match *request.method() {
         method::Method::GET => {
             println!("Handle get method.");
-            let request_user_id = get_id_from_request(&request);
-            if request_user_id.is_some() {
-                let id = request_user_id.unwrap();
-                println!("Get user by id: {}", id);
+            if let Some(id) = get_id_from_request(&request) {
+                println!("Get user by id: {}", id.clone());
                 user_collection = None;
                 user_response = controller::get_user_by_id(id).await;
                 status_code = 200;
