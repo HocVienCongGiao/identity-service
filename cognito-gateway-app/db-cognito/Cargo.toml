@@ -7,9 +7,9 @@ edition = "2018"
 chrono = "0.4.19"
 #domain = { path = "../../cognito-gateway-app/domain" }
 tokio = { version = "1.6.0", features = ["full"] }
-rusoto_core = { version = "0.42.0", default_features = false, features = ["rustls"] }
-rusoto_cognito_idp = { version = "0.42.0", default_features = false, features = ["rustls"] }
-rusoto_dynamodb = { version = "0.42.0", default_features = false, features = ["rustls"] }
+rusoto_core = { version = "0.47.0", default_features = false, features = ["rustls"] }
+rusoto_cognito_idp = { version = "0.47.0", default_features = false, features = ["rustls"] }
+rusoto_dynamodb = { version = "0.47.0", default_features = false, features = ["rustls"] }
 rusoto_credential = { version = "0.43.0" }
 serde_dynamodb = { version = "0.9.0"}
 serde_json = "1.0"
