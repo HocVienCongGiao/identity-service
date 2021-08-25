@@ -213,7 +213,8 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
             cognito_user_pool_id.clone(),
             user_groups,
             rusoto_cognito_idp_client.clone(),
-        ).await;
+        )
+        .await;
 
         if enabled.unwrap() == *"false" {
             let admin_disable_user_request = AdminDisableUserRequest {
