@@ -115,9 +115,11 @@ pub async fn update_identity_user_email(client: &Client, user: &User) -> Result<
 }
 
 pub async fn save_identity_user_group(client: &Client, user: &User, group_ids: Vec<Uuid>) -> bool {
+    println!("save_identity_user_group group_ids: {:?}", group_ids);
     for group_id in group_ids {
         let user_group_id = Uuid::new_v4();
-        println!("user_group_id: {}", user_group_id);
+        println!("save_identity_user_group user_group_id: {}", user_group_id);
+        println!("save_identity_user_group group_id: {}", group_id);
         let stmt = (*client)
             .prepare("INSERT into identity__user_group(id, user_id, group_id) VALUES ($1, $2, $3)")
             .await
