@@ -100,7 +100,7 @@ mod tests {
             email: Option::from("create_test_user@gmail.com".to_string()),
             phone: Option::from("+84 939686970".to_string()),
             enabled: None,
-            group: Option::from(vec![
+            groups: Option::from(vec![
                 hvcg_iam_openapi_identity::models::Group::ADMIN_GROUP,
                 hvcg_iam_openapi_identity::models::Group::STUDENT_GROUP,
             ]),
@@ -142,7 +142,7 @@ mod tests {
         );
         assert_eq!(deserialized_user.enabled, Option::from(true));
         assert_eq!(
-            deserialized_user.group,
+            deserialized_user.groups,
             Option::from(vec![
                 hvcg_iam_openapi_identity::models::Group::ADMIN_GROUP,
                 hvcg_iam_openapi_identity::models::Group::STUDENT_GROUP
@@ -160,7 +160,7 @@ mod tests {
             email: None,
             phone: None,
             enabled: None,
-            group: None,
+            groups: None,
         };
         let mut serialized_request = serde_json::to_string(&deactivate_request).unwrap();
 
@@ -221,7 +221,7 @@ mod tests {
             email: Option::from("test_update_user_updated@gmail.com".to_string()),
             phone: Option::from("+84 939969699".to_string()),
             enabled: None,
-            group: Option::from(update_group_request.clone()),
+            groups: Option::from(update_group_request.clone()),
         };
         let serialized_user = serde_json::to_string(&update_user_request).unwrap();
         let uri = format!(
@@ -269,7 +269,7 @@ mod tests {
             Option::from("+84 939969699".to_string())
         );
         assert_eq!(
-            deserialized_user.group.unwrap(),
+            deserialized_user.groups.unwrap(),
             update_group_request.clone()
         );
         println!("Update user successfully!");
@@ -295,7 +295,7 @@ mod tests {
             email: Option::from("nhut_donot_delete@gmail.com".to_string()),
             phone: Option::from("+84 123456002".to_string()),
             enabled: None,
-            group: Option::from(vec![Group::ADMIN_GROUP]),
+            groups: Option::from(vec![Group::ADMIN_GROUP]),
         };
 
         let user = controller::create_user(&user_test).await;
@@ -347,13 +347,13 @@ mod tests {
             email: Option::from("test003@gmail.com".to_string()),
             phone: Option::from("+84 123456003".to_string()),
             enabled: None,
-            group: Option::from(vec![Group::ADMIN_GROUP, Group::PROFESSOR_GROUP]),
+            groups: Option::from(vec![Group::ADMIN_GROUP, Group::PROFESSOR_GROUP]),
         };
 
         let user = controller::create_user(&user_test).await;
         let user_id = user.unwrap().id.unwrap();
         let uri = format!(
-            "https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/users/{}",
+            "https://dev-sg.portal.hocvienconggiao.com/query-api/identity-service/users/{}",
             user_id
         );
         let mut path_param = HashMap::new();
@@ -402,7 +402,7 @@ mod tests {
             email: Option::from("test004@gmail.com".to_string()),
             phone: Option::from("+84 123456004".to_string()),
             enabled: None,
-            group: Option::from(vec![Group::ADMIN_GROUP, Group::PROFESSOR_GROUP]),
+            groups: Option::from(vec![Group::ADMIN_GROUP, Group::PROFESSOR_GROUP]),
         };
 
         let second_user_test = User {
@@ -411,7 +411,7 @@ mod tests {
             email: Option::from("test005@gmail.com".to_string()),
             phone: Option::from("+84 123456005".to_string()),
             enabled: None,
-            group: Option::from(vec![Group::ADMIN_GROUP, Group::PROFESSOR_GROUP]),
+            groups: Option::from(vec![Group::ADMIN_GROUP, Group::PROFESSOR_GROUP]),
         };
 
         let first_user_test = controller::create_user(&first_user_test).await;

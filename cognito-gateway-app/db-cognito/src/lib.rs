@@ -126,13 +126,13 @@ pub async fn insert_user_to_dynamodb(user: Option<&User>, user_table_name: Strin
         },
     );
 
-    let mut user_group = user_dynamodb.group.clone().unwrap();
+    let mut user_group = user_dynamodb.groups.clone().unwrap();
     let mut groups: Vec<String> = vec![];
     for group in &mut user_group {
         groups.push(get_group_name(group))
     }
     user_attributes.insert(
-        String::from("group"),
+        String::from("groups"),
         AttributeValue {
             ss: Some(groups),
             ..Default::default()
@@ -262,14 +262,14 @@ pub async fn update_user_to_dynamodb(user: Option<&User>, user_table_name: Strin
         },
     );
 
-    let mut user_group = user_dynamodb.group.clone().unwrap();
+    let mut user_group = user_dynamodb.groups.clone().unwrap();
     let mut groups: Vec<String> = vec![];
     for group in &mut user_group {
         groups.push(get_group_name(group))
     }
 
     attribute_updates.insert(
-        String::from("group"),
+        String::from("groups"),
         AttributeValueUpdate {
             action: Option::from("PUT".to_string()),
             value: Option::from(AttributeValue {

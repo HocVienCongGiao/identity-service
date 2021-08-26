@@ -5,7 +5,7 @@ use hvcg_iam_openapi_identity::models::{Group, UserCollection};
 
 impl ToOpenApi<User> for UserMutationResponse {
     fn user_openapi(self) -> User {
-        let mut user_group: Vec<String> = self.group.clone();
+        let mut user_group: Vec<String> = self.groups.clone();
         let mut groups: Vec<Group> = vec![];
         for i in &mut user_group {
             groups.push(get_group_name_open_api(i));
@@ -17,14 +17,14 @@ impl ToOpenApi<User> for UserMutationResponse {
             email: Option::from(self.email),
             phone: Option::from(self.phone),
             enabled: Option::from(self.enabled),
-            group: Option::from(groups),
+            groups: Option::from(groups),
         }
     }
 }
 
 impl ToOpenApi<User> for UserQueryResponse {
     fn user_openapi(self) -> User {
-        let mut user_group: Vec<String> = self.group.clone();
+        let mut user_group: Vec<String> = self.groups.clone();
         let mut groups: Vec<Group> = vec![];
         for i in &mut user_group {
             groups.push(get_group_name_open_api(i));
@@ -35,7 +35,7 @@ impl ToOpenApi<User> for UserQueryResponse {
             email: Option::from(self.email),
             phone: Option::from(self.phone),
             enabled: Option::from(self.enabled),
-            group: Option::from(groups),
+            groups: Option::from(groups),
         }
     }
 }
@@ -43,7 +43,7 @@ impl ToOpenApi<User> for UserQueryResponse {
 impl ToModel<UserMutationRequest> for &User {
     fn to_model(&self) -> UserMutationRequest {
         // let user_group: String = self.group.clone().unwrap().to_string();
-        let mut user_group: Vec<Group> = self.group.clone().unwrap();
+        let mut user_group: Vec<Group> = self.groups.clone().unwrap();
         let mut groups: Vec<String> = vec![];
         for i in &mut user_group {
             groups.push(get_group_name(i))
@@ -52,7 +52,7 @@ impl ToModel<UserMutationRequest> for &User {
             username: self.username.to_string(),
             email: self.email.clone(),
             phone: self.phone.clone(),
-            group: Option::from(groups),
+            groups: Option::from(groups),
         }
     }
 }

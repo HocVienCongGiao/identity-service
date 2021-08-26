@@ -7,6 +7,6 @@ edition = "2018"
 domain = { path = "../domain" }
 tokio-postgres = "0.7.2"
 db-postgres = { path = "../../identity-app/db-postgres" }
-hvcg_iam_openapi_identity = "0.1.3"
+hvcg_iam_openapi_identity = "0.1.4"
 tokio = { version = "1.6.0", features = ["full"] }
 uuid = {version = "0.8", features = ["v4"]}

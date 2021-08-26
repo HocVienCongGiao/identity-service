@@ -1,19 +1,17 @@
 use lambda_runtime::{Context, Error};
 use rusoto_cognito_idp::{
     AdminAddUserToGroupRequest, AdminCreateUserRequest, AdminDisableUserRequest,
-    AdminEnableUserRequest, AdminGetUserRequest, AdminListGroupsForUserRequest,
-    AdminRemoveUserFromGroupRequest, AdminUpdateUserAttributesRequest, AttributeType,
-    CognitoIdentityProvider, CognitoIdentityProviderClient,
+    AdminEnableUserRequest, AdminListGroupsForUserRequest, AdminRemoveUserFromGroupRequest,
+    AdminUpdateUserAttributesRequest, AttributeType, CognitoIdentityProvider,
+    CognitoIdentityProviderClient,
 };
 use rusoto_core::credential::EnvironmentProvider;
 use rusoto_core::{Client, HttpClient, Region};
 use rusoto_dynamodb::{AttributeValue, DynamoDb, DynamoDbClient, GetItemInput};
 use serde_json::{json, Value};
 use std::collections::HashMap;
-use std::str::FromStr;
-use strum_macros::EnumString;
 pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
-    let mut temp_password: String = "Hvcg@123456789".to_string();
+    let temp_password: String = "Hvcg@123456789".to_string();
     println!("welcome to dynamodb processor!!!!");
     println!("Event payload is {:?}", event);
 
@@ -142,7 +140,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
             .admin_create_user(admin_create_user_request)
             .await;
 
-        let mut user_groups = groups.unwrap();
+        let user_groups = groups.unwrap();
 
         if user_groups.is_empty() {
             println!("Groups not found.");
@@ -200,7 +198,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
             }));
         }
 
-        let mut user_groups = groups.unwrap();
+        let user_groups = groups.unwrap();
 
         if user_groups.is_empty() {
             println!("Groups not found.");
