@@ -204,8 +204,32 @@ impl domain::boundaries::UserDbGateway for UserRepository {
 
         let row = result.unwrap();
         println!("get_user_by_id : {:?}", row);
+        let mut user_groups = get_user_group_by_user_id(&(*self).client, id)
+            .await
+            .unwrap();
+        if user_groups.is_empty() {
+            println!("User group is empty");
+        }
+        let mut group_ids = vec![];
+        for row in user_groups {
+            let group_id = row.get("group_id");
+            group_ids.push(group_id);
+        }
+        println!("group_ids: {:?}", group_ids);
+        let mut groups = query::get_groups_by_group_id(&(*self).client, group_ids)
+            .await
+            .unwrap();
+        println!("mut_groups_result: {:?}", groups);
+        if groups.is_empty() {
+            println!("Groups is empty");
+        }
+        let mut group_names: Vec<String> = vec![];
+        for group in groups {
+            let group_name: String = group.get("group_name");
+            group_names.push(group_name)
+        }
 
-        Some(convert_to_user_db_response(row))
+        Some(convert_to_user_db_response(row, group_names))
     }
 
     async fn get_users(
@@ -225,7 +249,7 @@ impl domain::boundaries::UserDbGateway for UserRepository {
         collection = result
             .unwrap()
             .into_iter()
-            .map(convert_to_user_db_response)
+            .map(|row| convert_to_user_db_response(row, vec![]))
             .collect();
 
         let has_more: Option<bool>;
@@ -363,7 +387,7 @@ fn combine_into_pagination_string(offset: Option<u16>, count: Option<u16>) -> St
     format!("LIMIT {} OFFSET {}", count, offset)
 }
 
-fn convert_to_user_db_response(row: Row) -> UserDbResponse {
+fn convert_to_user_db_response(row: Row, group_name: Vec<String> ) -> UserDbResponse {
     let id: Uuid = row.get("id");
     let username: String = row.get("username");
     let phone: String = row.get("phone");
@@ -376,7 +400,7 @@ fn convert_to_user_db_response(row: Row) -> UserDbResponse {
         email,
         phone,
         enabled,
-        group: vec![],
+        groups: group_name,
     }
 }
 

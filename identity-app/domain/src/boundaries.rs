@@ -52,7 +52,7 @@ pub struct UserMutationRequest {
     pub username: String,
     pub email: Option<String>,
     pub phone: Option<String>,
-    pub group: Option<Vec<String>>,
+    pub groups: Option<Vec<String>>,
 }
 
 pub struct Test1SimpleMutationResponse {}
@@ -67,7 +67,7 @@ pub struct UserDbResponse {
     pub email: String,
     pub phone: String,
     pub enabled: bool,
-    pub group: Vec<String>,
+    pub groups: Vec<String>,
 }
 
 pub struct GroupDbResponse {
@@ -81,7 +81,7 @@ pub struct UserMutationResponse {
     pub email: String,
     pub phone: String,
     pub enabled: bool,
-    pub group: Vec<String>,
+    pub groups: Vec<String>,
 }
 
 pub struct UserQueryResponse {
@@ -90,7 +90,7 @@ pub struct UserQueryResponse {
     pub email: String,
     pub phone: String,
     pub enabled: bool,
-    pub group: Vec<String>,
+    pub groups: Vec<String>,
 }
 
 pub trait MutationOutputBoundary {}

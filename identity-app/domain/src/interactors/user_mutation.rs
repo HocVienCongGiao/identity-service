@@ -53,7 +53,7 @@ where
             return Err(UserMutationError::InvalidPhone);
         }
 
-        let mut request_group_name = request.group.clone().unwrap();
+        let mut request_group_name = request.groups.clone().unwrap();
 
         let mut group_ids = vec![];
         for group_name in &mut request_group_name {
@@ -72,7 +72,7 @@ where
             email: request.email,
             phone: request.phone,
             enabled: true,
-            group: request.group,
+            group: request.groups,
         };
 
         if !is_not_valid_username {
@@ -120,7 +120,7 @@ where
             current_user.as_ref().unwrap().id
         );
 
-        let mut request_group_name = request.group.clone().unwrap();
+        let mut request_group_name = request.groups.clone().unwrap();
 
         let mut group_ids = vec![];
         for group_name in &mut request_group_name {
@@ -135,7 +135,7 @@ where
             email: request.email,
             phone: request.phone,
             enabled: current_user.as_ref().unwrap().enabled,
-            group: request.group,
+            group: request.groups,
         };
 
         let result = (*self)
@@ -176,7 +176,7 @@ impl crate::entity::user::User {
             email: self.email.clone().unwrap(),
             phone: self.phone.clone().unwrap(),
             enabled: self.enabled,
-            group: self.group.clone().unwrap(),
+            groups: self.group.clone().unwrap(),
         }
     }
 }

@@ -20,7 +20,7 @@ where
     async fn get_user_by_id(&self, id: Uuid) -> Option<UserQueryResponse> {
         println!("user query input boundary {}", id.to_hyphenated());
 
-        return if let Some(db_response) = ((*self).db_gateway.get_user_by_id(id)).await {
+        return if let Some(mut db_response) = ((*self).db_gateway.get_user_by_id(id)).await {
             println!("user found");
             Some(db_response.to_user_query_response())
         } else {
@@ -71,7 +71,7 @@ impl UserDbResponse {
             email: self.email.to_string(),
             phone: self.phone.to_string(),
             enabled: self.enabled,
-            group: self.group.clone(),
+            groups: self.groups.clone(),
         }
     }
 }

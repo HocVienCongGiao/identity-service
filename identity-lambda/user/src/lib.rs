@@ -246,7 +246,7 @@ fn empty_response(_req: Request) -> Response<Body> {
                 email: None,
                 phone: None,
                 enabled: None,
-                group: None,
+                groups: None,
             })
             .expect("unable to serialize user_json::Value")
             .into(),
