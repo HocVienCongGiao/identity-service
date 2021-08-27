@@ -272,7 +272,7 @@ mod tests {
             deserialized_user.groups.unwrap(),
             update_group_request.clone()
         );
-        println!("Update user successfully!");
+        println!("Update user successfully!!");
     }
 
     #[tokio::test]
