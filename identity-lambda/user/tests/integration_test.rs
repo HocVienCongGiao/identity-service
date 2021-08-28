@@ -275,7 +275,6 @@ mod tests {
 
     #[tokio::test]
     async fn update_password_user_success() {
-        truncate_data().await;
         initialise();
         println!("is it working?");
         env::set_var(
@@ -336,7 +335,6 @@ mod tests {
             "AWS_SECRET_ACCESS_KEY",
             std::env::var("AWS_SECRET_ACCESS_KEY").unwrap(),
         );
-        truncate_data().await;
         // Given
         let user_test = User {
             id: None,
@@ -375,7 +373,6 @@ mod tests {
         // Then
         println!("response: {:?}", response);
         assert_eq!(response.status(), 200);
-        // truncate_data().await;
     }
 
     #[tokio::test]
@@ -390,7 +387,7 @@ mod tests {
             "AWS_SECRET_ACCESS_KEY",
             std::env::var("AWS_SECRET_ACCESS_KEY").unwrap(),
         );
-        truncate_data().await;
+
         // Given
         let first_user_test = User {
             id: None,
