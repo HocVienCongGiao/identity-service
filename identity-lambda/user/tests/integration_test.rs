@@ -112,7 +112,6 @@ mod tests {
             .uri("https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/user")
             .method("POST")
             .header("Content-Type", "application/json")
-            .header("authorization", "Bearer 123445")
             .body(Body::from(serialized_user))
             .unwrap();
         println!("request : {}", request.uri().to_string());
@@ -168,7 +167,6 @@ mod tests {
             .uri("https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/users/deactivation")
             .method("POST")
             .header("Content-Type", "application/json")
-            .header("authorization", "Bearer 123445")
             .body(Body::from(serialized_request.clone()))
             .unwrap();
 
@@ -193,7 +191,6 @@ mod tests {
             .uri("https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/users/activation")
             .method("POST")
             .header("Content-Type", "application/json")
-            .header("authorization", "Bearer 123445")
             .body(Body::from(serialized_request.clone()))
             .unwrap();
         let mut activate_context: Context = Context::default();
@@ -237,7 +234,6 @@ mod tests {
             .uri("https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/users")
             .method("PUT")
             .header("Content-Type", "application/json")
-            .header("authorization", "Bearer 123445")
             .body(Body::from(serialized_user))
             .unwrap()
             .with_path_parameters(path_param);
@@ -277,6 +273,7 @@ mod tests {
 
     #[tokio::test]
     async fn update_password_user_success() {
+        truncate_data().await;
         initialise();
         println!("is it working?");
         env::set_var(
@@ -287,7 +284,6 @@ mod tests {
             "AWS_SECRET_ACCESS_KEY",
             std::env::var("AWS_SECRET_ACCESS_KEY").unwrap(),
         );
-
         // Given
         let user_test = User {
             id: None,
@@ -310,7 +306,6 @@ mod tests {
             .uri("https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/users/update-password")
             .method("PUT")
             .header("Content-Type", "application/json")
-            .header("authorization", "Bearer 123445")
             .body(Body::from(serialized_user))
             .unwrap();
         println!("request: {:?}", request);
@@ -362,7 +357,6 @@ mod tests {
             .uri(uri)
             .method("GET")
             .header("Content-Type", "application/json")
-            .header("authorization", "Bearer 123445")
             .body(Body::default())
             .unwrap()
             .with_path_parameters(path_param);
