@@ -38,6 +38,7 @@ mod tests {
     use std::collections::hash_map::DefaultHasher;
     use std::collections::HashMap;
     use std::hash::{Hash, Hasher};
+    use std::{thread, time};
     use tokio_postgres::types::ToSql;
     use user::{func, UserUpdate};
 
@@ -151,7 +152,8 @@ mod tests {
             "Create user successfully with id {:?}",
             deserialized_user.id.unwrap()
         );
-
+        let one_second = time::Duration::from_secs(1);
+        thread::sleep(one_second);
         // Deactivate user
         let deactivate_request = User {
             id: Option::from(deserialized_user.id.unwrap()),

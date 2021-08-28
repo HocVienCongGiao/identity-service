@@ -61,17 +61,8 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
         username = String::from("anonymous");
     }
     println!("token username {}", username);
-    // creating an application/json response
-    // Ok(json!({
-    // "message": "Test 2 is me, how are you?"
-    // }))
     println!("auth_header is {}", auth_header_str);
     println!("req.headers() is {:?}", request.headers());
-    let value = json!(
-        {
-            "message": "Test 2 20210616 is me, how are you?"
-        }
-    );
     let status_code: u16;
     let user_response: Option<controller::openapi::identity_user::User>;
     let invoked_function_arn = context.invoked_function_arn;
