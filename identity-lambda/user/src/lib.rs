@@ -201,7 +201,7 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
                 .await;
                 println!("update user dynamodb result: {}", dynamodb_result);
                 user_collection = None;
-            } else if request.uri().to_string().contains("update-password") {
+            } else if request.uri().to_string().contains("password-update") {
                 println!("Update user password");
                 let user_update_request = request.payload().unwrap_or(None);
                 if user_update_request.is_some() {

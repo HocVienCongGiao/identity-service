@@ -300,7 +300,7 @@ mod tests {
         let serialized_user = serde_json::to_string(&user_request).unwrap();
 
         let request = http::Request::builder()
-            .uri("https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/users/update-password")
+            .uri("https://dev-sg.portal.hocvienconggiao.com/mutation-api/identity-service/users/password-update")
             .method("PUT")
             .header("Content-Type", "application/json")
             .body(Body::from(serialized_user))
