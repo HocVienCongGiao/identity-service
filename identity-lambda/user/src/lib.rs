@@ -69,6 +69,7 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
     println!("invoked_function_arn: {:?}", invoked_function_arn);
     let user_table_name = get_user_table_name(invoked_function_arn);
     let function_name = get_post_function_name(request.uri().to_string());
+    println!("function_name: {:?}", &function_name);
     let mut is_get_users = false;
     let user_collection: Option<UserCollection>;
 
@@ -104,7 +105,8 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
         }
         method::Method::POST => match function_name {
             PostFunctionName::Activation => {
-                let lambda_user_request: Option<User> = request.payload().unwrap_or(None);
+                let lambda_user_request: Option<UserUpdateRequest> =
+                    request.payload().unwrap_or(None);
                 let mut user = &lambda_user_request.unwrap();
                 println!("Start activate user");
                 let result = controller::activate_user(user.id.unwrap()).await;
@@ -127,7 +129,8 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
             }
             PostFunctionName::Deactivation => {
                 println!("Start deactivate user");
-                let lambda_user_request: Option<User> = request.payload().unwrap_or(None);
+                let lambda_user_request: Option<UserUpdateRequest> =
+                    request.payload().unwrap_or(None);
                 let mut user = &lambda_user_request.unwrap();
                 let result = controller::deactivate_user(user.id.unwrap()).await;
                 status_code = set_status_code(&result);
@@ -202,13 +205,15 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
                 println!("Update user password");
                 let user_update_request = request.payload().unwrap_or(None);
                 if user_update_request.is_some() {
-                    let lambda_user_request: UserUpdate = user_update_request.unwrap();
+                    let lambda_user_request: UserUpdateRequest = user_update_request.unwrap();
                     let user_result =
                         controller::get_user_by_id(lambda_user_request.id.unwrap()).await;
                     let user = user_result.unwrap();
-                    let update_password_result =
-                        db_cognito::update_user_password(&user, lambda_user_request.plain_password)
-                            .await;
+                    let update_password_result = db_cognito::update_user_password(
+                        &user,
+                        lambda_user_request.plain_password.unwrap(),
+                    )
+                    .await;
                     println!("update_password_result: {}", update_password_result);
                     user_response =
                         controller::get_user_by_id(lambda_user_request.id.unwrap()).await;
@@ -357,10 +362,10 @@ pub enum PostFunctionName {
 
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
-pub struct UserUpdate {
+pub struct UserUpdateRequest {
     #[serde(rename = "id")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<uuid::Uuid>,
     #[serde(rename = "plainPassword")]
-    pub plain_password: String,
+    pub plain_password: Option<String>,
 }
