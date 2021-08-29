@@ -40,7 +40,7 @@ mod tests {
     use std::hash::{Hash, Hasher};
     use std::{thread, time};
     use tokio_postgres::types::ToSql;
-    use user::{func, UserUpdate};
+    use user::{func, UserUpdateRequest};
 
     static INIT: Once = Once::new();
 
@@ -155,13 +155,9 @@ mod tests {
         let one_second = time::Duration::from_secs(1);
         thread::sleep(one_second);
         // Deactivate user
-        let deactivate_request = User {
+        let deactivate_request = UserUpdateRequest {
             id: Option::from(deserialized_user.id.unwrap()),
-            username: "".to_string(),
-            email: None,
-            phone: None,
-            enabled: None,
-            groups: None,
+            plain_password: None,
         };
         let mut serialized_request = serde_json::to_string(&deactivate_request).unwrap();
 
@@ -296,9 +292,9 @@ mod tests {
         };
 
         let user = controller::create_user(&user_test).await;
-        let user_request = UserUpdate {
+        let user_request = UserUpdateRequest {
             id: user.unwrap().id,
-            plain_password: "Test@12345678".to_string(),
+            plain_password: Option::from("Test@12345678".to_string()),
         };
 
         let serialized_user = serde_json::to_string(&user_request).unwrap();
