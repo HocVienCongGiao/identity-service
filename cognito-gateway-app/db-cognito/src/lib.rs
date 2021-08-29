@@ -318,9 +318,8 @@ pub async fn update_user_password(user: &User, plain_password: String) -> bool {
     let result_cognito = rusoto_cognito_idp_client
         .admin_set_user_password(admin_set_user_password_request)
         .await;
-    let is_ok_result = result_cognito.is_ok();
-    println!("Update password result: {}", is_ok_result);
-    is_ok_result
+    println!("Update password result: {:?}", result_cognito);
+    result_cognito.is_ok()
 }
 
 fn hash<T>(obj: T) -> u64
