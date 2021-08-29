@@ -68,8 +68,8 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
     let invoked_function_arn = context.invoked_function_arn;
     println!("invoked_function_arn: {:?}", invoked_function_arn);
     let user_table_name = get_user_table_name(invoked_function_arn);
-    let function_name = get_post_function_name(request.uri().to_string());
-    println!("function_name: {:?}", &function_name);
+    let request_post_function_name = get_post_function_name(request.uri().to_string());
+    println!("function_name: {:?}", &request_post_function_name);
     let mut is_get_users = false;
     let user_collection: Option<UserCollection>;
 
