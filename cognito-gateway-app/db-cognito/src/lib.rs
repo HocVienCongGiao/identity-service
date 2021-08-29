@@ -76,6 +76,8 @@ pub async fn insert_user_to_dynamodb(user: Option<&User>, user_table_name: Strin
     let user_dynamodb = user.unwrap();
 
     let mut user_attributes = HashMap::new();
+    println!("user_dynamodb: {:?}", user_dynamodb);
+    println!("user_table_name: {}", user_table_name);
     println!("user_id: {}", user_dynamodb.id.unwrap());
 
     user_attributes.insert(
@@ -148,11 +150,14 @@ pub async fn insert_user_to_dynamodb(user: Option<&User>, user_table_name: Strin
         .await;
 
     if result.is_err() {
-        println!("put_item() result {:#?}", result.as_ref().err());
+        println!("put_item() result error {:#?}", result.as_ref().err());
         return false;
     }
 
-    println!("put_item() result {:#?}", result.as_ref().unwrap());
+    println!(
+        "put_item() result {:#?}",
+        result.as_ref().unwrap().attributes
+    );
 
     result.is_ok()
 }

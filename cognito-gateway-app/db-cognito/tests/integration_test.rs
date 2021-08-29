@@ -78,8 +78,8 @@ mod tests {
 
         let user_dynamodb = &User {
             id: Option::from(Uuid::new_v4()),
-            username: "test_user_group".to_string(),
-            email: Option::from("test_user_group1@gmail.com".to_string()),
+            username: "test_user_group2".to_string(),
+            email: Option::from("test_user_group2@gmail.com".to_string()),
             phone: Option::from("+84123456789".to_string()),
             enabled: Option::from(true),
             groups: Option::from(vec![Group::ADMIN_GROUP, Group::STUDENT_GROUP]),

@@ -55,7 +55,7 @@ mod tests {
 
         hash_key_object_details.insert(
             "S".to_string(),
-            Value::String("16409123419541265597".to_string()),
+            Value::String("5014457316158331716".to_string()),
         );
         hash_key_object.insert(
             "HashKey".to_string(),

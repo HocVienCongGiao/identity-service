@@ -103,7 +103,7 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
                 status_code = 200;
             }
         }
-        method::Method::POST => match function_name {
+        method::Method::POST => match request_post_function_name {
             PostFunctionName::Activation => {
                 let lambda_user_request: Option<UserUpdateRequest> =
                     request.payload().unwrap_or(None);
@@ -209,6 +209,7 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
                     let user_result =
                         controller::get_user_by_id(lambda_user_request.id.unwrap()).await;
                     let user = user_result.unwrap();
+                    println!("Update user found: {:?}", user);
                     let update_password_result = db_cognito::update_user_password(
                         &user,
                         lambda_user_request.plain_password.unwrap(),

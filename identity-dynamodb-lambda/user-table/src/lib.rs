@@ -77,7 +77,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
 
     if item.as_ref().unwrap().get("username").is_none()
         || item.as_ref().unwrap().get("email").is_none()
-        || item.as_ref().unwrap().get("group").is_none()
+        || item.as_ref().unwrap().get("groups").is_none()
     {
         println!("Username or email or group not found.");
         return Ok(json!({ "message": "Username or email or enabled not found." }));
@@ -103,7 +103,7 @@ pub async fn func(event: Value, context: Context) -> Result<Value, Error> {
     let groups = item
         .as_ref()
         .unwrap()
-        .get("group")
+        .get("groups")
         .and_then(|value| value.ss.clone());
     // Insert user to cognito
     let aws_client = Client::shared();

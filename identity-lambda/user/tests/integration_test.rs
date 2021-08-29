@@ -97,8 +97,8 @@ mod tests {
 
         let user_request = User {
             id: None,
-            username: "create_test_user".to_string(),
-            email: Option::from("create_test_user@gmail.com".to_string()),
+            username: "random004".to_string(),
+            email: Option::from("random004@gmail.com".to_string()),
             phone: Option::from("+84 939686970".to_string()),
             enabled: None,
             groups: Option::from(vec![
@@ -154,6 +154,7 @@ mod tests {
         );
         let one_second = time::Duration::from_secs(1);
         thread::sleep(one_second);
+
         // Deactivate user
         let deactivate_request = UserUpdateRequest {
             id: Option::from(deserialized_user.id.unwrap()),
