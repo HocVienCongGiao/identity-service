@@ -209,18 +209,25 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
                     let lambda_user_request: UserUpdateRequest = user_update_request.unwrap();
                     let user_result =
                         controller::get_user_by_id(lambda_user_request.id.unwrap()).await;
-                    let user = user_result.unwrap();
-                    println!("Update user found: {:?}", user);
-                    let update_password_result = db_cognito::update_user_password(
-                        &user,
-                        lambda_user_request.plain_password.unwrap(),
-                    )
-                    .await;
-                    println!("update_password_result: {}", update_password_result);
-                    user_response =
-                        controller::get_user_by_id(lambda_user_request.id.unwrap()).await;
-                    status_code = 200;
-                    user_collection = None;
+                    if user_result.is_none() {
+                        print!("Password update user not found.");
+                        user_collection = None;
+                        user_response = None;
+                        status_code = 404
+                    } else {
+                        let user = user_result.unwrap();
+                        println!("Password update user found: {:?}", user);
+                        let update_password_result = db_cognito::update_user_password(
+                            &user,
+                            lambda_user_request.plain_password.unwrap(),
+                        )
+                            .await;
+                        println!("update_password_result: {}", update_password_result);
+                        user_response =
+                            controller::get_user_by_id(lambda_user_request.id.unwrap()).await;
+                        status_code = 200;
+                        user_collection = None;
+                    }
                 } else {
                     user_collection = None;
                     user_response = None;
