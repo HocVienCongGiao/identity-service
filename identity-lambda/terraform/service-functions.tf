@@ -86,7 +86,7 @@ module "users_password_update" {
 
   function_name = "users_password_update"
   file_name     = "user"
-  path_part     = "update-password"
+  path_part     = "password-update"
   depends_on = [
     module.users
   ]
