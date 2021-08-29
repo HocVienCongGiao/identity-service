@@ -71,8 +71,8 @@ impl domain::boundaries::UserDbGateway for UserRepository {
     }
 
     async fn deactivate_user(&self, id: Uuid) -> Result<User, DbError> {
-        let user = get_user_by_id(&(*self).client, id).await.unwrap();
-        if user.is_empty() {
+        let currently_user = get_user_by_id(&(*self).client, id).await.unwrap();
+        if currently_user.is_empty() {
             println!("User with id {} is empty", id);
             return Err(DbError::UnknownError);
         }
@@ -111,13 +111,13 @@ impl domain::boundaries::UserDbGateway for UserRepository {
             let group_name: String = group.get("group_name");
             group_names.push(group_name)
         }
-
+        let user_deactivate_result = get_user_by_id(&(*self).client, id).await.unwrap();
         Ok(User {
-            id: user.get("id"),
-            username: user.get("username"),
-            email: user.get("email"),
-            phone: user.get("phone"),
-            enabled: user.get("enabled"),
+            id: user_deactivate_result.get("id"),
+            username: user_deactivate_result.get("username"),
+            email: user_deactivate_result.get("email"),
+            phone: user_deactivate_result.get("phone"),
+            enabled: user_deactivate_result.get("enabled"),
             group: Option::from(group_names),
         })
     }

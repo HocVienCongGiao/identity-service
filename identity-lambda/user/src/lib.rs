@@ -133,6 +133,7 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
                     request.payload().unwrap_or(None);
                 let mut user = &lambda_user_request.unwrap();
                 let result = controller::deactivate_user(user.id.unwrap()).await;
+                println!("deactivate user result:{:?}", &result);
                 status_code = set_status_code(&result);
                 user_response = result.map(Some).unwrap_or_else(|e| {
                     println!("{:?}", e);
