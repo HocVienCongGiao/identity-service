@@ -591,9 +591,9 @@ checksum = "6456b8a6c8f33fee7d958fcd1b60d55b11940a79e63ae87013e6d22e26034440"
 
 [[package]]
 name = "hvcg_iam_openapi_identity"
-version = "0.1.5"
+version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5315e450b6212cab08fc63eb098df921450e61a894c0568fa653c671284302a1"
+checksum = "b39c88288e1831babcdf6aefc838a9571513228608304ff352e9cf2f61fbe93a"
 dependencies = [
  "async-trait",
  "chrono",
