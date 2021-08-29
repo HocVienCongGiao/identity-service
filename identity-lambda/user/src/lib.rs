@@ -231,25 +231,19 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
 
                         let admin_set_user_password_request = AdminSetUserPasswordRequest {
                             password: lambda_user_request.plain_password.unwrap(),
-                            permanent: None,
+                            permanent: Option::from(true),
                             user_pool_id,
                             username: user.username,
                         };
 
-                        let result_cognito = rusoto_cognito_idp_client
+                        rusoto_cognito_idp_client
                             .admin_set_user_password(admin_set_user_password_request)
                             .await;
-                        if result_cognito.is_ok() {
-                            user_response =
-                                controller::get_user_by_id(lambda_user_request.id.unwrap()).await;
-                            status_code = 200;
-                            user_collection = None;
-                        } else {
-                            print!("Error when update password: {:?}", result_cognito);
-                            user_collection = None;
-                            user_response = None;
-                            status_code = 404
-                        }
+
+                        user_response =
+                            controller::get_user_by_id(lambda_user_request.id.unwrap()).await;
+                        status_code = 200;
+                        user_collection = None;
                     }
                 } else {
                     user_collection = None;
