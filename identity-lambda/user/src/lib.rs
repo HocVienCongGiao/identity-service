@@ -221,7 +221,7 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
                             &user,
                             lambda_user_request.plain_password.unwrap(),
                         )
-                            .await;
+                        .await;
                         println!("update_password_result: {}", update_password_result);
                         user_response =
                             controller::get_user_by_id(lambda_user_request.id.unwrap()).await;
