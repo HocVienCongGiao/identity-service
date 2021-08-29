@@ -7,6 +7,10 @@ use lambda_http::http::header::{
 };
 use lambda_http::http::{method, HeaderValue, Method, StatusCode};
 use lambda_http::{Body, Context, IntoResponse, Request, RequestExt, Response};
+use rusoto_cognito_idp::{
+    AdminSetUserPasswordRequest, CognitoIdentityProvider, CognitoIdentityProviderClient,
+};
+use rusoto_core::{Client, Region};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use uuid::Uuid;
@@ -217,16 +221,35 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
                     } else {
                         let user = user_result.unwrap();
                         println!("Password update user found: {:?}", user);
-                        let update_password_result = db_cognito::update_user_password(
-                            &user,
-                            lambda_user_request.plain_password.unwrap(),
-                        )
-                        .await;
-                        println!("update_password_result: {}", update_password_result);
-                        user_response =
-                            controller::get_user_by_id(lambda_user_request.id.unwrap()).await;
-                        status_code = 200;
-                        user_collection = None;
+                        let aws_client = Client::shared();
+                        let user_pool_id = "ap-southeast-1_9QWSYGzXk".to_string();
+                        let rusoto_cognito_idp_client =
+                            CognitoIdentityProviderClient::new_with_client(
+                                aws_client,
+                                Region::ApSoutheast1,
+                            );
+
+                        let admin_set_user_password_request = AdminSetUserPasswordRequest {
+                            password: lambda_user_request.plain_password.unwrap(),
+                            permanent: None,
+                            user_pool_id,
+                            username: user.username,
+                        };
+
+                        let result_cognito = rusoto_cognito_idp_client
+                            .admin_set_user_password(admin_set_user_password_request)
+                            .await;
+                        if result_cognito.is_ok() {
+                            user_response =
+                                controller::get_user_by_id(lambda_user_request.id.unwrap()).await;
+                            status_code = 200;
+                            user_collection = None;
+                        } else {
+                            print!("Error when update password: {:?}", result_cognito);
+                            user_collection = None;
+                            user_response = None;
+                            status_code = 404
+                        }
                     }
                 } else {
                     user_collection = None;
