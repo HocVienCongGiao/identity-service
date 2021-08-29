@@ -236,10 +236,10 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
                             username: user.clone().username,
                         };
 
-                        let update_password_result = rusoto_cognito_idp_client
-                            .admin_set_user_password(admin_set_user_password_request)
-                            .await;
-                        print!("update_password_result: {:?}", update_password_result);
+                        // let update_password_result = rusoto_cognito_idp_client
+                        //     .admin_set_user_password(admin_set_user_password_request)
+                        //     .await;
+                        // print!("update_password_result: {:?}", update_password_result);
 
                         user_response = Option::from(user);
                         status_code = 200;
