@@ -233,15 +233,15 @@ pub async fn func(request: Request, context: Context) -> Result<impl IntoRespons
                             password: lambda_user_request.plain_password.unwrap(),
                             permanent: Option::from(true),
                             user_pool_id,
-                            username: user.username,
+                            username: user.clone().username,
                         };
 
-                        rusoto_cognito_idp_client
+                        let update_password_result = rusoto_cognito_idp_client
                             .admin_set_user_password(admin_set_user_password_request)
                             .await;
+                        print!("update_password_result: {:?}", update_password_result);
 
-                        user_response =
-                            controller::get_user_by_id(lambda_user_request.id.unwrap()).await;
+                        user_response = Option::from(user);
                         status_code = 200;
                         user_collection = None;
                     }
