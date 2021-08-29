@@ -97,8 +97,8 @@ mod tests {
 
         let user_request = User {
             id: None,
-            username: "random004".to_string(),
-            email: Option::from("random004@gmail.com".to_string()),
+            username: "create_test_user".to_string(),
+            email: Option::from("create_test_user@gmail.com".to_string()),
             phone: Option::from("+84 939686970".to_string()),
             enabled: None,
             groups: Option::from(vec![
